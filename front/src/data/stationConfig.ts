@@ -7,20 +7,20 @@ export const USERS: User[] = [
 ];
 
 export const WIDGETS: Record<string, WidgetDef> = {
-    pompes: {id: "pompes", label: "Etat des Pompes", icon: "⛽", color: "#3B82F6"},
-    transactions: {id: "transactions", label: "Transactions", icon: "💳", color: "#10B981"},
-    stock: {id: "stock", label: "Stock Carburant", icon: "🛢️", color: "#F59E0B"},
-    caisse: {id: "caisse", label: "Caisse", icon: "🏧", color: "#8B5CF6"},
-    alertes: {id: "alertes", label: "Alertes", icon: "🔔", color: "#EF4444"},
-    clients: {id: "clients", label: "File d'attente", icon: "👥", color: "#06B6D4"},
-    stats: {id: "stats", label: "Statistiques du jour", icon: "📊", color: "#E85D04"},
-    chiffre: {id: "chiffre", label: "Chiffre d'affaires", icon: "💰", color: "#10B981"},
-    employes: {id: "employes", label: "Employes en service", icon: "👤", color: "#8B5CF6"},
-    planning: {id: "planning", label: "Planning", icon: "📅", color: "#3B82F6"},
-    fournisseurs: {id: "fournisseurs", label: "Fournisseurs", icon: "🚛", color: "#F59E0B"},
-    rapport: {id: "rapport", label: "Rapport Etendu", icon: "📋", color: "#EF4444", wide: true},
-    maintenance: {id: "maintenance", label: "Maintenance", icon: "🔧", color: "#06B6D4"},
-    prix: {id: "prix", label: "Gestion des Prix", icon: "🏷️", color: "#EC4899"},
+    chargeurs: {id: "chargeurs", label: "Chargeurs", icon: "🔌"},
+    CCE: {id: "CCE", label: "CCE", icon: "💳"},
+    ticket: {id: "ticket", label: "Ticket", icon: "🧾"},
+    pompes: {id: "pompes", label: "Etat des Pompes", icon: "⛽"},
+    historique_transactions: {id: "historique_transactions", label: "Historique transactions", icon: "😮"},
+    calculatrice: {id: "calculatrice", label: "Calculatrice", icon: "🧮"},
+    reapprovisionnements: {id: "reapprovisionnements", label: "Réapprovisionnements", icon: "🙏", rows: 2},
+    marchandises: {id: "marchandises", label: "Marchandises", icon: "⛈️"},
+    transactions: {id: "transactions", label: "Transactions", icon: "📅"},
+    clients: {id: "clients", label: "Clients", icon: "😎"},
+    table_transactions: {id: "table_transactions", label: "Table transactions", icon: "🍽️"},
+    directives: {id: "directives", label: "Directives", icon: "🤬"},
+    documents_de_gestion: {id: "documents_de_gestion", label: "Documents De Gestion", icon: "🐽"},
+    incident: {id: "incident", label: "Incident", icon: "⛷️"},
 };
 
 export const SCREENS: Record<string, ScreenConfig> = {
@@ -28,27 +28,30 @@ export const SCREENS: Record<string, ScreenConfig> = {
         cols: 3,
         rows: 2,
         label: "Employe - Vue principale",
-        defaultGrid: ["chargeurs", "CCE", "ticket", "pompes", "historique transactions", "calculatrice"],
+        defaultGrid: ["chargeurs", "CCE", "ticket", "pompes", "historique_transactions", "calculatrice"],
     },
     employe_2: {
         cols: 2,
         rows: 2,
         label: "Employe - Vue simplifiee",
-        defaultGrid: ["réapprovisionnements", "produits", "transactions", "clients"],
+        defaultGrid: ["reapprovisionnements", "produits", "transactions", "clients"],
     },
     gerant_1: {
         cols: 3,
         rows: 2,
         label: "Gerant - Vue principale",
-        defaultGrid: ["transactions", "marchandises", "CCE", "vide", "réapprovisionnements", "clients"],
+        defaultGrid: ["reapprovisionnements", "marchandises", "CCE", null, "transactions", "clients"],
     },
     gerant_2: {
         cols: 2,
         rows: 2,
         label: "Gerant - Vue analytique",
-        defaultGrid: ["table transactions", "directives", "documents de gestion", "incident"],
+        defaultGrid: ["table_transactions", "directives", "documents_de_gestion", "incident"],
     },
 };
 
 export const buildGrid = (screenKey: string): (string | null)[] => [...SCREENS[screenKey].defaultGrid];
-export const isWide = (widgetId: string | null): boolean => widgetId !== null && Boolean(WIDGETS[widgetId]?.wide);
+export const isWide = (widgetId: string | null): boolean => widgetId !== null && Boolean(WIDGETS[widgetId]?.cols);
+export const size = (widgetId: string | null): Array<number> => {
+    [WIDGETS[widgetId]?.cols || 0, WIDGETS[widgetId]?.rows || 0]
+}

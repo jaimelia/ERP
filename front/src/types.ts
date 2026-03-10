@@ -12,8 +12,8 @@ export interface WidgetDef {
     id: string;
     label: string;
     icon: string;
-    color: string;
-    wide?: boolean;
+    cols?: number;
+    rows?: number;
 }
 
 export interface ScreenConfig {

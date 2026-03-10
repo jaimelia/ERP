@@ -2,10 +2,7 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    border-radius: 12px;
-    border: 1.5px solid var(--color-border);
     background: var(--color-surface);
-    box-shadow: var(--shadow-sm);
     transition: border-color 0.15s ease, background 0.15s ease, opacity 0.15s ease, box-shadow 0.2s ease;
 }
 
@@ -101,50 +98,4 @@
 
 .tile-empty-content {
     font-size: 12px;
-}
-
-.tile-icon--pompes,
-.tile-icon--planning {
-    background: rgba(59, 130, 246, 0.09);
-    border-color: rgba(59, 130, 246, 0.18);
-}
-
-.tile-icon--transactions,
-.tile-icon--chiffre {
-    background: rgba(16, 185, 129, 0.09);
-    border-color: rgba(16, 185, 129, 0.18);
-}
-
-.tile-icon--stock,
-.tile-icon--fournisseurs {
-    background: rgba(245, 158, 11, 0.09);
-    border-color: rgba(245, 158, 11, 0.18);
-}
-
-.tile-icon--caisse,
-.tile-icon--employes {
-    background: rgba(139, 92, 246, 0.09);
-    border-color: rgba(139, 92, 246, 0.18);
-}
-
-.tile-icon--alertes,
-.tile-icon--rapport {
-    background: rgba(239, 68, 68, 0.09);
-    border-color: rgba(239, 68, 68, 0.18);
-}
-
-.tile-icon--clients,
-.tile-icon--maintenance {
-    background: rgba(6, 182, 212, 0.09);
-    border-color: rgba(6, 182, 212, 0.18);
-}
-
-.tile-icon--stats {
-    background: rgba(232, 93, 4, 0.09);
-    border-color: rgba(232, 93, 4, 0.18);
-}
-
-.tile-icon--prix {
-    background: rgba(236, 72, 153, 0.09);
-    border-color: rgba(236, 72, 153, 0.18);
 }

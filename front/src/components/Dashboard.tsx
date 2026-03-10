@@ -1,5 +1,5 @@
 import {useCallback, useRef, useState, type DragEvent, type FC, type JSX} from "react";
-import {SCREENS, buildGrid, isWide} from "../data/stationConfig";
+import {SCREENS, buildGrid, } from "../data/stationConfig";
 import type {ThemeKey, User} from "../types";
 import {EmptySlot} from "./EmptySlot";
 import {Tile} from "./Tile";
@@ -177,12 +177,11 @@ export const Dashboard: FC<DashboardProps> = ({screenKey, user, level, onLevel, 
                 </div>
             </header>
 
-            <div className="dashboard-hint">
-                <span className="dashboard-hint-icon">💡</span>
-                <span>Glissez la barre en haut de chaque widget pour reorganiser votre tableau de bord.</span>
-            </div>
-
-            <main className={`dashboard-grid dashboard-grid--${config.cols}x${config.rows}`}>{widgets}</main>
+            <main>
+                <div className={`dashboard-grid dashboard-grid--${config.cols}x${config.rows}`}>
+                    {widgets}
+                </div>
+            </main>
         </div>
     );
 };

@@ -13,15 +13,15 @@ interface TileProps {
 }
 
 export const Tile: FC<TileProps> = ({
-    widgetId,
-    colSpan = 1,
-    dragging,
-    dragOver,
-    onDragStart,
-    onDragOver,
-    onDragLeave,
-    onDrop,
-}) => {
+                                        widgetId,
+                                        colSpan = 1,
+                                        dragging,
+                                        dragOver,
+                                        onDragStart,
+                                        onDragOver,
+                                        onDragLeave,
+                                        onDrop,
+                                    }) => {
     const widget = WIDGETS[widgetId];
     const classNames = [
         "tile",
@@ -36,9 +36,11 @@ export const Tile: FC<TileProps> = ({
         <article className={classNames} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
             <div className="tile-drag-bar" draggable onDragStart={onDragStart}>
                 <div className="tile-drag-info">
-                    <svg className="tile-grip" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                    <svg className="tile-grip" width="12" height="12" viewBox="0 0 12 12" fill="none"
+                         aria-hidden="true">
                         {[0, 4, 8].map(cx =>
-                            [2, 6, 10].map(cy => <circle key={`${cx}-${cy}`} cx={cx + 2} cy={cy} r="1" fill="currentColor"/>)
+                            [2, 6, 10].map(cy => <circle key={`${cx}-${cy}`} cx={cx + 2} cy={cy} r="1"
+                                                         fill="currentColor"/>)
                         )}
                     </svg>
                     <span className="tile-drag-title">{widget?.label ?? "Widget"}</span>
