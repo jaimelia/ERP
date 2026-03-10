@@ -8,6 +8,7 @@ export const USERS: User[] = [
 
 export const WIDGETS: Record<string, WidgetDef> = {
     pompes: {id: "pompes", label: "Etat des Pompes", icon: "⛽", color: "#3B82F6"},
+    calculatrice: {id: "calculatrice", label: "Calculatrice", icon: "+-", color: "#64748B"},
     transactions: {id: "transactions", label: "Transactions", icon: "💳", color: "#10B981"},
     stock: {id: "stock", label: "Stock Carburant", icon: "🛢️", color: "#F59E0B"},
     caisse: {id: "caisse", label: "Caisse", icon: "🏧", color: "#8B5CF6"},
