@@ -1,0 +1,116 @@
+:root {
+    font-family: "DM Sans", "Segoe UI", sans-serif;
+    line-height: 1.4;
+    --color-bg: #f0f2f5;
+    --color-surface: #ffffff;
+    --color-surface-alt: #eceef2;
+    --color-border: #d1d5db;
+    --color-border-strong: #9ca3af;
+    --color-text: #111827;
+    --color-text-muted: #6b7280;
+    --color-text-subtle: #9ca3af;
+    --color-accent: #e85d04;
+    --color-accent-hover: #c44d00;
+    --color-accent-soft: #fff0e6;
+    --color-accent-soft-border: rgba(232, 93, 4, 0.18);
+    --color-header-bg: #1c1f26;
+    --color-header-text: #f9fafb;
+    --color-drag-bar: #f3f4f6;
+    --color-drag-bar-hover: #e5e7eb;
+    --color-drag-over: rgba(232, 93, 4, 0.07);
+    --color-drag-over-border: #e85d04;
+    --color-danger-bg: #fee2e2;
+    --color-danger-border: #fecaca;
+    --color-danger-text: #dc2626;
+    --color-employee: #60a5fa;
+    --color-employee-soft: rgba(96, 165, 250, 0.12);
+    --color-employee-border: rgba(96, 165, 250, 0.3);
+    --color-manager-soft: rgba(232, 93, 4, 0.15);
+    --color-manager-border: rgba(232, 93, 4, 0.28);
+    --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.14);
+    --shadow-accent: rgba(232, 93, 4, 0.3);
+    --login-gradient: linear-gradient(135deg, #1c1f26, #2d3142, #1c1f26);
+}
+
+[data-theme="light"] {
+    color-scheme: light;
+    --color-bg: #f0f2f5;
+    --color-surface: #ffffff;
+    --color-surface-alt: #eceef2;
+    --color-border: #d1d5db;
+    --color-border-strong: #9ca3af;
+    --color-text: #111827;
+    --color-text-muted: #6b7280;
+    --color-text-subtle: #9ca3af;
+    --color-accent: #e85d04;
+    --color-accent-hover: #c44d00;
+    --color-accent-soft: #fff0e6;
+    --color-accent-soft-border: rgba(232, 93, 4, 0.18);
+    --color-header-bg: #1c1f26;
+    --color-header-text: #f9fafb;
+    --color-drag-bar: #f3f4f6;
+    --color-drag-bar-hover: #e5e7eb;
+    --color-drag-over: rgba(232, 93, 4, 0.07);
+    --color-drag-over-border: #e85d04;
+    --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.14);
+    --shadow-accent: rgba(232, 93, 4, 0.3);
+    --color-manager-soft: rgba(232, 93, 4, 0.15);
+    --color-manager-border: rgba(232, 93, 4, 0.28);
+    --login-gradient: linear-gradient(135deg, #1c1f26, #2d3142, #1c1f26);
+}
+
+[data-theme="dark"] {
+    color-scheme: dark;
+    --color-bg: #0f1117;
+    --color-surface: #1a1d27;
+    --color-surface-alt: #13151e;
+    --color-border: #2a2d3a;
+    --color-border-strong: #3d4050;
+    --color-text: #e8eaf0;
+    --color-text-muted: #8b90a4;
+    --color-text-subtle: #5a5f74;
+    --color-accent: #ff6b1a;
+    --color-accent-hover: #ff8040;
+    --color-accent-soft: #2a1a0e;
+    --color-accent-soft-border: rgba(255, 107, 26, 0.24);
+    --color-header-bg: #0a0c12;
+    --color-header-text: #e8eaf0;
+    --color-drag-bar: #22253a;
+    --color-drag-bar-hover: #2e3150;
+    --color-drag-over: rgba(255, 107, 26, 0.08);
+    --color-drag-over-border: #ff6b1a;
+    --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.5);
+    --shadow-accent: rgba(255, 107, 26, 0.3);
+    --color-manager-soft: rgba(255, 107, 26, 0.15);
+    --color-manager-border: rgba(255, 107, 26, 0.3);
+    --login-gradient: linear-gradient(135deg, #0a0c12, #1a1d27, #0f1117);
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+    width: 100%;
+    min-height: 100%;
+    margin: 0;
+}
+
+body {
+    min-width: 320px;
+    background: #f0f2f5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+button,
+input {
+    font: inherit;
+}

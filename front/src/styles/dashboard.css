@@ -1,0 +1,209 @@
+.dashboard-screen {
+    min-height: 100vh;
+    background: var(--color-bg);
+    display: flex;
+    flex-direction: column;
+}
+
+.dashboard-header {
+    height: 52px;
+    flex-shrink: 0;
+    padding: 0 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    background: var(--color-header-bg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.header-left-group,
+.header-right-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.header-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.header-brand-icon {
+    font-size: 20px;
+}
+
+.header-brand-name {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+    color: var(--color-header-text);
+}
+
+.header-divider {
+    width: 1px;
+    height: 18px;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.header-view-label {
+    border-radius: 6px;
+    padding: 3px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    background: rgba(255, 255, 255, 0.05);
+    color: #9ca3af;
+    font-size: 12px;
+}
+
+.header-level-button {
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.13);
+    background: transparent;
+    color: #9ca3af;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 12px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.header-level-button:hover {
+    border-color: rgba(255, 255, 255, 0.22);
+}
+
+.header-level-button.is-active {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    color: #ffffff;
+}
+
+.header-role-badge {
+    border-radius: 6px;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    border: 1px solid transparent;
+}
+
+.header-role-badge.is-manager {
+    color: var(--color-accent);
+    background: var(--color-manager-soft);
+    border-color: var(--color-manager-border);
+}
+
+.header-role-badge.is-employee {
+    color: var(--color-employee);
+    background: var(--color-employee-soft);
+    border-color: var(--color-employee-border);
+}
+
+.header-user-name {
+    color: #9ca3af;
+    font-size: 12px;
+}
+
+.header-icon-button {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.11);
+    background: rgba(255, 255, 255, 0.08);
+    color: #f9fafb;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.header-icon-button:hover {
+    background: rgba(255, 255, 255, 0.16);
+}
+
+.header-logout-button {
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.11);
+    background: transparent;
+    color: #9ca3af;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 12px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.header-logout-button:hover {
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.22);
+    background: rgba(239, 68, 68, 0.13);
+}
+
+.dashboard-hint {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 20px;
+    border-bottom: 1px solid var(--color-accent-soft-border);
+    background: var(--color-accent-soft);
+    color: var(--color-text-muted);
+    font-size: 12px;
+}
+
+.dashboard-hint-icon {
+    font-size: 13px;
+}
+
+.dashboard-grid {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    gap: 12px;
+    padding: 16px;
+}
+
+.dashboard-grid--3x2 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+}
+
+.dashboard-grid--2x2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+}
+
+@media (max-width: 960px) {
+    .dashboard-header {
+        height: auto;
+        padding: 10px 12px;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+
+    .header-left-group,
+    .header-right-group {
+        flex-wrap: wrap;
+    }
+
+    .dashboard-hint {
+        padding: 6px 12px;
+    }
+
+    .dashboard-grid {
+        padding: 12px;
+    }
+}
+
+@media (max-width: 640px) {
+    .dashboard-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        grid-auto-rows: minmax(140px, 1fr);
+    }
+
+    .tile--wide {
+        grid-column: span 2;
+    }
+}

@@ -1,0 +1,12 @@
+@import "./styles/login.css";
+@import "./styles/dashboard.css";
+@import "./styles/tile.css";
+@import "./styles/empty-slot.css";
+
+.app-shell {
+    min-height: 100vh;
+    width: 100%;
+    color: var(--color-text);
+    background: var(--color-bg);
+    font-family: "DM Sans", "Segoe UI", sans-serif;
+}

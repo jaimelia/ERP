@@ -1,0 +1,62 @@
+import type {DragEvent, FC} from "react";
+import {WIDGETS} from "../data/stationConfig";
+
+interface TileProps {
+    widgetId: string;
+    colSpan?: number;
+    dragging: boolean;
+    dragOver: boolean;
+    onDragStart: () => void;
+    onDragOver: (event: DragEvent<HTMLDivElement>) => void;
+    onDragLeave: () => void;
+    onDrop: () => void;
+}
+
+export const Tile: FC<TileProps> = ({
+    widgetId,
+    colSpan = 1,
+    dragging,
+    dragOver,
+    onDragStart,
+    onDragOver,
+    onDragLeave,
+    onDrop,
+}) => {
+    const widget = WIDGETS[widgetId];
+    const classNames = [
+        "tile",
+        colSpan > 1 ? "tile--wide" : "",
+        dragging ? "is-dragging" : "",
+        dragOver ? "is-drag-over" : "",
+    ]
+        .filter(Boolean)
+        .join(" ");
+
+    return (
+        <article className={classNames} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
+            <div className="tile-drag-bar" draggable onDragStart={onDragStart}>
+                <div className="tile-drag-info">
+                    <svg className="tile-grip" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                        {[0, 4, 8].map(cx =>
+                            [2, 6, 10].map(cy => <circle key={`${cx}-${cy}`} cx={cx + 2} cy={cy} r="1" fill="currentColor"/>)
+                        )}
+                    </svg>
+                    <span className="tile-drag-title">{widget?.label ?? "Widget"}</span>
+                </div>
+                {colSpan > 1 && <span className="tile-wide-badge">2x</span>}
+            </div>
+
+            <div className="tile-content">
+                {widget ? (
+                    <>
+                        <div className={`tile-icon tile-icon--${widget.id}`}>{widget.icon}</div>
+                        <div className="tile-title">{widget.label}</div>
+                        <div className="tile-subtitle">Contenu a venir</div>
+                    </>
+                ) : (
+                    <div className="tile-empty-content">-</div>
+                )}
+            </div>
+        </article>
+    );
+};

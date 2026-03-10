@@ -1,0 +1,16 @@
+.empty-slot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    border: 2px dashed var(--color-border);
+    background: var(--color-surface-alt);
+    color: var(--color-text-subtle);
+    font-size: 12px;
+    transition: all 0.15s ease;
+}
+
+.empty-slot.is-drag-over {
+    border-color: var(--color-drag-over-border);
+    background: var(--color-drag-over);
+}
