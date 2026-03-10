@@ -1,4 +1,4 @@
-import type {ScreenConfig, User, WidgetDef} from "../types";
+import type {ScreenConfig, Size, User, WidgetDef} from "../types";
 
 export const USERS: User[] = [
     {username: "employe1", password: "1234", role: "employe", name: "Jean Dupont"},
@@ -13,10 +13,12 @@ export const WIDGETS: Record<string, WidgetDef> = {
     pompes: {id: "pompes", label: "Etat des Pompes", icon: "⛽"},
     historique_transactions: {id: "historique_transactions", label: "Historique transactions", icon: "😮"},
     calculatrice: {id: "calculatrice", label: "Calculatrice", icon: "🧮"},
-    reapprovisionnements: {id: "reapprovisionnements", label: "Réapprovisionnements", icon: "🙏", rows: 2},
-    marchandises: {id: "marchandises", label: "Marchandises", icon: "⛈️"},
+    reapprovisionnements_employe: {id: "reapprovisionnements_employe", label: "Réapprovisionnements", icon: "🙏"},
+    produits: {id: "produits", label: "Produits", icon: "🧈"},
     transactions: {id: "transactions", label: "Transactions", icon: "📅"},
     clients: {id: "clients", label: "Clients", icon: "😎"},
+    reapprovisionnements_gerant: {id: "reapprovisionnements_gerant", label: "Réapprovisionnements", icon: "🙏", rows: 2},
+    marchandises: {id: "marchandises", label: "Marchandises", icon: "⛈️"},
     table_transactions: {id: "table_transactions", label: "Table transactions", icon: "🍽️"},
     directives: {id: "directives", label: "Directives", icon: "🤬"},
     documents_de_gestion: {id: "documents_de_gestion", label: "Documents De Gestion", icon: "🐽"},
@@ -25,33 +27,32 @@ export const WIDGETS: Record<string, WidgetDef> = {
 
 export const SCREENS: Record<string, ScreenConfig> = {
     employe_1: {
-        cols: 3,
-        rows: 2,
         label: "Employe - Vue principale",
-        defaultGrid: ["chargeurs", "CCE", "ticket", "pompes", "historique_transactions", "calculatrice"],
+        defaultGrid: [["chargeurs", "CCE", "ticket"], ["pompes", "historique_transactions", "calculatrice"]],
     },
     employe_2: {
-        cols: 2,
-        rows: 2,
         label: "Employe - Vue simplifiee",
-        defaultGrid: ["reapprovisionnements", "produits", "transactions", "clients"],
+        defaultGrid: [["reapprovisionnements_employe", "produits"], ["transactions", "clients"]],
     },
     gerant_1: {
-        cols: 3,
-        rows: 2,
         label: "Gerant - Vue principale",
-        defaultGrid: ["reapprovisionnements", "marchandises", "CCE", null, "transactions", "clients"],
+        defaultGrid: [["reapprovisionnements_gerant", "marchandises", "CCE"], [null, "transactions", "clients"]],
     },
     gerant_2: {
-        cols: 2,
-        rows: 2,
         label: "Gerant - Vue analytique",
-        defaultGrid: ["table_transactions", "directives", "documents_de_gestion", "incident"],
+        defaultGrid: [["table_transactions", "directives"], ["documents_de_gestion", "incident"]],
     },
 };
 
-export const buildGrid = (screenKey: string): (string | null)[] => [...SCREENS[screenKey].defaultGrid];
-export const isWide = (widgetId: string | null): boolean => widgetId !== null && Boolean(WIDGETS[widgetId]?.cols);
-export const size = (widgetId: string | null): Array<number> => {
-    [WIDGETS[widgetId]?.cols || 0, WIDGETS[widgetId]?.rows || 0]
+export const buildGrid = (screenKey: string): (string | null)[][] => [...SCREENS[screenKey].defaultGrid];
+export const isWide = (widgetId: string | null): boolean => widgetId !== null && Boolean(WIDGETS[widgetId]?.cols == 2);
+export const getSize = (widgetId: string | null): Size => {
+    if (widgetId === null) {
+        return {width: 0, height: 0};
+    }
+    
+    return {
+        width: WIDGETS[widgetId]?.cols || 1, 
+        height: WIDGETS[widgetId]?.rows || 1
+    }
 }

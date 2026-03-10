@@ -1,9 +1,11 @@
-import type {DragEvent, FC} from "react";
+import  {type DragEvent, type FC} from "react";
 import {WIDGETS} from "../data/stationConfig";
+import * as React from "react";
 
 interface TileProps {
     widgetId: string;
-    colSpan?: number;
+    cols?: number;
+    rows?: number;
     dragging: boolean;
     dragOver: boolean;
     onDragStart: () => void;
@@ -14,7 +16,8 @@ interface TileProps {
 
 export const Tile: FC<TileProps> = ({
                                         widgetId,
-                                        colSpan = 1,
+                                        cols = 1,
+                                        rows = 1,
                                         dragging,
                                         dragOver,
                                         onDragStart,
@@ -25,7 +28,6 @@ export const Tile: FC<TileProps> = ({
     const widget = WIDGETS[widgetId];
     const classNames = [
         "tile",
-        colSpan > 1 ? "tile--wide" : "",
         dragging ? "is-dragging" : "",
         dragOver ? "is-drag-over" : "",
     ]
@@ -33,7 +35,13 @@ export const Tile: FC<TileProps> = ({
         .join(" ");
 
     return (
-        <article className={classNames} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
+        <article 
+            className={classNames} 
+            onDragOver={onDragOver} 
+            onDragLeave={onDragLeave} 
+            onDrop={onDrop} 
+            style={{'--cols': cols, '--rows': rows} as React.CSSProperties}>
+            
             <div className="tile-drag-bar" draggable onDragStart={onDragStart}>
                 <div className="tile-drag-info">
                     <svg className="tile-grip" width="12" height="12" viewBox="0 0 12 12" fill="none"
@@ -45,7 +53,6 @@ export const Tile: FC<TileProps> = ({
                     </svg>
                     <span className="tile-drag-title">{widget?.label ?? "Widget"}</span>
                 </div>
-                {colSpan > 1 && <span className="tile-wide-badge">2x</span>}
             </div>
 
             <div className="tile-content">

@@ -1,13 +1,14 @@
 .tile {
+	--cols: 1;
+	--rows: 1;
+	grid-column: span var(--cols);
+	grid-row: span var(--rows);
+	
     display: flex;
     flex-direction: column;
     overflow: hidden;
     background: var(--color-surface);
     transition: border-color 0.15s ease, background 0.15s ease, opacity 0.15s ease, box-shadow 0.2s ease;
-}
-
-.tile--wide {
-    grid-column: span 2;
 }
 
 .tile.is-drag-over {

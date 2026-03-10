@@ -17,8 +17,21 @@ export interface WidgetDef {
 }
 
 export interface ScreenConfig {
-    cols: number;
-    rows: number;
     label: string;
-    defaultGrid: (string | null)[];
+    defaultGrid: (string | null)[][];
 }
+
+export interface Coords {
+    x: number;
+    y : number;
+}
+
+export interface Size {
+    width: number;
+    height: number;
+}
+
+export const coordsToKey = (c: Coords): string => `${c.x},${c.y}`;
+export const coordsEqual = (a: Coords | null, b: Coords | null): boolean =>
+    a !== null && b !== null && a.x === b.x && a.y === b.y;
+

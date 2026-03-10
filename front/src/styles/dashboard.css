@@ -149,6 +149,11 @@ main {
 }
 
 .dashboard-grid {
+	--cols: 3;
+	--rows: 2;
+	grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+	grid-template-rows: repeat(var(--rows), minmax(0, 1fr));
+	
     display: grid;
 	height: 100%;
 	background-color: var(--color-border);
@@ -157,14 +162,4 @@ main {
 	border-radius: 10px;
 	overflow: clip;
 	box-shadow: var(--shadow-sm);
-}
-
-.dashboard-grid--3x2 {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    grid-template-rows: repeat(2, minmax(0, 1fr));
-}
-
-.dashboard-grid--2x2 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-template-rows: repeat(2, minmax(0, 1fr));
 }
