@@ -2,6 +2,7 @@ import  {type DragEvent, type FC} from "react";
 import {WIDGETS} from "../data/stationConfig";
 import {Calculator} from "./Calculator.tsx";
 import * as React from "react";
+import {Products} from "./Products.tsx";
 
 interface TileProps {
     widgetId: string;
@@ -39,6 +40,8 @@ export const Tile: FC<TileProps> = ({
         switch (widgetId) {
             case "calculatrice":
                 return <Calculator />;
+            case "marchandises":
+                return <Products />;
             default:
                 return <div className="tile-subtitle">Contenu a venir</div>;
         }
