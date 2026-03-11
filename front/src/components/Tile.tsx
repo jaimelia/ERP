@@ -1,5 +1,6 @@
 import  {type DragEvent, type FC} from "react";
 import {WIDGETS} from "../data/stationConfig";
+import {Calculatrice} from "./Calculatrice";
 import * as React from "react";
 
 interface TileProps {
@@ -34,6 +35,15 @@ export const Tile: FC<TileProps> = ({
         .filter(Boolean)
         .join(" ");
 
+    const renderWidgetContent = () => {
+        switch (widgetId) {
+            case "calculatrice":
+                return <Calculatrice />;
+            default:
+                return <div className="tile-subtitle">Contenu a venir</div>;
+        }
+    };
+
     return (
         <article 
             className={classNames} 
@@ -57,11 +67,15 @@ export const Tile: FC<TileProps> = ({
 
             <div className="tile-content">
                 {widget ? (
-                    <>
-                        <div className={`tile-icon tile-icon--${widget.id}`}>{widget.icon}</div>
-                        <div className="tile-title">{widget.label}</div>
-                        <div className="tile-subtitle">Contenu a venir</div>
-                    </>
+                    widget.id === "calculatrice" ? (
+                        renderWidgetContent()
+                    ) : (
+                        <>
+                            <div className={`tile-icon tile-icon--${widget.id}`}>{widget.icon}</div>
+                            <div className="tile-title">{widget.label}</div>
+                            {renderWidgetContent()}
+                        </>
+                    )
                 ) : (
                     <div className="tile-empty-content">-</div>
                 )}

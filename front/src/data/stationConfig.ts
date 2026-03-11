@@ -12,7 +12,7 @@ export const WIDGETS: Record<string, WidgetDef> = {
     ticket: {id: "ticket", label: "Ticket", icon: "🧾"},
     pompes: {id: "pompes", label: "Etat des Pompes", icon: "⛽"},
     historique_transactions: {id: "historique_transactions", label: "Historique transactions", icon: "😮"},
-    calculatrice: {id: "calculatrice", label: "Calculatrice", icon: "🧮"},
+    calculatrice: {id: "calculatrice", label: "Calculatrice", icon: "+-"},
     reapprovisionnements_employe: {id: "reapprovisionnements_employe", label: "Réapprovisionnements", icon: "🙏"},
     produits: {id: "produits", label: "Produits", icon: "🧈"},
     transactions: {id: "transactions", label: "Transactions", icon: "📅"},
