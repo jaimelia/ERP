@@ -35,19 +35,91 @@ export const Dashboard: FC<DashboardProps> = ({screenKey, user, level, onLevel, 
             setGrid(previousGrid => {
                 const nextGrid = previousGrid.map(row => [...row]);
                 const sourceWidget = nextGrid[fromCoords.y][fromCoords.x];
+                const sourceSize = getSize(sourceWidget);
+                const targetWidget = nextGrid[targetCoords.y][targetCoords.x];
+                const targetSize = getSize(targetWidget);
 
-                const sourceWidgetSize = getSize(sourceWidget);
+                // Destination positions (clamped to grid bounds)
+                const srcDestX = Math.min(targetCoords.x, nextGrid[0].length - sourceSize.width);
+                const srcDestY = Math.min(targetCoords.y, nextGrid.length - sourceSize.height);
+                const tgtDestX = Math.min(fromCoords.x, nextGrid[0].length - targetSize.width);
+                const tgtDestY = Math.min(fromCoords.y, nextGrid.length - targetSize.height);
 
-                targetCoords.x -= Math.max(0, targetCoords.x + sourceWidgetSize.width - nextGrid[0].length);
-                targetCoords.y -= Math.max(0, targetCoords.y + sourceWidgetSize.height - nextGrid.length);
+                // Track all affected cells and collect displaced widgets
+                const affected = new Set<string>();
+                const collateral: string[] = [];
 
-                for (let dy = 0; dy < sourceWidgetSize.height; dy++) {
-                    for (let dx = 0; dx < sourceWidgetSize.width; dx++) {
-                        nextGrid[fromCoords.y + dy][fromCoords.x + dx] = nextGrid[targetCoords.y + dy][targetCoords.x + dx];
+                const markCells = (x: number, y: number, w: number, h: number): void => {
+                    for (let dy = 0; dy < h; dy++)
+                        for (let dx = 0; dx < w; dx++)
+                            affected.add(`${x + dx},${y + dy}`);
+                };
+
+                // Cells of source and target widgets (original positions)
+                markCells(fromCoords.x, fromCoords.y, sourceSize.width, sourceSize.height);
+                markCells(targetCoords.x, targetCoords.y, targetSize.width, targetSize.height);
+
+                // Cells the target widget will occupy at its new position
+                // Any non-null widget there that isn't source/target is collateral
+                for (let dy = 0; dy < targetSize.height; dy++) {
+                    for (let dx = 0; dx < targetSize.width; dx++) {
+                        const cx = tgtDestX + dx, cy = tgtDestY + dy;
+                        const key = `${cx},${cy}`;
+                        if (!affected.has(key)) {
+                            const w = nextGrid[cy][cx];
+                            if (w !== null) collateral.push(w);
+                            // Also clear the full extent of that collateral widget
+                            const cs = getSize(w);
+                            markCells(cx, cy, cs.width, cs.height);
+                        }
                     }
                 }
 
-                nextGrid[targetCoords.y][targetCoords.x] = sourceWidget;
+                // Cells the source widget will occupy at its new position
+                for (let dy = 0; dy < sourceSize.height; dy++) {
+                    for (let dx = 0; dx < sourceSize.width; dx++) {
+                        const cx = srcDestX + dx, cy = srcDestY + dy;
+                        const key = `${cx},${cy}`;
+                        if (!affected.has(key)) {
+                            const w = nextGrid[cy][cx];
+                            if (w !== null) collateral.push(w);
+                            const cs = getSize(w);
+                            markCells(cx, cy, cs.width, cs.height);
+                        }
+                    }
+                }
+
+                // Clear all affected cells
+                for (const key of affected) {
+                    const [x, y] = key.split(",").map(Number);
+                    nextGrid[y][x] = null;
+                }
+
+                // Place source and target at their new positions
+                nextGrid[srcDestY][srcDestX] = sourceWidget;
+                nextGrid[tgtDestY][tgtDestX] = targetWidget;
+
+                // Track cells used by placed widgets
+                const used = new Set<string>();
+                for (let dy = 0; dy < sourceSize.height; dy++)
+                    for (let dx = 0; dx < sourceSize.width; dx++)
+                        used.add(`${srcDestX + dx},${srcDestY + dy}`);
+                for (let dy = 0; dy < targetSize.height; dy++)
+                    for (let dx = 0; dx < targetSize.width; dx++)
+                        used.add(`${tgtDestX + dx},${tgtDestY + dy}`);
+
+                // Place collateral widgets in remaining free cells
+                const freeCells: Coords[] = [];
+                for (const key of affected) {
+                    if (!used.has(key)) {
+                        const [x, y] = key.split(",").map(Number);
+                        freeCells.push({x, y});
+                    }
+                }
+
+                for (let i = 0; i < collateral.length && i < freeCells.length; i++) {
+                    nextGrid[freeCells[i].y][freeCells[i].x] = collateral[i];
+                }
 
                 return nextGrid;
             });
