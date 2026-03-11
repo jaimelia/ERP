@@ -7,22 +7,22 @@ export const USERS: User[] = [
 ];
 
 export const WIDGETS: Record<string, WidgetDef> = {
-    chargeurs: {id: "chargeurs", label: "Chargeurs", icon: "🔌"},
-    CCE: {id: "CCE", label: "CCE", icon: "💳"},
-    ticket: {id: "ticket", label: "Ticket", icon: "🧾"},
-    pompes: {id: "pompes", label: "Etat des Pompes", icon: "⛽"},
-    historique_transactions: {id: "historique_transactions", label: "Historique transactions", icon: "😮"},
-    calculatrice: {id: "calculatrice", label: "Calculatrice", icon: "+-"},
-    reapprovisionnements_employe: {id: "reapprovisionnements_employe", label: "Réapprovisionnements", icon: "🙏"},
-    produits: {id: "produits", label: "Produits", icon: "🧈"},
-    transactions: {id: "transactions", label: "Transactions", icon: "📅"},
-    clients: {id: "clients", label: "Clients", icon: "😎"},
-    reapprovisionnements_gerant: {id: "reapprovisionnements_gerant", label: "Réapprovisionnements", icon: "🙏", rows: 2},
-    marchandises: {id: "marchandises", label: "Marchandises", icon: "⛈️"},
-    table_transactions: {id: "table_transactions", label: "Table transactions", icon: "🍽️"},
-    directives: {id: "directives", label: "Directives", icon: "🤬"},
-    documents_de_gestion: {id: "documents_de_gestion", label: "Documents De Gestion", icon: "🐽"},
-    incident: {id: "incident", label: "Incident", icon: "⛷️"},
+    chargeurs: {id: "chargeurs", label: "Chargeurs", size: {width: 1, height: 1}},
+    CCE: {id: "CCE", label: "CCE", size: {width: 1, height: 1}},
+    ticket: {id: "ticket", label: "Ticket", size: {width: 1, height: 1}},
+    pompes: {id: "pompes", label: "Etat des Pompes", size: {width: 1, height: 1}},
+    historique_transactions: {id: "historique_transactions", label: "Historique transactions", size: {width: 1, height: 1}},
+    calculatrice: {id: "calculatrice", label: "Calculatrice", size: {width: 1, height: 1}},
+    reapprovisionnements_employe: {id: "reapprovisionnements_employe", label: "Réapprovisionnements", size: {width: 1, height: 1}},
+    produits: {id: "produits", label: "Produits", size: {width: 1, height: 1}},
+    transactions: {id: "transactions", label: "Transactions", size: {width: 1, height: 1}},
+    clients: {id: "clients", label: "Clients", size: {width: 1, height: 1}},
+    reapprovisionnements_gerant: {id: "reapprovisionnements_gerant", label: "Réapprovisionnements", size: {width: 1, height: 2}},
+    marchandises: {id: "marchandises", label: "Marchandises", size: {width: 1, height: 1}},
+    table_transactions: {id: "table_transactions", label: "Table transactions", size: {width: 1, height: 1}},
+    directives: {id: "directives", label: "Directives", size: {width: 1, height: 1}},
+    documents_de_gestion: {id: "documents_de_gestion", label: "Documents De Gestion", size: {width: 1, height: 1}},
+    incident: {id: "incident", label: "Incident", size: {width: 1, height: 1}},
 };
 
 export const SCREENS: Record<string, ScreenConfig> = {
@@ -45,14 +45,10 @@ export const SCREENS: Record<string, ScreenConfig> = {
 };
 
 export const buildGrid = (screenKey: string): (string | null)[][] => [...SCREENS[screenKey].defaultGrid];
-export const isWide = (widgetId: string | null): boolean => widgetId !== null && Boolean(WIDGETS[widgetId]?.cols == 2);
 export const getSize = (widgetId: string | null): Size => {
     if (widgetId === null) {
-        return {width: 0, height: 0};
+        return {width: 1, height: 1};
     }
     
-    return {
-        width: WIDGETS[widgetId]?.cols || 1, 
-        height: WIDGETS[widgetId]?.rows || 1
-    }
+    return WIDGETS[widgetId]?.size || {width: 1, height: 1};
 }

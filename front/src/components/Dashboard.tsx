@@ -1,8 +1,8 @@
-import {useCallback, useRef, useState, type DragEvent, type FC, type JSX} from "react";
-import {SCREENS, buildGrid, getSize} from "../data/stationConfig";
+import * as React from "react";
+import {type DragEvent, type FC, type JSX, useCallback, useRef, useState} from "react";
+import {buildGrid, getSize, SCREENS} from "../data/stationConfig";
 import {type Coords, coordsEqual, coordsToKey, type ThemeKey, type User} from "../types";
 import {Tile} from "./Tile";
-import * as React from "react";
 
 interface DashboardProps {
     screenKey: string;
@@ -36,145 +36,18 @@ export const Dashboard: FC<DashboardProps> = ({screenKey, user, level, onLevel, 
                 const nextGrid = previousGrid.map(row => [...row]);
                 const sourceWidget = nextGrid[fromCoords.y][fromCoords.x];
 
-                if (!sourceWidget) {
-                    return nextGrid;
-                }
+                const sourceWidgetSize = getSize(sourceWidget);
 
-                const rows = nextGrid.length;
-                const cols = nextGrid[0]?.length ?? 0;
-                const sourceSize = getSize(sourceWidget);
+                targetCoords.x -= Math.max(0, targetCoords.x + sourceWidgetSize.width - nextGrid[0].length);
+                targetCoords.y -= Math.max(0, targetCoords.y + sourceWidgetSize.height - nextGrid.length);
 
-                const isInside = (coords: Coords, anchor: Coords, size: { width: number; height: number }): boolean =>
-                    coords.x >= anchor.x
-                    && coords.x < anchor.x + size.width
-                    && coords.y >= anchor.y
-                    && coords.y < anchor.y + size.height;
-
-                const clampAnchor = (anchor: Coords, size: { width: number; height: number }): Coords => ({
-                    x: Math.max(0, Math.min(anchor.x, cols - size.width)),
-                    y: Math.max(0, Math.min(anchor.y, rows - size.height)),
-                });
-
-                let targetAnchor: Coords | null = null;
-                let targetWidget: string | null = null;
-                let targetSize = { width: 0, height: 0 };
-
-                for (let y = 0; y < rows; y++) {
-                    for (let x = 0; x < cols; x++) {
-                        const widgetId = nextGrid[y][x];
-                        if (!widgetId) {
-                            continue;
-                        }
-
-                        const size = getSize(widgetId);
-                        if (isInside(targetCoords, { x, y }, size)) {
-                            targetAnchor = { x, y };
-                            targetWidget = widgetId;
-                            targetSize = size;
-                            break;
-                        }
-                    }
-
-                    if (targetAnchor) {
-                        break;
+                for (let dy = 0; dy < sourceWidgetSize.height; dy++) {
+                    for (let dx = 0; dx < sourceWidgetSize.width; dx++) {
+                        nextGrid[fromCoords.y + dy][fromCoords.x + dx] = nextGrid[targetCoords.y + dy][targetCoords.x + dx];
                     }
                 }
 
-                if (targetAnchor && coordsEqual(targetAnchor, fromCoords)) {
-                    return nextGrid;
-                }
-
-                if (!targetAnchor && isInside(targetCoords, fromCoords, sourceSize)) {
-                    return nextGrid;
-                }
-
-                const adjustedSourceAnchor = clampAnchor(targetCoords, sourceSize);
-                const adjustedTargetAnchor = targetWidget ? clampAnchor(fromCoords, targetSize) : null;
-
-                if (!targetWidget && coordsEqual(adjustedSourceAnchor, fromCoords)) {
-                    return nextGrid;
-                }
-
-                if (targetWidget && adjustedTargetAnchor && coordsEqual(adjustedSourceAnchor, adjustedTargetAnchor)) {
-                    return nextGrid;
-                }
-
-                const occupied = Array.from({ length: rows }, () => Array(cols).fill(false));
-                for (let y = 0; y < rows; y++) {
-                    for (let x = 0; x < cols; x++) {
-                        const widgetId = nextGrid[y][x];
-                        if (!widgetId) {
-                            continue;
-                        }
-
-                        if (coordsEqual({ x, y }, fromCoords)) {
-                            continue;
-                        }
-
-                        if (targetAnchor && coordsEqual({ x, y }, targetAnchor)) {
-                            continue;
-                        }
-
-                        const size = getSize(widgetId);
-                        for (let dy = 0; dy < size.height; dy++) {
-                            for (let dx = 0; dx < size.width; dx++) {
-                                occupied[y + dy][x + dx] = true;
-                            }
-                        }
-                    }
-                }
-
-                const canPlace = (anchor: Coords, size: { width: number; height: number }): boolean => {
-                    if (anchor.x < 0 || anchor.y < 0) {
-                        return false;
-                    }
-
-                    if (anchor.x + size.width > cols || anchor.y + size.height > rows) {
-                        return false;
-                    }
-
-                    for (let dy = 0; dy < size.height; dy++) {
-                        for (let dx = 0; dx < size.width; dx++) {
-                            if (occupied[anchor.y + dy][anchor.x + dx]) {
-                                return false;
-                            }
-                        }
-                    }
-
-                    return true;
-                };
-
-                if (!canPlace(adjustedSourceAnchor, sourceSize)) {
-                    return nextGrid;
-                }
-
-                for (let dy = 0; dy < sourceSize.height; dy++) {
-                    for (let dx = 0; dx < sourceSize.width; dx++) {
-                        occupied[adjustedSourceAnchor.y + dy][adjustedSourceAnchor.x + dx] = true;
-                    }
-                }
-
-                if (targetWidget && adjustedTargetAnchor) {
-                    if (!canPlace(adjustedTargetAnchor, targetSize)) {
-                        return nextGrid;
-                    }
-
-                    for (let dy = 0; dy < targetSize.height; dy++) {
-                        for (let dx = 0; dx < targetSize.width; dx++) {
-                            occupied[adjustedTargetAnchor.y + dy][adjustedTargetAnchor.x + dx] = true;
-                        }
-                    }
-                }
-
-                nextGrid[fromCoords.y][fromCoords.x] = null;
-                if (targetAnchor) {
-                    nextGrid[targetAnchor.y][targetAnchor.x] = null;
-                }
-
-                nextGrid[adjustedSourceAnchor.y][adjustedSourceAnchor.x] = sourceWidget;
-                if (targetWidget && adjustedTargetAnchor) {
-                    nextGrid[adjustedTargetAnchor.y][adjustedTargetAnchor.x] = targetWidget;
-                }
+                nextGrid[targetCoords.y][targetCoords.x] = sourceWidget;
 
                 return nextGrid;
             });

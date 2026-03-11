@@ -11,9 +11,7 @@ export interface User {
 export interface WidgetDef {
     id: string;
     label: string;
-    icon: string;
-    cols?: number;
-    rows?: number;
+    size: Size;
 }
 
 export interface ScreenConfig {
