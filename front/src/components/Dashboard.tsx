@@ -1,7 +1,6 @@
 import {useCallback, useRef, useState, type DragEvent, type FC, type JSX} from "react";
 import {SCREENS, buildGrid, getSize} from "../data/stationConfig";
 import {type Coords, coordsEqual, coordsToKey, type ThemeKey, type User} from "../types";
-import {EmptySlot} from "./EmptySlot";
 import {Tile} from "./Tile";
 import * as React from "react";
 
@@ -240,16 +239,6 @@ export const Dashboard: FC<DashboardProps> = ({screenKey, user, level, onLevel, 
                         dragging={coordsEqual(fromCoords, coords)}
                         dragOver={coordsEqual(overCoords, coords)}
                         onDragStart={() => setFromCoords(coords)}
-                        onDragOver={onDragOver}
-                        onDragLeave={onDragLeave}
-                        onDrop={onDrop}
-                    />
-                );
-            } else {
-                widgets.push(
-                    <EmptySlot
-                        key={`empty-${x}-${y}`}
-                        dragOver={coordsEqual(overCoords, coords)}
                         onDragOver={onDragOver}
                         onDragLeave={onDragLeave}
                         onDrop={onDrop}

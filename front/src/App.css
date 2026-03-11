@@ -1,7 +1,7 @@
 @import "./styles/login.css";
 @import "./styles/dashboard.css";
 @import "./styles/tile.css";
-@import "./styles/empty-slot.css";
+@import "./styles/widgets/calculator.css";
 
 .app-shell {
     min-height: 100vh;
