@@ -1,40 +1,81 @@
 package com.g1b.station_back.model;
 
+import jakarta.persistence.*;
+import java.math.BigDecimal;
+
+@Entity
+@Table(name = "Products")
 public class Product {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "idProduct")
+    private Long idProduct;
+
+    @Column(name = "name")
     private String name;
-    private ProductType type;
-    private float quantity;
-    private float price;
+
+    @Column(name = "unitPrice")
+    private BigDecimal unitPrice;
+
+    @Column(name = "idShop")
+    private Integer idShop;
+
+    @Column(name = "stock")
+    private Integer stock;
+
+    @Column(name = "alertThreshold")
+    private Integer alertThreshold;
+
+    public Product() {
+    }
+
+
+    public Long getIdProduct() {
+        return idProduct;
+    }
+
+    public void setIdProduct(Long idProduct) {
+        this.idProduct = idProduct;
+    }
 
     public String getName() {
         return name;
-    }
-
-    public ProductType getType() {
-        return type;
-    }
-
-    public float getQuantity() {
-        return quantity;
-    }
-
-    public float getPrice() {
-        return price;
     }
 
     public void setName(String name) {
         this.name = name;
     }
 
-    public void setType(ProductType type) {
-        this.type = type;
+    public BigDecimal getUnitPrice() {
+        return unitPrice;
     }
 
-    public void setQuantity(float quantity) {
-        this.quantity = quantity;
+    public void setUnitPrice(BigDecimal unitPrice) {
+        this.unitPrice = unitPrice;
     }
 
-    public void setPrice(float price) {
-        this.price = price;
+    public Integer getIdShop() {
+        return idShop;
+    }
+
+    public void setIdShop(Integer idShop) {
+        this.idShop = idShop;
+    }
+
+    public Integer getStock() {
+        return stock;
+    }
+
+    public void setStock(Integer stock) {
+        this.stock = stock;
+    }
+
+    public Integer getAlertThreshold() {
+        return alertThreshold;
+    }
+
+    public void setAlertThreshold(Integer alertThreshold) {
+        this.alertThreshold = alertThreshold;
     }
 }
