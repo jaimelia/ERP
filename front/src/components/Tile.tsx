@@ -1,7 +1,10 @@
 import  {type DragEvent, type FC} from "react";
 import {WIDGETS} from "../data/stationConfig";
-import {Calculator} from "./Calculator.tsx";
-import * as React from "react";
+import {ReapprovisionnementWidget} from "./widgets/ReapprovisionnementWidget";
+import {MarchandisesWidget} from "./widgets/MarchandisesWidget";
+import {CEEWidget} from "./widgets/CEEWidget";
+import {TransactionsWidget} from "./widgets/TransactionsWidget";
+import {ClientsWidget} from "./widgets/ClientsWidget";
 
 interface TileProps {
     widgetId: string;
@@ -15,6 +18,14 @@ interface TileProps {
     onDrop: () => void;
 }
 
+const WIDGET_COMPONENTS: Partial<Record<string, FC>> = {
+    reappro: ReapprovisionnementWidget,
+    marchandises: MarchandisesWidget,
+    cee: CEEWidget,
+    transactions_g: TransactionsWidget,
+    clients_g: ClientsWidget,
+};
+
 export const Tile: FC<TileProps> = ({
                                         widgetId,
                                         cols = 1,
@@ -27,6 +38,8 @@ export const Tile: FC<TileProps> = ({
                                         onDrop,
                                     }) => {
     const widget = WIDGETS[widgetId];
+    const WidgetFC = WIDGET_COMPONENTS[widgetId];
+
     const classNames = [
         "tile",
         dragging ? "is-dragging" : "",
@@ -61,25 +74,27 @@ export const Tile: FC<TileProps> = ({
                                                          fill="currentColor"/>)
                         )}
                     </svg>
-                    <span className="tile-drag-title">{widget?.label ?? "Widget"}</span>
+                    <span className="tile-drag-title">{widget?.label ?? widgetId}</span>
                 </div>
             </div>
 
-            <div className="tile-content">
-                {widget ? (
-                    widget.id === "calculatrice" ? (
-                        renderWidgetContent()
-                    ) : (
+            {WidgetFC ? (
+                <div className="tile-widget-content">
+                    <WidgetFC />
+                </div>
+            ) : (
+                <div className="tile-content">
+                    {widget ? (
                         <>
                             <div className={`tile-icon tile-icon--${widget.id}`}>{widget.icon}</div>
                             <div className="tile-title">{widget.label}</div>
-                            {renderWidgetContent()}
+                            <div className="tile-subtitle">Contenu a venir</div>
                         </>
-                    )
-                ) : (
-                    <div className="tile-empty-content">-</div>
-                )}
-            </div>
+                    ) : (
+                        <div className="tile-empty-content">-</div>
+                    )}
+                </div>
+            )}
         </article>
     );
 };
