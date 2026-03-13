@@ -1,12 +1,13 @@
-import  {type DragEvent, type FC} from "react";
-import {WIDGETS} from "../data/stationConfig";
-import {Calculator} from "./Calculator.tsx";
+import {type DragEvent, type FC, type JSX} from "react";
+import {WIDGETS} from "../data/stationConfig.tsx";
 import * as React from "react";
+import type {WidgetDef} from "../types.ts";
 
 interface TileProps {
     widgetId: string;
     cols?: number;
     rows?: number;
+    editingLayout: boolean;
     dragging: boolean;
     dragOver: boolean;
     onDragStart: () => void;
@@ -19,6 +20,7 @@ export const Tile: FC<TileProps> = ({
                                         widgetId,
                                         cols = 1,
                                         rows = 1,
+                                        editingLayout,
                                         dragging,
                                         dragOver,
                                         onDragStart,
@@ -29,56 +31,35 @@ export const Tile: FC<TileProps> = ({
     const widget = WIDGETS[widgetId];
     const classNames = [
         "tile",
+        editingLayout ? "is-editing" : "",
         dragging ? "is-dragging" : "",
         dragOver ? "is-drag-over" : "",
     ]
         .filter(Boolean)
         .join(" ");
 
-    const renderWidgetContent = () => {
-        switch (widgetId) {
-            case "calculatrice":
-                return <Calculator />;
-            default:
-                return <div className="tile-subtitle">Contenu a venir</div>;
+    const renderWidgetContent = (widget: WidgetDef): JSX.Element => {
+        if (widget.element) {
+            return widget.element;
         }
+        return <></>
     };
 
     return (
-        <article 
-            className={classNames} 
-            onDragOver={onDragOver} 
-            onDragLeave={onDragLeave} 
-            onDrop={onDrop} 
-            style={{'--cols': cols, '--rows': rows} as React.CSSProperties}>
-            
-            <div className="tile-drag-bar" draggable onDragStart={onDragStart}>
-                <div className="tile-drag-info">
-                    <svg className="tile-grip" width="12" height="12" viewBox="0 0 12 12" fill="none"
-                         aria-hidden="true">
-                        {[0, 4, 8].map(cx =>
-                            [2, 6, 10].map(cy => <circle key={`${cx}-${cy}`} cx={cx + 2} cy={cy} r="1"
-                                                         fill="currentColor"/>)
-                        )}
-                    </svg>
-                    <span className="tile-drag-title">{widget?.label ?? "Widget"}</span>
-                </div>
-            </div>
+        <article
+            className={classNames}
+            draggable={editingLayout}
+            onDragStart={editingLayout ? onDragStart : undefined}
+            onDragOver={onDragOver}
+            onDragLeave={onDragLeave}
+            onDrop={onDrop}
+            style={{'--cols': cols, '--rows': rows, '--name': `'${widget.label}'`} as React.CSSProperties}>
 
             <div className="tile-content">
-                {widget ? (
-                    widget.id === "calculatrice" ? (
-                        renderWidgetContent()
-                    ) : (
-                        <>
-                            <div className={`tile-icon tile-icon--${widget.id}`}>{widget.icon}</div>
-                            <div className="tile-title">{widget.label}</div>
-                            {renderWidgetContent()}
-                        </>
-                    )
-                ) : (
-                    <div className="tile-empty-content">-</div>
-                )}
+                {widget
+                    ? renderWidgetContent(widget)
+                    : <div className="tile-empty-content">-</div>
+                }
             </div>
         </article>
     );

@@ -1,6 +1,6 @@
 import * as React from "react";
 import {type DragEvent, type FC, type JSX, useCallback, useRef, useState} from "react";
-import {buildGrid, getSize, SCREENS} from "../data/stationConfig";
+import {buildGrid, getSize, SCREENS} from "../data/stationConfig.tsx";
 import {type Coords, coordsEqual, coordsToKey, type ThemeKey, type User} from "../types";
 import {Tile} from "./Tile";
 
@@ -10,11 +10,13 @@ interface DashboardProps {
     level: number;
     onLevel: (level: number) => void;
     onLogout: () => void;
+    editingLayout: boolean;
+    onEditLayout: (editingLayout: boolean) => void;
     theme: ThemeKey;
     toggleTheme: () => void;
 }
 
-export const Dashboard: FC<DashboardProps> = ({screenKey, user, level, onLevel, onLogout, theme, toggleTheme}) => {
+export const Dashboard: FC<DashboardProps> = ({screenKey, user, level, onLevel, onLogout, editingLayout, onEditLayout, theme, toggleTheme}) => {
     const config = SCREENS[screenKey];
     const [grid, setGrid] = useState<(string | null)[][]>(() => buildGrid(screenKey));
     const [fromCoords, setFromCoords] = useState<Coords | null>(null);
@@ -181,6 +183,7 @@ export const Dashboard: FC<DashboardProps> = ({screenKey, user, level, onLevel, 
                         widgetId={widgetId}
                         cols={size.width}
                         rows={size.height}
+                        editingLayout={editingLayout}
                         dragging={coordsEqual(fromCoords, coords)}
                         dragOver={coordsEqual(overCoords, coords)}
                         onDragStart={() => setFromCoords(coords)}
@@ -203,6 +206,13 @@ export const Dashboard: FC<DashboardProps> = ({screenKey, user, level, onLevel, 
                     </div>
                     <div className="header-divider"/>
                     <span className="header-view-label">{config.label}</span>
+                    <button 
+                        type="button"
+                        className={`header-button ${editingLayout ? "is-active" : ""}`} 
+                        onClick={() => onEditLayout(!editingLayout)}
+                    >
+                        Mode déplacement
+                    </button>
                 </div>
 
                 <div className="header-right-group">
@@ -210,7 +220,7 @@ export const Dashboard: FC<DashboardProps> = ({screenKey, user, level, onLevel, 
                         <button
                             key={candidateLevel}
                             type="button"
-                            className={`header-level-button ${level === candidateLevel ? "is-active" : ""}`}
+                            className={`header-button ${level === candidateLevel ? "is-active" : ""}`}
                             onClick={() => onLevel(candidateLevel)}
                         >
                             Niveau {candidateLevel}

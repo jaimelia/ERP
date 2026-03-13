@@ -17,7 +17,7 @@
     --color-header-text: #f9fafb;
     --color-drag-bar: #f3f4f6;
     --color-drag-bar-hover: #e5e7eb;
-    --color-drag-over: rgba(232, 93, 4, 0.07);
+	--color-drag-over: rgba(239, 111, 29, 0.07);
     --color-drag-over-border: #e85d04;
     --color-danger-bg: #fee2e2;
     --color-danger-border: #fecaca;
@@ -55,7 +55,7 @@
     --color-header-text: #f9fafb;
     --color-drag-bar: #f3f4f6;
     --color-drag-bar-hover: #e5e7eb;
-    --color-drag-over: rgba(232, 93, 4, 0.07);
+    --color-drag-over: rgba(239, 111, 29, 0.07);
     --color-drag-over-border: #e85d04;
 	--shadow-sm: 0 0 4px 4px rgba(0, 0, 0, 0.08);
     --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.14);
@@ -117,7 +117,7 @@ body,
 
 body {
     min-width: 320px;
-    background: #f0f2f5;
+    background: var(--color-bg);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }

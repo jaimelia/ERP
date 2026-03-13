@@ -1,5 +1,5 @@
 import {useState, type FC, type FormEvent} from "react";
-import {USERS} from "../data/stationConfig";
+import {USERS} from "../data/stationConfig.tsx";
 import type {ThemeKey, User} from "../types";
 
 interface LoginProps {

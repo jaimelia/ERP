@@ -1,3 +1,5 @@
+import {type ReactElement} from "react";
+
 export type ThemeKey = "light" | "dark";
 export type Role = "employe" | "gerant";
 
@@ -12,6 +14,7 @@ export interface WidgetDef {
     id: string;
     label: string;
     size: Size;
+    element?: ReactElement;
 }
 
 export interface ScreenConfig {
