@@ -1,6 +1,6 @@
 import * as React from "react";
 import {type DragEvent, type FC, type JSX, useCallback, useRef, useState} from "react";
-import {buildGrid, getSize, SCREENS} from "../data/stationConfig";
+import {buildGrid, getSize, SCREENS} from "../data/stationConfig.tsx";
 import {type Coords, coordsEqual, coordsToKey, type ThemeKey, type User} from "../types";
 import {Tile} from "./Tile";
 

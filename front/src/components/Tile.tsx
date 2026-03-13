@@ -1,7 +1,7 @@
-import  {type DragEvent, type FC} from "react";
-import {WIDGETS} from "../data/stationConfig";
-import {Calculator} from "./Calculator.tsx";
+import {type DragEvent, type FC, type JSX} from "react";
+import {WIDGETS} from "../data/stationConfig.tsx";
 import * as React from "react";
+import type {WidgetDef} from "../types.ts";
 
 interface TileProps {
     widgetId: string;
@@ -35,13 +35,11 @@ export const Tile: FC<TileProps> = ({
         .filter(Boolean)
         .join(" ");
 
-    const renderWidgetContent = () => {
-        switch (widgetId) {
-            case "calculatrice":
-                return <Calculator />;
-            default:
-                return <div className="tile-subtitle">Contenu a venir</div>;
+    const renderWidgetContent = (widget: WidgetDef): JSX.Element => {
+        if (widget.element) {
+            return widget.element;
         }
+        return <></>
     };
 
     return (
@@ -66,19 +64,11 @@ export const Tile: FC<TileProps> = ({
             </div>
 
             <div className="tile-content">
-                {widget ? (
-                    widget.id === "calculatrice" ? (
-                        renderWidgetContent()
-                    ) : (
-                        <>
-                            <div className={`tile-icon tile-icon--${widget.id}`}>{widget.icon}</div>
-                            <div className="tile-title">{widget.label}</div>
-                            {renderWidgetContent()}
-                        </>
-                    )
-                ) : (
-                    <div className="tile-empty-content">-</div>
-                )}
+                {
+                    widget
+                    ? renderWidgetContent(widget)
+                    : <div className="tile-empty-content">-</div>
+                }
             </div>
         </article>
     );

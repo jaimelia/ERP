@@ -14,6 +14,7 @@
 .tile.is-drag-over {
     border-color: var(--color-drag-over-border);
     background: var(--color-drag-over);
+	opacity: 0.4;
 }
 
 .tile.is-dragging {
