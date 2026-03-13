@@ -117,7 +117,7 @@ body,
 
 body {
     min-width: 320px;
-    background: #f0f2f5;
+    background: var(--color-bg);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }

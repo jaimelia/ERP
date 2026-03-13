@@ -8,6 +8,7 @@ const App: FC = () => {
     const [user, setUser] = useState<User | null>(null);
     const [level, setLevel] = useState<number>(1);
     const [theme, setTheme] = useState<ThemeKey>("light");
+    const [editingLayout, setEditingLayout] = useState<boolean>(false)
 
     const toggleTheme = (): void => setTheme(previous => previous === "dark" ? "light" : "dark");
 
@@ -33,6 +34,8 @@ const App: FC = () => {
                         setUser(null);
                         setLevel(1);
                     }}
+                    editingLayout={editingLayout}
+                    onEditLayout={setEditingLayout}
                     theme={theme}
                     toggleTheme={toggleTheme}
                 />

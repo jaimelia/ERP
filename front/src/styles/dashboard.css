@@ -62,7 +62,7 @@ main {
     font-size: 12px;
 }
 
-.header-level-button {
+.header-button {
     border-radius: 6px;
     border: 1px solid rgba(255, 255, 255, 0.13);
     background: transparent;
@@ -74,11 +74,11 @@ main {
     transition: all 0.15s ease;
 }
 
-.header-level-button:hover {
+.header-button:hover {
     border-color: rgba(255, 255, 255, 0.22);
 }
 
-.header-level-button.is-active {
+.header-button.is-active {
     border-color: var(--color-accent);
     background: var(--color-accent);
     color: #ffffff;
