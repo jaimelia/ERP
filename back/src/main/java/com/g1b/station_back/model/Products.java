@@ -4,47 +4,22 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "Products")
-public class Product {
+@Table
+public class Products extends Items {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "idProduct")
-    private Long idProduct;
-
-    @Column(name = "name")
-    private String name;
-
-    @Column(name = "unitPrice")
+    @Column(precision = 5, scale = 3, nullable = false)
     private BigDecimal unitPrice;
 
-    @Column(name = "idShop")
+    @Column
     private Integer idShop;
 
-    @Column(name = "stock")
+    @Column
     private Integer stock;
 
-    @Column(name = "alertThreshold")
+    @Column
     private Integer alertThreshold;
 
-    public Product() {
-    }
-
-
-    public Long getIdProduct() {
-        return idProduct;
-    }
-
-    public void setIdProduct(Long idProduct) {
-        this.idProduct = idProduct;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    public Products() {
     }
 
     public BigDecimal getUnitPrice() {
