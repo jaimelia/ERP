@@ -1,5 +1,6 @@
 import type {ScreenConfig, Size, User, WidgetDef} from "../types";
 import {Calculator} from "../components/Calculator.tsx";
+import {Products} from "../components/Products.tsx";
 
 export const USERS: User[] = [
     {username: "employe1", password: "1234", role: "employe", name: "Jean Dupont"},
@@ -19,7 +20,7 @@ export const WIDGETS: Record<string, WidgetDef> = {
     transactions: {id: "transactions", label: "Transactions", size: {width: 1, height: 1}},
     clients: {id: "clients", label: "Clients", size: {width: 1, height: 1}},
     reapprovisionnements_gerant: {id: "reapprovisionnements_gerant", label: "Réapprovisionnements", size: {width: 1, height: 2}},
-    marchandises: {id: "marchandises", label: "Marchandises", size: {width: 1, height: 1}},
+    marchandises: {id: "marchandises", label: "Marchandises", size: {width: 1, height: 1}, element: <Products />},
     table_transactions: {id: "table_transactions", label: "Table transactions", size: {width: 1, height: 1}},
     directives: {id: "directives", label: "Directives", size: {width: 1, height: 1}},
     documents_de_gestion: {id: "documents_de_gestion", label: "Documents De Gestion", size: {width: 1, height: 1}},
