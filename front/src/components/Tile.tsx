@@ -19,11 +19,12 @@ interface TileProps {
 }
 
 const WIDGET_COMPONENTS: Partial<Record<string, FC>> = {
-    reappro: ReapprovisionnementWidget,
+    reapprovisionnements_gerant: ReapprovisionnementWidget,
+    reapprovisionnements_employe: ReapprovisionnementWidget,
     marchandises: MarchandisesWidget,
-    cee: CEEWidget,
-    transactions_g: TransactionsWidget,
-    clients_g: ClientsWidget,
+    CCE: CEEWidget,
+    transactions: TransactionsWidget,
+    clients: ClientsWidget,
 };
 
 export const Tile: FC<TileProps> = ({

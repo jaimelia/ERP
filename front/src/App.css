@@ -1,7 +1,6 @@
 @import "./styles/login.css";
 @import "./styles/dashboard.css";
 @import "./styles/tile.css";
-@import "./styles/empty-slot.css";
 @import "./styles/widgets.css";
 
 .app-shell {
