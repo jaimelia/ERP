@@ -70,7 +70,7 @@ export const Tile: FC<TileProps> = ({
 
             <div className="tile-content">
                 {widget ? (
-                    widget.id === "calculatrice" ? (
+                    widget.id === "calculatrice" || widget.id === "marchandises" ? (
                         renderWidgetContent()
                     ) : (
                         <>
