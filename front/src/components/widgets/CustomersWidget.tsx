@@ -1,6 +1,6 @@
 import {useState, type FC} from "react";
 
-interface Client {
+interface Customer {
     id: number;
     nom: string;
     prenom: string;
@@ -9,7 +9,7 @@ interface Client {
 }
 
 // TODO : remplacer par des appels API
-const mockClients: Client[] = [
+const mockCustomers: Customer[] = [
     {id: 1, nom: "Carli", prenom: "Mathéo", email: "matheo.carli@jmail.com", telephone: "06.95.90.41.23"},
     {id: 2, nom: "Pomel", prenom: "Matthéo", email: "mattheo.pomel@jmail.com", telephone: "06.09.25.43.03"},
     {id: 3, nom: "Carly", prenom: "Matheau", email: "matheau.carly@jmail.com", telephone: "06.86.78.96.01"},
@@ -17,10 +17,10 @@ const mockClients: Client[] = [
     {id: 5, nom: "Karly", prenom: "Matéo", email: "mateo.karly@jmail.com", telephone: "07.68.13.24.18"},
 ];
 
-export const ClientsWidget: FC = () => {
+export const CustomersWidget: FC = () => {
     const [search, setSearch] = useState("");
 
-    const filtered = mockClients.filter(c =>
+    const filtered = mockCustomers.filter(c =>
         `${c.nom} ${c.prenom}`.toLowerCase().includes(search.toLowerCase()) ||
         c.email.toLowerCase().includes(search.toLowerCase()) ||
         c.telephone.includes(search)

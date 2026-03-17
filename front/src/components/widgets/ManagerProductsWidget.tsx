@@ -1,6 +1,6 @@
 import {useState, type FC} from "react";
 
-interface Marchandise {
+interface Product {
     id: number;
     produit: string;
     quantite: string;
@@ -9,7 +9,7 @@ interface Marchandise {
 }
 
 // TODO : remplacer par des appels API
-const mockMarchandises: Marchandise[] = [
+const mockProducts: Product[] = [
     {id: 1, produit: "Sans plomb 95", quantite: "1200 L", type: "Carburant", prix: "1.750 €/L"},
     {id: 2, produit: "Stylo bille BIC", quantite: "196", type: "Produit", prix: "1.57 €"},
     {id: 3, produit: "Essuie-glace", quantite: "15", type: "Produit", prix: "24.50 €"},
@@ -17,11 +17,11 @@ const mockMarchandises: Marchandise[] = [
     {id: 5, produit: "Arbre magique", quantite: "37", type: "Produit", prix: "0.99 €"},
 ];
 
-export const MarchandisesWidget: FC = () => {
+export const ManagerProductsWidget: FC = () => {
     const [search, setSearch] = useState("");
     const [filtre, setFiltre] = useState("Tous");
 
-    const filtered = mockMarchandises.filter(m => {
+    const filtered = mockProducts.filter(m => {
         const matchSearch = m.produit.toLowerCase().includes(search.toLowerCase());
         const matchType = filtre === "Tous" || m.type === filtre;
         return matchSearch && matchType;

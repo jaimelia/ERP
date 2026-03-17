@@ -1,6 +1,6 @@
 import {useState, type FC} from "react";
 
-interface CompteEntreprise {
+interface CCE {
     id: number;
     nom: string;
     prenom: string;
@@ -11,7 +11,7 @@ interface CompteEntreprise {
 }
 
 // TODO : remplacer par des appels API
-const mockCCE: CompteEntreprise[] = [
+const mockCCE: CCE[] = [
     {id: 1, nom: "CARLI", prenom: "Mathéo", numeroCCE: "****9999", statut: "Active", dateCreation: "11/12/2025 15:35", montantCredite: "35.25€"},
     {id: 2, nom: "POMEL", prenom: "Matthieu", numeroCCE: "****8888", statut: "Désactivée", dateCreation: "02/12/2025 15:30", montantCredite: "12.64€"},
     {id: 3, nom: "LACHAL", prenom: "Bryan", numeroCCE: "****7777", statut: "Active", dateCreation: "01/11/2025 14:15", montantCredite: "10.68€"},

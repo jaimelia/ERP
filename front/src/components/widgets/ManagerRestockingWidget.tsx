@@ -1,6 +1,6 @@
 import {useState, type FC} from "react";
 
-interface Reappro {
+interface Restocking {
     id: number;
     produit: string;
     quantite: string;
@@ -9,7 +9,7 @@ interface Reappro {
 }
 
 // TODO : remplacer par des appels API
-const mockReappros: Reappro[] = [
+const mockRestocking: Restocking[] = [
     {id: 1, produit: "Sans plomb 95", quantite: "400 L", statut: "en cours", date: "11/12/2025 15:35"},
     {id: 2, produit: "Diesel", quantite: "300 L", statut: "en cours", date: "02/12/2025 09:42"},
     {id: 3, produit: "Sans plomb 98", quantite: "500 L", statut: "en cours", date: "21/11/2025 16:14"},
@@ -21,10 +21,10 @@ const mockReappros: Reappro[] = [
     {id: 9, produit: "Sans plomb 98", quantite: "500 L", statut: "effectué", date: "21/11/2025 16:14"},
 ];
 
-export const ReapprovisionnementWidget: FC = () => {
+export const ManagerRestockingWidget: FC = () => {
     const [search, setSearch] = useState("");
 
-    const filtered = mockReappros.filter(r =>
+    const filtered = mockRestocking.filter(r =>
         r.produit.toLowerCase().includes(search.toLowerCase())
     );
 

@@ -1,10 +1,10 @@
 import type {ScreenConfig, Size, User, WidgetDef} from "../types";
 import {Calculator} from "../components/widgets/Calculator.tsx";
-import {Products} from "../components/widgets/Products.tsx";
 import {CCEWidget} from "../components/widgets/CCEWidget.tsx";
-import {ClientsWidget} from "../components/widgets/ClientsWidget.tsx";
-import {ReapprovisionnementWidget} from "../components/widgets/ReapprovisionnementWidget.tsx";
+import {CustomersWidget} from "../components/widgets/CustomersWidget.tsx";
+import {ManagerRestockingWidget} from "../components/widgets/ManagerRestockingWidget.tsx";
 import {TransactionsWidget} from "../components/widgets/TransactionsWidget.tsx";
+import {ManagerProductsWidget} from "../components/widgets/ManagerProductsWidget.tsx";
 
 export const USERS: User[] = [
     {username: "employe1", password: "1234", role: "employe", name: "Jean Dupont"},
@@ -13,40 +13,40 @@ export const USERS: User[] = [
 ];
 
 export const WIDGETS: Record<string, WidgetDef> = {
-    chargeurs: {id: "chargeurs", label: "Chargeurs", size: {width: 1, height: 1}},
+    chargers: {id: "chargers", label: "Chargeurs", size: {width: 1, height: 1}},
     CCE: {id: "CCE", label: "CCE", size: {width: 1, height: 1}, element: <CCEWidget />},
     ticket: {id: "ticket", label: "Ticket", size: {width: 1, height: 1}},
-    pompes: {id: "pompes", label: "Etat des Pompes", size: {width: 1, height: 1}},
-    historique_transactions: {id: "historique_transactions", label: "Historique transactions", size: {width: 1, height: 1}},
-    calculatrice: {id: "calculatrice", label: "Calculatrice", size: {width: 1, height: 1}, element: <Calculator />},
-    reapprovisionnements_employe: {id: "reapprovisionnements_employe", label: "Réapprovisionnements", size: {width: 1, height: 1}},
-    produits: {id: "produits", label: "Produits", size: {width: 1, height: 1}},
+    pumps: {id: "pumps", label: "Etat des Pompes", size: {width: 1, height: 1}},
+    transaction_history: {id: "transaction_history", label: "Historique transactions", size: {width: 1, height: 1}},
+    calculator: {id: "calculator", label: "Calculatrice", size: {width: 1, height: 1}, element: <Calculator />},
+    employee_restocking: {id: "employee_restocking", label: "Réapprovisionnements", size: {width: 1, height: 1}},
+    employee_products: {id: "employee_products", label: "Produits", size: {width: 1, height: 1}},
     transactions: {id: "transactions", label: "Transactions", size: {width: 1, height: 1}, element: <TransactionsWidget />},
-    clients: {id: "clients", label: "Clients", size: {width: 1, height: 1}, element: <ClientsWidget />},
-    reapprovisionnements_gerant: {id: "reapprovisionnements_gerant", label: "Réapprovisionnements", size: {width: 1, height: 2}, element: <ReapprovisionnementWidget />},
-    marchandises: {id: "marchandises", label: "Marchandises", size: {width: 1, height: 1}, element: <Products />},
-    table_transactions: {id: "table_transactions", label: "Table transactions", size: {width: 1, height: 1}},
-    directives: {id: "directives", label: "Directives", size: {width: 1, height: 1}},
-    documents_de_gestion: {id: "documents_de_gestion", label: "Documents De Gestion", size: {width: 1, height: 1}},
+    customers: {id: "customers", label: "Clients", size: {width: 1, height: 1}, element: <CustomersWidget />},
+    manager_restocking: {id: "manager_restocking", label: "Réapprovisionnements", size: {width: 1, height: 2}, element: <ManagerRestockingWidget />},
+    manager_products: {id: "manager_products", label: "Marchandises", size: {width: 1, height: 1}, element: <ManagerProductsWidget />},
+    transaction_table: {id: "transaction_table", label: "Table transactions", size: {width: 1, height: 1}},
+    guidelines: {id: "guidelines", label: "Directives", size: {width: 1, height: 1}},
+    management_documents: {id: "management_documents", label: "Documents De Gestion", size: {width: 1, height: 1}},
     incident: {id: "incident", label: "Incident", size: {width: 1, height: 1}},
 };
 
 export const SCREENS: Record<string, ScreenConfig> = {
     employe_1: {
         label: "Employe - Vue principale",
-        defaultGrid: [["chargeurs", "CCE", "ticket"], ["pompes", "historique_transactions", "calculatrice"]],
+        defaultGrid: [["chargers", "CCE", "ticket"], ["pumps", "transaction_history", "calculator"]],
     },
     employe_2: {
         label: "Employe - Vue simplifiee",
-        defaultGrid: [["reapprovisionnements_employe", "produits"], ["transactions", "clients"]],
+        defaultGrid: [["employee_restocking", "employee_products"], ["transactions", "customers"]],
     },
     gerant_1: {
         label: "Gerant - Vue principale",
-        defaultGrid: [["reapprovisionnements_gerant", "marchandises", "CCE"], [null, "transactions", "clients"]],
+        defaultGrid: [["manager_restocking", "manager_products", "CCE"], [null, "transactions", "customers"]],
     },
     gerant_2: {
         label: "Gerant - Vue analytique",
-        defaultGrid: [["table_transactions", "directives"], ["documents_de_gestion", "incident"]],
+        defaultGrid: [["transaction_table", "guidelines"], ["management_documents", "incident"]],
     },
 };
 
