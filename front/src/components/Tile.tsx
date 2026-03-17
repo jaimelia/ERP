@@ -1,7 +1,7 @@
 import {type DragEvent, type FC, type JSX, useCallback, useRef} from "react";
-import {WIDGETS} from "../data/stationConfig.tsx";
 import * as React from "react";
 import type {WidgetDef} from "../types.ts";
+import {WIDGETS} from "../data/stationConfig";
 
 interface TileProps {
     widgetId: string;

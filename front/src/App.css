@@ -3,6 +3,8 @@
 @import "./styles/tile.css";
 @import "./styles/widgets/calculator.css";
 @import "./styles/widgets/products.css";
+@import "./styles/widgets/cce.css";
+@import "./styles/widgets/widgets.css";
 
 .app-shell {
     min-height: 100vh;

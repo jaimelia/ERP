@@ -1,6 +1,10 @@
 import type {ScreenConfig, Size, User, WidgetDef} from "../types";
-import {Calculator} from "../components/Calculator.tsx";
-import {Products} from "../components/Products.tsx";
+import {Calculator} from "../components/widgets/Calculator.tsx";
+import {Products} from "../components/widgets/Products.tsx";
+import {CCEWidget} from "../components/widgets/CCEWidget.tsx";
+import {ClientsWidget} from "../components/widgets/ClientsWidget.tsx";
+import {ReapprovisionnementWidget} from "../components/widgets/ReapprovisionnementWidget.tsx";
+import {TransactionsWidget} from "../components/widgets/TransactionsWidget.tsx";
 
 export const USERS: User[] = [
     {username: "employe1", password: "1234", role: "employe", name: "Jean Dupont"},
@@ -10,16 +14,16 @@ export const USERS: User[] = [
 
 export const WIDGETS: Record<string, WidgetDef> = {
     chargeurs: {id: "chargeurs", label: "Chargeurs", size: {width: 1, height: 1}},
-    CCE: {id: "CCE", label: "CCE", size: {width: 1, height: 1}},
+    CCE: {id: "CCE", label: "CCE", size: {width: 1, height: 1}, element: <CCEWidget />},
     ticket: {id: "ticket", label: "Ticket", size: {width: 1, height: 1}},
     pompes: {id: "pompes", label: "Etat des Pompes", size: {width: 1, height: 1}},
     historique_transactions: {id: "historique_transactions", label: "Historique transactions", size: {width: 1, height: 1}},
     calculatrice: {id: "calculatrice", label: "Calculatrice", size: {width: 1, height: 1}, element: <Calculator />},
     reapprovisionnements_employe: {id: "reapprovisionnements_employe", label: "Réapprovisionnements", size: {width: 1, height: 1}},
     produits: {id: "produits", label: "Produits", size: {width: 1, height: 1}},
-    transactions: {id: "transactions", label: "Transactions", size: {width: 1, height: 1}},
-    clients: {id: "clients", label: "Clients", size: {width: 1, height: 1}},
-    reapprovisionnements_gerant: {id: "reapprovisionnements_gerant", label: "Réapprovisionnements", size: {width: 1, height: 2}},
+    transactions: {id: "transactions", label: "Transactions", size: {width: 1, height: 1}, element: <TransactionsWidget />},
+    clients: {id: "clients", label: "Clients", size: {width: 1, height: 1}, element: <ClientsWidget />},
+    reapprovisionnements_gerant: {id: "reapprovisionnements_gerant", label: "Réapprovisionnements", size: {width: 1, height: 2}, element: <ReapprovisionnementWidget />},
     marchandises: {id: "marchandises", label: "Marchandises", size: {width: 1, height: 1}, element: <Products />},
     table_transactions: {id: "table_transactions", label: "Table transactions", size: {width: 1, height: 1}},
     directives: {id: "directives", label: "Directives", size: {width: 1, height: 1}},
