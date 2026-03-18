@@ -51,6 +51,7 @@ export const ManagerProductsWidget: FC = () => {
                     <option>Carburant</option>
                     <option>Produit</option>
                 </select>
+                <button className="widget-btn-add" type="button" title="Ajouter">+</button>
             </div>
 
             <div className="widget-table-wrap">
@@ -61,7 +62,7 @@ export const ManagerProductsWidget: FC = () => {
                             <th>Quantité</th>
                             <th>Type</th>
                             <th>Prix</th>
-                            <th></th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>

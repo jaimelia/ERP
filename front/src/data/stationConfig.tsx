@@ -1,10 +1,11 @@
 import type {ScreenConfig, Size, User, WidgetDef} from "../types";
-import {Calculator} from "../components/widgets/Calculator.tsx";
+import {CalculatorWidget} from "../components/widgets/CalculatorWidget.tsx";
 import {CCEWidget} from "../components/widgets/CCEWidget.tsx";
 import {CustomersWidget} from "../components/widgets/CustomersWidget.tsx";
 import {ManagerRestockingWidget} from "../components/widgets/ManagerRestockingWidget.tsx";
 import {TransactionsWidget} from "../components/widgets/TransactionsWidget.tsx";
 import {ManagerProductsWidget} from "../components/widgets/ManagerProductsWidget.tsx";
+import {ChargersWidget} from "../components/widgets/ChargersWidget.tsx";
 
 export const USERS: User[] = [
     {username: "employe1", password: "1234", role: "employe", name: "Jean Dupont"},
@@ -13,12 +14,12 @@ export const USERS: User[] = [
 ];
 
 export const WIDGETS: Record<string, WidgetDef> = {
-    chargers: {id: "chargers", label: "Chargeurs", size: {width: 1, height: 1}},
+    chargers: {id: "chargers", label: "Chargeurs", size: {width: 1, height: 1}, element: <ChargersWidget />},
     CCE: {id: "CCE", label: "CCE", size: {width: 1, height: 1}, element: <CCEWidget />},
     ticket: {id: "ticket", label: "Ticket", size: {width: 1, height: 1}},
     pumps: {id: "pumps", label: "Etat des Pompes", size: {width: 1, height: 1}},
     transaction_history: {id: "transaction_history", label: "Historique transactions", size: {width: 1, height: 1}},
-    calculator: {id: "calculator", label: "Calculatrice", size: {width: 1, height: 1}, element: <Calculator />},
+    calculator: {id: "calculator", label: "Calculatrice", size: {width: 1, height: 1}, element: <CalculatorWidget />},
     employee_restocking: {id: "employee_restocking", label: "Réapprovisionnements", size: {width: 1, height: 1}},
     employee_products: {id: "employee_products", label: "Produits", size: {width: 1, height: 1}},
     transactions: {id: "transactions", label: "Transactions", size: {width: 1, height: 1}, element: <TransactionsWidget />},

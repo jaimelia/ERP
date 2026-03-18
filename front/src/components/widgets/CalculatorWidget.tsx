@@ -1,6 +1,6 @@
 import {useState, type FC} from "react";
 
-export const Calculator: FC = () => {
+export const CalculatorWidget: FC = () => {
     const [currentValue, setCurrentValue] = useState<string>("0");
     const [previousValue, setPreviousValue] = useState<string | null>(null);
     const [operator, setOperator] = useState<string | null>(null);
