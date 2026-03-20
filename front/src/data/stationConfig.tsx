@@ -6,6 +6,7 @@ import {ManagerRestockingWidget} from "../components/widgets/ManagerRestockingWi
 import {TransactionsWidget} from "../components/widgets/TransactionsWidget.tsx";
 import {ManagerProductsWidget} from "../components/widgets/ManagerProductsWidget.tsx";
 import {ChargersWidget} from "../components/widgets/ChargersWidget.tsx";
+import {TicketWidget} from "../components/widgets/TicketWidget.tsx";
 
 export const USERS: User[] = [
     {username: "employe1", password: "1234", role: "employe", name: "Jean Dupont"},
@@ -16,7 +17,7 @@ export const USERS: User[] = [
 export const WIDGETS: Record<string, WidgetDef> = {
     chargers: {id: "chargers", label: "Chargeurs", size: {width: 1, height: 1}, element: <ChargersWidget />},
     CCE: {id: "CCE", label: "CCE", size: {width: 1, height: 1}, element: <CCEWidget />},
-    ticket: {id: "ticket", label: "Ticket", size: {width: 1, height: 1}},
+    ticket: {id: "ticket", label: "Ticket", size: {width: 1, height: 1}, element: <TicketWidget />},
     pumps: {id: "pumps", label: "Etat des Pompes", size: {width: 1, height: 1}},
     transaction_history: {id: "transaction_history", label: "Historique transactions", size: {width: 1, height: 1}},
     calculator: {id: "calculator", label: "Calculatrice", size: {width: 1, height: 1}, element: <CalculatorWidget />},
