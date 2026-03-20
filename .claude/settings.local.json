@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find 'c:/Users/pm304770/Documents/sae station-service/projet_4e' -name *.log -o -name *error*.txt)",
+      "Bash(find 'c:/Users/pm304770/Documents/sae station-service/projet_4e' -path *sql* -o -path *SQL*)",
+      "Bash(grep -E \"\\\\.\\(sql|SQL\\)$\")"
+    ]
+  }
+}

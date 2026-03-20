@@ -1,0 +1,17 @@
+services:
+  db:
+    image: postgres:18.3
+    container_name: erp-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: 4e_user
+      POSTGRES_PASSWORD: 4e_mdp
+      POSTGRES_DB: projet_4e
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./init-db:/docker-entrypoint-initdb.d
+      - postgres-data:/var/lib/postgresql/data
+
+volumes:
+  postgres-data:
