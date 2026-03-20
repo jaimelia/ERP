@@ -39,6 +39,7 @@
 	--status-available: #00C407;
 	--status-inUse: #E8BA00;
 	--status-outOfOrder: #D30000;
+	--status-deactivated: #AAAAAC;
 	
 	--switch-enabled: #34C759;
 	--switch-disabled: #AAAAAC;
@@ -78,6 +79,7 @@
 	--status-available: #00C407;
 	--status-inUse: #E8BA00;
 	--status-outOfOrder: #D30000;
+	--status-deactivated: #AAAAAC;
 
 	--switch-enabled: #34C759;
 	--switch-disabled: #AAAAAC;
@@ -117,6 +119,7 @@
 	--status-available: #00C407;
 	--status-inUse: #E8BA00;
 	--status-outOfOrder: #D30000;
+	--status-deactivated: #AAAAAC;
 
 	--switch-enabled: #34C759;
 	--switch-disabled: #AAAAAC;

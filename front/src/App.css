@@ -5,6 +5,7 @@
 @import "./styles/widgets/products.css";
 @import "./styles/widgets/cce.css";
 @import "./styles/widgets/chargers.css";
+@import "./styles/widgets/pumps.css";
 @import "./styles/widgets/widgets.css";
 
 .app-shell {
