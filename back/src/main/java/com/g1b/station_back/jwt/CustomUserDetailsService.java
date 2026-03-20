@@ -1,0 +1,36 @@
+package com.g1b.station_back.jwt;
+
+import com.g1b.station_back.exception.UserNotFound;
+import com.g1b.station_back.model.User;
+import com.g1b.station_back.repository.UserRepository;
+
+import org.jspecify.annotations.NullMarked;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+
+@Service
+public class CustomUserDetailsService implements UserDetailsService {
+
+	private final UserRepository userRepository;
+
+	public CustomUserDetailsService(UserRepository userRepository) {
+		this.userRepository = userRepository;
+	}
+
+	@Override
+	@NullMarked
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		User user = userRepository.findByUsername(username)
+				.orElseThrow(UserNotFound::new);
+
+		return new org.springframework.security.core.userdetails.User(
+				user.getUsername(),
+				user.getPassword(),
+				new ArrayList<>()
+		);
+	}
+}

@@ -1,8 +1,8 @@
 import {type FC} from "react";
 import {Switch} from "../Switch.tsx";
-import {apiUrl} from "../../config/api.ts";
 import {useFetch} from "../../hooks/useFetch.ts";
 import {FetchWrapper} from "../FetchWrapper.tsx";
+import {apiUrl} from "../../api/common.ts";
 
 interface Charger {
 	idEvCharger: number;
