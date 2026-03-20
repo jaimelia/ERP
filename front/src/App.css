@@ -7,6 +7,7 @@
 @import "./styles/widgets/chargers.css";
 @import "./styles/widgets/pumps.css";
 @import "./styles/widgets/widgets.css";
+@import "./styles/widgets/ticket.css";
 
 .app-shell {
     min-height: 100vh;
