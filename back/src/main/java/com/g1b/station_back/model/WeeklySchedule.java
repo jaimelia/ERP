@@ -17,12 +17,47 @@ public class WeeklySchedule {
     private Schedule monday;
 
 
-    @Embedded private Schedule tuesday;
-    @Embedded private Schedule wednesday;
-    @Embedded private Schedule thursday;
-    @Embedded private Schedule friday;
-    @Embedded private Schedule saturday;
-    @Embedded private Schedule sunday;
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "openingTime", column = @Column(name = "tuesday_opening_time")),
+            @AttributeOverride(name = "closingTime", column = @Column(name = "tuesday_closing_time"))
+    })
+    private Schedule tuesday;
+
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "openingTime", column = @Column(name = "wednesday_opening_time")),
+            @AttributeOverride(name = "closingTime", column = @Column(name = "wednesday_closing_time"))
+    })
+    private Schedule wednesday;
+
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "openingTime", column = @Column(name = "thursday_opening_time")),
+            @AttributeOverride(name = "closingTime", column = @Column(name = "thursday_closing_time"))
+    })
+    private Schedule thursday;
+
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "openingTime", column = @Column(name = "friday_opening_time")),
+            @AttributeOverride(name = "closingTime", column = @Column(name = "friday_closing_time"))
+    })
+    private Schedule friday;
+
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "openingTime", column = @Column(name = "saturday_opening_time")),
+            @AttributeOverride(name = "closingTime", column = @Column(name = "saturday_closing_time"))
+    })
+    private Schedule saturday;
+
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "openingTime", column = @Column(name = "sunday_opening_time")),
+            @AttributeOverride(name = "closingTime", column = @Column(name = "sunday_closing_time"))
+    })
+    private Schedule sunday;
 
     public WeeklySchedule() {}
 
