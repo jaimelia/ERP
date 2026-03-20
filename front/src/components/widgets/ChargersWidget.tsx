@@ -1,42 +1,60 @@
-import  {type FC} from "react";
+import {type FC} from "react";
 import {Switch} from "../Switch.tsx";
-
-
+import {apiUrl} from "../../config/api.ts";
+import {useFetch} from "../../hooks/useFetch.ts";
+import {FetchWrapper} from "../FetchWrapper.tsx";
 
 interface Charger {
-    id: number;
-    fast: boolean;
-    status: "available" | "inUse" | "deactivated" | "outOfOrder";
+	idEvCharger: number;
+	isFast: boolean;
+	status: "available" | "inUse" | "deactivated" | "outOfOrder";
 }
 
-const mockChargers: Charger[] = [
-    {id: 1, fast: true, status: "available"},
-    {id: 2, fast: true, status: "available"},
-    {id: 3, fast: true, status: "inUse"},
-    {id: 4, fast: true, status: "inUse"},
-    {id: 5, fast: true, status: "available"},
-    {id: 6, fast: true, status: "available"},
-    {id: 7, fast: true, status: "outOfOrder"},
-    {id: 8, fast: true, status: "available"},
-    {id: 9, fast: false, status: "available"},
-    {id: 10, fast: false, status: "available"}
-]
-
 export const ChargersWidget: FC = () => {
-    
-    const switchEnabled = (charger: Charger): boolean => {
-        return charger.status === "available" || charger.status === "inUse";
-    }
-    
-    return (
-        <div className={"widget-container chargers-container"}>
-            {mockChargers.map(charger => (
-                <div className={"charger-row"}>
-                    <div className={`status`} style={{"backgroundColor": `var(--status-${charger.status})`}} title={charger.status}></div>
-                    Chargeur {charger.fast ? "rapide " : ""}{charger.id}
-                    <Switch enabled={switchEnabled(charger)} id={`switch-${charger.id}`} onClick={(b) => console.log(b)} />
-                </div>
-            ))}
-        </div>
-    )
+
+	const {data: chargers, setData: setChargers, loading, error} = useFetch<Charger[]>(
+		apiUrl("/chargers"),
+		5000
+	);
+	const isSwitchChecked = (charger: Charger): boolean => {
+		return charger.status === "available" || charger.status === "inUse";
+	}
+
+	const handleSwitchClick = (checked: boolean, charger: Charger): void => {
+		let newStatus: Charger["status"] | null = null;
+
+		switch (charger.status) {
+			case "available":
+			case "inUse":
+				if (!checked) newStatus = "deactivated";
+				break;
+			case "deactivated":
+				if (checked) newStatus = "available";
+				break;
+		}
+
+		if (newStatus === null) return;
+
+		setChargers(prev => prev
+			? prev.map(c => c.idEvCharger === charger.idEvCharger ? {...c, status: newStatus!} : c)
+			: prev
+		);
+	}
+
+	return (
+		<FetchWrapper loading={loading} error={error}>
+			<div className="widget-container chargers-container">
+				{chargers?.map(charger => (
+					<div key={charger.idEvCharger} className="charger-row">
+						<div className="status" style={{"backgroundColor": `var(--status-${charger.status})`}}
+							 title={charger.status}></div>
+						Chargeur {charger.isFast ? "rapide " : ""}{charger.idEvCharger}
+						<Switch checked={isSwitchChecked(charger)} id={`switch-${charger.idEvCharger}`}
+								onClick={(enabled) => handleSwitchClick(enabled, charger)}
+								disabled={charger.status === "outOfOrder"}/>
+					</div>
+				))}
+			</div>
+		</FetchWrapper>
+	)
 }

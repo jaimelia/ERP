@@ -93,8 +93,6 @@ CREATE TABLE IF NOT EXISTS "pumps" (
 CREATE TABLE IF NOT EXISTS "ev_chargers" (
 	"id_ev_charger" INTEGER NOT NULL UNIQUE,
 	"is_fast" BOOLEAN NOT NULL,
-	"energy_available" NUMERIC(5,3) NOT NULL,
-	"alert_threshold" NUMERIC(5,3),
 	"status" pump_charger_status NOT NULL,
 	PRIMARY KEY("id_ev_charger")
 );
@@ -130,6 +128,7 @@ CREATE TABLE IF NOT EXISTS "users" (
 
 
 CREATE TABLE IF NOT EXISTS "weekly_schedule" (
+	"id_weekly_schedule" INTEGER NOT NULL UNIQUE,
 	"monday" SCHEDULE,
 	"tuesday" SCHEDULE,
 	"wednesday" SCHEDULE,
@@ -313,3 +312,15 @@ ON UPDATE NO ACTION ON DELETE NO ACTION;
 ALTER TABLE "transaction_payments"
 ADD FOREIGN KEY("id_cce_card") REFERENCES "cce_cards"("id_cce_card")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+INSERT INTO "ev_chargers" ("id_ev_charger", "is_fast", "status") VALUES
+(1, true, 'available'),
+(2, true, 'available'),
+(3, true, 'inUse'),
+(4, true, 'inUse'),
+(5, true, 'available'),
+(6, true, 'available'),
+(7, true, 'outOfOrder'),
+(8, true, 'available'),
+(9, false, 'available'),
+(10, false, 'available');

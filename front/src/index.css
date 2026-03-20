@@ -41,8 +41,8 @@
 	--status-outOfOrder: #D30000;
 	--status-deactivated: #AAAAAC;
 	
-	--switch-enabled: #34C759;
-	--switch-disabled: #AAAAAC;
+	--switch-checked: #34C759;
+	--switch-unchecked: #AAAAAC;
 }
 
 [data-theme="light"] {
@@ -81,8 +81,8 @@
 	--status-outOfOrder: #D30000;
 	--status-deactivated: #AAAAAC;
 
-	--switch-enabled: #34C759;
-	--switch-disabled: #AAAAAC;
+	--switch-checked: #34C759;
+	--switch-unchecked: #AAAAAC;
 }
 
 [data-theme="dark"] {
@@ -121,8 +121,8 @@
 	--status-outOfOrder: #D30000;
 	--status-deactivated: #AAAAAC;
 
-	--switch-enabled: #34C759;
-	--switch-disabled: #AAAAAC;
+	--switch-checked: #34C759;
+	--switch-unchecked: #AAAAAC;
 }
 
 *,
@@ -151,6 +151,7 @@ input {
     font: inherit;
 }
 
+/* switch */
 .toggle-switch {
 	position: relative;
 	display: inline-block;
@@ -168,7 +169,7 @@ input {
 	left: 0;
 	width: 40px;
 	height: 24px;
-	background-color: var(--switch-disabled);
+	background-color: var(--switch-unchecked);
 	border-radius: 34px;
 	cursor: pointer;
 	transition: background-color 0.3s;
@@ -188,9 +189,14 @@ input {
 }
 
 .toggle-switch .toggle-input:checked + .toggle-label {
-	background-color: var(--switch-enabled);
+	background-color: var(--switch-checked);
 }
 
 .toggle-switch .toggle-input:checked + .toggle-label::before {
 	transform: translateX(16px);
+}
+
+.toggle-switch .toggle-input:disabled + .toggle-label {
+	cursor: not-allowed;
+	opacity: 0.5;
 }

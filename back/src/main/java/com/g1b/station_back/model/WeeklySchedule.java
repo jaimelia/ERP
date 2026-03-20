@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 public class WeeklySchedule {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "id_weekly_schedule")
     private Integer id;
 
     @Embedded

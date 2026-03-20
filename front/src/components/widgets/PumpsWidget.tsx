@@ -170,7 +170,7 @@ const PumpCard: FC<PumpCardProps> = ({ pump, onToggle, onPay }) => {
                 <div className="pump-toggle">
                     <Switch
                         id={`pump-switch-${pump.id}`}
-                        enabled={pump.enabled}
+                        checked={pump.enabled}
                         onClick={(enabled) => onToggle(pump.id, enabled)}
                     />
                 </div>
