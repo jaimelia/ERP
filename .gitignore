@@ -25,3 +25,5 @@ dist-ssr
 
 # PostgreSQL data
 postgres-data/
+
+.claude/
