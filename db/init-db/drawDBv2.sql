@@ -119,8 +119,8 @@ CREATE TABLE IF NOT EXISTS "users" (
 	"password" VARCHAR(255) NOT NULL,
 	"email" VARCHAR(255) NOT NULL,
 	"role" VARCHAR(255) NOT NULL,
-	"uses_dark_mode" BOOLEAN NOT NULL,
-	"tile_layout" JSONB NOT NULL,
+	"uses_dark_mode" BOOLEAN NOT NULL DEFAULT false,
+	"tile_layout" TEXT,
 	PRIMARY KEY("id_user")
 );
 
@@ -324,3 +324,8 @@ INSERT INTO "ev_chargers" ("id_ev_charger", "is_fast", "status") VALUES
 (8, true, 'available'),
 (9, false, 'available'),
 (10, false, 'available');
+
+INSERT INTO "users" ("id_user", "username", "password", "email", "role") VALUES
+(1, 'gerant1', '$2a$10$2IBaa5RyHYQyz6qNdWfmteVIWJUbFKSq8KOnuUyY89k43tKMTWd8C', 'admin@example.com', 'gerant'),
+(2, 'employe1', '$2a$10$Q4H7dnAln9/nOyQg4hx0e.p8iwMNJAbffD6MVd9VNdtWT2V7E/WgS', 'employe1@example.com', 'employe'),
+(3, 'employe2', '$2a$10$Q4H7dnAln9/nOyQg4hx0e.p8iwMNJAbffD6MVd9VNdtWT2V7E/WgS', 'employe2@example.com', 'employe');

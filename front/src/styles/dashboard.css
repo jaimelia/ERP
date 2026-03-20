@@ -53,15 +53,6 @@ main {
     background: rgba(255, 255, 255, 0.12);
 }
 
-.header-view-label {
-    border-radius: 6px;
-    padding: 3px 10px;
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    background: rgba(255, 255, 255, 0.05);
-    color: #9ca3af;
-    font-size: 12px;
-}
-
 .header-button {
     border-radius: 6px;
     border: 1px solid rgba(255, 255, 255, 0.13);
