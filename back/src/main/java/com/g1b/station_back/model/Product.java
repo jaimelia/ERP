@@ -19,8 +19,8 @@ public class Product extends Item {
     private Integer alertThreshold;
 
     public Product() {}
-    public Product(Integer idItem, String itemType, String name, BigDecimal unitPrice, Integer stock, Integer alertThreshold) {
-        super(idItem, itemType, name);
+    public Product(Integer idItem, String name, BigDecimal unitPrice, Integer stock, Integer alertThreshold) {
+        super(idItem, name);
         this.unitPrice = unitPrice; this.stock = stock; this.alertThreshold = alertThreshold;
     }
 

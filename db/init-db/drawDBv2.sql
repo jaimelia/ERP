@@ -240,7 +240,6 @@ CREATE TABLE IF NOT EXISTS "transaction_payments" (
 
 CREATE TABLE IF NOT EXISTS "items" (
 	"id_item" INTEGER NOT NULL UNIQUE,
-	"item_type" VARCHAR(255) NOT NULL,
 	"name" VARCHAR(255) NOT NULL,
 	PRIMARY KEY("id_item")
 );
@@ -324,3 +323,19 @@ INSERT INTO "ev_chargers" ("id_ev_charger", "is_fast", "status") VALUES
 (8, true, 'available'),
 (9, false, 'available'),
 (10, false, 'available');
+
+INSERT INTO "items" ("id_item", "name") VALUES
+(1, 'Lave-glace Hiver 5L'),
+(2, 'Huile Moteur 10W40 1L'),
+(3, 'Sandwich Triangle Poulet'),
+(4, 'Café Espresso'),
+(5, 'Paquet de Chips Salées'),
+(6, 'Liquide de refroidissement 2L');
+
+INSERT INTO "products" ("id_item", "unit_price", "stock", "alert_threshold") VALUES
+(1, 12.500, 20, 5),
+(2, 18.900, 15, 3),
+(3, 4.200, 10, 2),
+(4, 1.500, 50, 10),
+(5, 2.100, 30, 5),
+(6, 9.750, 12, 4);
