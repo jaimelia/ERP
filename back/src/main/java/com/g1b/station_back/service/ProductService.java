@@ -28,4 +28,8 @@ public class ProductService {
                 productRepository.findByStockGreaterThan(0);
         return products.stream().map(Product::getName).toList();
     }
+
+    public Product getProductById(Integer id) {
+        return productRepository.findById(id).orElse(null);
+    }
 }

@@ -99,7 +99,7 @@ export const TicketWidget: FC = () => {
 
     return (
         <div className="widget-container">
-            <div className="widget-toolbar" style={{ position: 'relative', overflow: 'visible' }}>
+            <div className="widget-toolbar widget-toolbar-relative">
                 <div className="widget-search">
                     <svg className="widget-search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                         <circle cx="11" cy="11" r="8"/>
@@ -117,42 +117,21 @@ export const TicketWidget: FC = () => {
                         onBlur={() => setTimeout(() => setShowResults(false), 200)}
                     />
                     {showResults && search && (
-                        <div style={{
-                            position: 'absolute',
-                            top: '100%',
-                            left: '0',
-                            right: '0',
-                            marginTop: '8px',
-                            backgroundColor: '#fff',
-                            border: '1px solid #e2e8f0',
-                            borderRadius: '8px',
-                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-                            zIndex: 1000,
-                            maxHeight: '250px',
-                            overflowY: 'auto'
-                        }}>
+                        <div className="search-results-dropdown">
                             {isSearching ? (
-                                <div style={{ padding: '12px 16px', color: '#64748b', fontSize: '14px' }}>Recherche...</div>
+                                <div className="search-results-message">Recherche...</div>
                             ) : searchResults.length > 0 ? (
                                 searchResults.map(name => (
                                     <div
                                         key={name}
-                                        style={{
-                                            padding: '12px 16px',
-                                            cursor: 'pointer',
-                                            borderBottom: '1px solid #f1f5f9',
-                                            fontSize: '14px',
-                                            color: '#334155'
-                                        }}
-                                        onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f8fafc')}
-                                        onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+                                        className="search-results-item"
                                         onClick={() => addProductToCart(name)}
                                     >
                                         {name}
                                     </div>
                                 ))
                             ) : (
-                                <div style={{ padding: '12px 16px', color: '#64748b', fontSize: '14px' }}>Aucun produit trouvé</div>
+                                <div className="search-results-message">Aucun produit trouvé</div>
                             )}
                         </div>
                     )}
