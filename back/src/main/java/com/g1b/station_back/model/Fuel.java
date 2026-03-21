@@ -17,8 +17,8 @@ public class Fuel extends Item {
     private BigDecimal alertThreshold;
 
     public Fuel() {}
-    public Fuel(Integer idItem, String itemType, String name, BigDecimal pricePerLiter, BigDecimal stock, BigDecimal alertThreshold) {
-        super(idItem, itemType, name);
+    public Fuel(Integer idItem, String name, BigDecimal pricePerLiter, BigDecimal stock, BigDecimal alertThreshold) {
+        super(idItem, name);
         this.pricePerLiter = pricePerLiter; this.stock = stock; this.alertThreshold = alertThreshold;
     }
 

@@ -240,7 +240,6 @@ CREATE TABLE IF NOT EXISTS "transaction_payments" (
 
 CREATE TABLE IF NOT EXISTS "items" (
 	"id_item" INTEGER NOT NULL UNIQUE,
-	"item_type" VARCHAR(255) NOT NULL,
 	"name" VARCHAR(255) NOT NULL,
 	PRIMARY KEY("id_item")
 );
@@ -329,3 +328,19 @@ INSERT INTO "users" ("id_user", "username", "password", "email", "role") VALUES
 (1, 'gerant1', '$2a$10$2IBaa5RyHYQyz6qNdWfmteVIWJUbFKSq8KOnuUyY89k43tKMTWd8C', 'admin@example.com', 'gerant'),
 (2, 'employe1', '$2a$10$Q4H7dnAln9/nOyQg4hx0e.p8iwMNJAbffD6MVd9VNdtWT2V7E/WgS', 'employe1@example.com', 'employe'),
 (3, 'employe2', '$2a$10$Q4H7dnAln9/nOyQg4hx0e.p8iwMNJAbffD6MVd9VNdtWT2V7E/WgS', 'employe2@example.com', 'employe');
+
+INSERT INTO "items" ("id_item", "name") VALUES
+(1, 'Lave-glace Hiver 5L'),
+(2, 'Huile Moteur 10W40 1L'),
+(3, 'Sandwich Triangle Poulet'),
+(4, 'Café Espresso'),
+(5, 'Paquet de Chips Salées'),
+(6, 'Liquide de refroidissement 2L');
+
+INSERT INTO "products" ("id_item", "unit_price", "stock", "alert_threshold") VALUES
+(1, 12.500, 20, 5),
+(2, 18.900, 15, 3),
+(3, 4.200, 10, 2),
+(4, 1.500, 50, 10),
+(5, 2.100, 30, 5),
+(6, 9.750, 12, 4);
