@@ -85,3 +85,41 @@
     border-color: var(--color-accent);
     color: var(--color-accent);
 }
+
+.widget-toolbar-relative {
+    position: relative;
+    overflow: visible;
+}
+
+.search-results-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 8px;
+    background-color: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    z-index: 1000;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.search-results-message {
+    padding: 12px 16px;
+    color: #64748b;
+    font-size: 14px;
+}
+
+.search-results-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 14px;
+    color: #334155;
+}
+
+.search-results-item:hover {
+    background-color: #f8fafc;
+}
