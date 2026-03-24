@@ -329,3 +329,86 @@ INSERT INTO "users" ("id_user", "username", "password", "email", "role") VALUES
 (1, 'gerant1', '$2a$10$2IBaa5RyHYQyz6qNdWfmteVIWJUbFKSq8KOnuUyY89k43tKMTWd8C', 'admin@example.com', 'gerant'),
 (2, 'employe1', '$2a$10$Q4H7dnAln9/nOyQg4hx0e.p8iwMNJAbffD6MVd9VNdtWT2V7E/WgS', 'employe1@example.com', 'employe'),
 (3, 'employe2', '$2a$10$Q4H7dnAln9/nOyQg4hx0e.p8iwMNJAbffD6MVd9VNdtWT2V7E/WgS', 'employe2@example.com', 'employe');
+
+INSERT INTO "items" ("id_item", "name") VALUES
+(7, 'Sans plomb 95'),
+(8, 'Sans plomb 98'),
+(9, 'Diesel'),
+(10, 'Stylo bille BIC'),
+(11, 'Essuie-glace'),
+(12, 'Arbre magique'),
+(13, 'Coca 33 Cl'),
+(14, 'Snack'),
+(15, 'Electricité');
+
+INSERT INTO "fuels" ("id_item", "price_per_liter", "stock", "alert_threshold") VALUES
+(7, 1.750, 1200, 500),
+(8, 1.850, 500, 200),
+(9, 1.650, 2000, 500);
+
+INSERT INTO "products" ("id_item", "unit_price", "stock", "alert_threshold") VALUES
+(10, 1.570, 196, 50),
+(11, 24.500, 15, 5),
+(12, 0.990, 37, 10),
+(13, 1.245, 100, 20),
+(14, 2.500, 50, 10);
+
+INSERT INTO "electricity" ("id_item", "fast_price", "normal_price") VALUES
+(15, 0.550, 0.350);
+
+INSERT INTO "cce_cards" ("id_cce_card", "balance", "created_at", "expires_at", "code", "minimum_credit_amount", "status") VALUES
+(1, 35.250, '2025-12-11', '2026-12-11', 9999, 10, 'activated'),
+(2, 12.640, '2025-12-02', '2026-12-02', 8888, 10, 'deactivated'),
+(3, 10.680, '2025-11-01', '2026-11-01', 7777, 10, 'activated'),
+(4, 152.660, '2025-10-04', '2026-10-04', 5555, 10, 'deactivated');
+
+INSERT INTO "clients" ("id_client", "firstname", "lastname", "mail", "phone_number", "id_cce_card") VALUES
+(1, 'Mathéo', 'CARLI', 'matheo.carli@gmail.com', '06.95.90.41.23', 1),
+(2, 'Matthéo', 'POMEL', 'mattheo.pomel@gmail.com', '06.09.25.43.03', 2),
+(3, 'Bryan', 'LACHAL', 'bryan.lachal@gmail.com', '06.12.34.56.78', 3),
+(4, 'Louis', 'BEDETTI', 'louis.bedetti@gmail.com', '06.98.76.54.32', 4);
+
+INSERT INTO "restocks" ("id_restock", "quantity", "restock_date", "id_item", "status") VALUES
+(1, 400, '2025-12-11', 7, 'pending'),
+(2, 300, '2025-12-02', 9, 'pending'),
+(3, 500, '2025-11-21', 8, 'pending'),
+(4, 10, '2025-11-21', 8, 'delivered'),
+(5, 500, '2025-11-21', 8, 'delivered'),
+(6, 500, '2025-11-21', 8, 'delivered');
+
+INSERT INTO "pumps" ("id_pump", "is_automat", "status") VALUES
+(1, false, 'available'),
+(2, true, 'inUse'),
+(3, false, 'available');
+
+INSERT INTO "pumps_fuels" ("id_pump_fuel", "id_fuel", "id_pump", "max_volume", "available_volume") VALUES
+(1, 7, 1, 5000, 1200),
+(2, 9, 1, 5000, 2000),
+(3, 8, 2, 5000, 500);
+
+INSERT INTO "transactions" ("id_transaction", "type", "transaction_date", "is_from_automat", "status") VALUES
+(145, 'Carburant', '2026-02-18', false, 'accepted'),
+(146, 'Boutique', '2026-02-18', false, 'accepted'),
+(147, 'Mixte', '2026-02-18', false, 'accepted');
+
+INSERT INTO "transactions_lines" ("id_transaction_line", "quantity", "id_transaction", "total_amount", "id_item") VALUES
+(1, 42, 145, 61.410, 9),
+(2, 2, 146, 2.490, 13),
+(3, 35, 147, 56.200, 7),
+(4, 1, 147, 2.500, 14);
+
+INSERT INTO "transaction_payments" ("id_transaction_payment", "id_transaction", "payment_method", "amount", "end_num_card", "status", "date", "id_cce_card") VALUES
+(1, 145, 'CCE', 61.410, '9999', 'accepted', '2026-02-18', 1),
+(2, 146, 'CreditCard', 2.490, '1234', 'accepted', '2026-02-18', NULL),
+(3, 147, 'Cash', 58.700, NULL, 'accepted', '2026-02-18', NULL);
+
+INSERT INTO "users" ("id_user", "username", "password", "email", "role", "uses_dark_mode", "tile_layout") VALUES
+(1, 'employe1', 'hash1234', 'employe1@station.com', 'employe', false, '{}'),
+(2, 'gerant1', 'hashadmin', 'gerant1@station.com', 'gerant', true, '{}');
+
+INSERT INTO "regional_guidelines" ("id_regional_guideline", "object", "content") VALUES
+(1, 'Procédure nettoyage', 'Nettoyage des pistes tous les mardis matin.'),
+(2, 'Sécurité incendie', 'Vérification mensuelle des extincteurs.');
+
+INSERT INTO "incident_reports" ("id_incident_report", "type", "date", "technical_detail", "resolution", "status") VALUES
+(1, 'Panne pompe', '2026-02-10', 'Erreur TPE sur pompe 2', 'Redémarrage du système', 'locked');
