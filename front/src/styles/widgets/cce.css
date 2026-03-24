@@ -1,4 +1,3 @@
-/* ── CCE bottom action bar ──────────────────────────────────── */
 .cce-actions {
 	display: grid;
 	grid-template-columns: repeat(3, 1fr);
@@ -26,9 +25,20 @@
 	color: var(--color-accent);
 }
 
-/* ── Masked CCE number ──────────────────────────────────────── */
 .cce-masked {
 	font-family: "Courier New", monospace;
 	letter-spacing: 0.3px;
 	font-size: 11px;
+}
+
+.cce-action-btn:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+	border-color: var(--color-border);
+	color: var(--color-text-muted);
+}
+
+.cce-action-btn:disabled:hover {
+	border-color: var(--color-border);
+	color: var(--color-text-muted);
 }
