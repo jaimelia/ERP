@@ -1,5 +1,5 @@
 import {useState, useEffect, type FC} from "react";
-import {apiUrl} from "../../config/api";
+import {apiUrl} from "../../api/common.ts";
 import { TicketActions } from "../TicketActions";
 
 interface Product {
