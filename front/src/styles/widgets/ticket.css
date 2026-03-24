@@ -1,0 +1,87 @@
+.ticket-total-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--color-surface-alt);
+    font-size: 16px;
+    color: var(--color-text);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.ticket-items-list {
+    flex: 1;
+    overflow-y: auto;
+    background: var(--color-surface);
+}
+
+.ticket-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text);
+    font-size: 14px;
+}
+
+.ticket-item-name {
+    flex: 1;
+}
+
+.ticket-quantity-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 16px;
+}
+
+.ticket-quantity-controls button {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: none;
+    background: var(--color-border);
+    color: var(--color-text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    transition: background-color 0.15s ease;
+}
+
+.ticket-quantity-controls button:hover {
+    background: var(--color-border-strong);
+}
+
+.ticket-item-price {
+    width: 60px;
+    text-align: right;
+}
+
+.ticket-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 8px 10px;
+    border-top: 1px solid var(--color-border);
+    flex-shrink: 0;
+    background: var(--color-surface-alt);
+}
+
+.ticket-action-btn {
+    padding: 8px 4px;
+    border-radius: 5px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: center;
+    transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.ticket-action-btn:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}

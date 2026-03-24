@@ -1,0 +1,44 @@
+.cce-actions {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 4px;
+	padding: 8px 10px;
+	border-top: 1px solid var(--color-border);
+	flex-shrink: 0;
+	background: var(--color-surface-alt);
+}
+
+.cce-action-btn {
+	padding: 5px 4px;
+	border-radius: 5px;
+	border: 1px solid var(--color-border);
+	background: var(--color-surface);
+	color: var(--color-text);
+	font-size: 11px;
+	font-weight: 500;
+	cursor: pointer;
+	text-align: center;
+}
+
+.cce-action-btn:hover {
+	border-color: var(--color-accent);
+	color: var(--color-accent);
+}
+
+.cce-masked {
+	font-family: "Courier New", monospace;
+	letter-spacing: 0.3px;
+	font-size: 11px;
+}
+
+.cce-action-btn:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+	border-color: var(--color-border);
+	color: var(--color-text-muted);
+}
+
+.cce-action-btn:disabled:hover {
+	border-color: var(--color-border);
+	color: var(--color-text-muted);
+}
