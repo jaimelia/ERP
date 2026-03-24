@@ -1,6 +1,7 @@
 // hooks/useFetch.ts
 import {useState, useEffect, useCallback} from "react";
 import * as React from "react";
+import {fetchJsonWithAuth} from "../api/common.ts";
 
 interface UseFetchResult<T> {
 	data: T | null;
@@ -17,9 +18,7 @@ export function useFetch<T>(url: string, pollingInterval?: number): UseFetchResu
 
 	const fetchData = useCallback(async (): Promise<void> => {
 		try {
-			const response = await fetch(url);
-			if (!response.ok) throw new Error(`Erreur serveur : ${response.status}`);
-			const result: T = await response.json();
+			const result = await fetchJsonWithAuth(url);
 			setData(result);
 			setError(null);
 		} catch (err) {
