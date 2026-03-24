@@ -1,51 +1,52 @@
 import {useState, type FC} from "react";
+import {useFetch} from "../../hooks/useFetch.ts";
+import {FetchWrapper} from "../FetchWrapper.tsx";
+import {apiUrl} from "../../api/common.ts";
 
 interface Customer {
-    id: number;
-    nom: string;
-    prenom: string;
-    email: string;
-    telephone: string;
+    idClient: number;
+    lastname: string;
+    firstname: string;
+    mail: string;
+    phoneNumber: string;
 }
-
-// TODO : remplacer par des appels API
-const mockCustomers: Customer[] = [
-    {id: 1, nom: "Carli", prenom: "Mathéo", email: "matheo.carli@jmail.com", telephone: "06.95.90.41.23"},
-    {id: 2, nom: "Pomel", prenom: "Matthéo", email: "mattheo.pomel@jmail.com", telephone: "06.09.25.43.03"},
-    {id: 3, nom: "Carly", prenom: "Matheau", email: "matheau.carly@jmail.com", telephone: "06.86.78.96.01"},
-    {id: 4, nom: "Karli", prenom: "Mathaio", email: "mathaio.karli@jmail.com", telephone: "06.33.63.69.81"},
-    {id: 5, nom: "Karly", prenom: "Matéo", email: "mateo.karly@jmail.com", telephone: "07.68.13.24.18"},
-];
 
 export const CustomersWidget: FC = () => {
     const [search, setSearch] = useState("");
 
-    const filtered = mockCustomers.filter(c =>
-        `${c.nom} ${c.prenom}`.toLowerCase().includes(search.toLowerCase()) ||
-        c.email.toLowerCase().includes(search.toLowerCase()) ||
-        c.telephone.includes(search)
+    const {data: customers, loading, error} = useFetch<Customer[]>(
+        apiUrl("/clients"),
+        5000
     );
 
-    return (
-        <div className="widget-container">
-            <div className="widget-toolbar">
-                <div className="widget-search">
-                    <svg className="widget-search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                        <circle cx="11" cy="11" r="8"/>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                    </svg>
-                    <input
-                        type="text"
-                        placeholder="Rechercher un client"
-                        value={search}
-                        onChange={e => setSearch(e.target.value)}
-                    />
-                </div>
-            </div>
+    const filtered = customers?.filter(c =>
+        `${c.lastname} ${c.firstname}`.toLowerCase().includes(search.toLowerCase()) ||
+        c.mail.toLowerCase().includes(search.toLowerCase()) ||
+        c.phoneNumber.includes(search)
+    ) ?? [];
 
-            <div className="widget-table-wrap">
-                <table className="widget-table">
-                    <thead>
+    return (
+        <FetchWrapper loading={loading} error={error}>
+            <div className="widget-container">
+                <div className="widget-toolbar">
+                    <div className="widget-search">
+                        <svg className="widget-search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" strokeWidth="2.5">
+                            <circle cx="11" cy="11" r="8"/>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        <input
+                            type="text"
+                            placeholder="Rechercher un client"
+                            value={search}
+                            onChange={e => setSearch(e.target.value)}
+                        />
+                    </div>
+                </div>
+
+                <div className="widget-table-wrap">
+                    <table className="widget-table">
+                        <thead>
                         <tr>
                             <th>Nom</th>
                             <th>Prénom</th>
@@ -53,16 +54,16 @@ export const CustomersWidget: FC = () => {
                             <th>N° Tel</th>
                             <th>Actions</th>
                         </tr>
-                    </thead>
-                    <tbody>
+                        </thead>
+                        <tbody>
                         {filtered.map(c => (
-                            <tr key={c.id}>
-                                <td>{c.nom}</td>
-                                <td>{c.prenom}</td>
+                            <tr key={c.idClient}>
+                                <td>{c.lastname}</td>
+                                <td>{c.firstname}</td>
                                 <td>
-                                    <span className="cell-truncate" title={c.email}>{c.email}</span>
+                                    <span className="cell-truncate" title={c.mail}>{c.mail}</span>
                                 </td>
-                                <td>{c.telephone}</td>
+                                <td>{c.phoneNumber}</td>
                                 <td>
                                     <div className="row-actions">
                                         <button className="action-btn" type="button">Modifier</button>
@@ -71,9 +72,10 @@ export const CustomersWidget: FC = () => {
                                 </td>
                             </tr>
                         ))}
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
+        </FetchWrapper>
     );
 };
