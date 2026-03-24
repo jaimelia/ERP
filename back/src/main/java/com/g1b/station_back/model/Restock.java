@@ -13,7 +13,7 @@ public class Restock {
     @Column(name = "id_restock")
     private Integer idRestock;
 
-    @Column(nullable = false, precision = 5, scale = 3)
+    @Column(nullable = false, precision = 10, scale = 3)
     private BigDecimal quantity;
 
     @Column(name = "restock_date", nullable = false)

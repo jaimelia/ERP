@@ -10,10 +10,10 @@ public class Fuel extends Item {
     @Column(name = "price_per_liter", nullable = false, precision = 5, scale = 3)
     private BigDecimal pricePerLiter;
 
-    @Column(precision = 5, scale = 3)
+    @Column(precision = 10, scale = 3)
     private BigDecimal stock;
 
-    @Column(name = "alert_threshold", nullable = false, precision = 5, scale = 3)
+    @Column(name = "alert_threshold", nullable = false, precision = 10, scale = 3)
     private BigDecimal alertThreshold;
 
     public Fuel() {}

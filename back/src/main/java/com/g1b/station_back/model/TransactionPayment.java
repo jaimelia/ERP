@@ -24,7 +24,7 @@ public class TransactionPayment {
     @Column(name = "payment_method", nullable = false)
     private PaymentMethod paymentMethod;
 
-    @Column(nullable = false, precision = 5, scale = 3)
+    @Column(nullable = false, precision = 10, scale = 3)
     private BigDecimal amount;
 
     @Column(name = "end_num_card", length = 4)
