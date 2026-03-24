@@ -8,10 +8,10 @@ services:
       POSTGRES_PASSWORD: 4e_mdp
       POSTGRES_DB: projet_4e
     ports:
-      - "5432:5432"
+      - "54320:5432"
     volumes:
       - ./init-db:/docker-entrypoint-initdb.d
-      - postgres-data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/18/docker
 
 volumes:
   postgres-data:
