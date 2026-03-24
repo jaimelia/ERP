@@ -1,9 +1,7 @@
 package com.g1b.station_back.model;
 
-import com.g1b.station_back.model.enums.PaymentMethod;
 import com.g1b.station_back.model.enums.TransactionStatus;
 import jakarta.persistence.*;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 

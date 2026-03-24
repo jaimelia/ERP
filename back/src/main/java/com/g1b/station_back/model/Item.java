@@ -1,7 +1,6 @@
 package com.g1b.station_back.model;
 
 import jakarta.persistence.*;
-import java.math.BigDecimal;
 
 @Entity
 @Table(name = "items")

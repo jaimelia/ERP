@@ -2,7 +2,6 @@ package com.g1b.station_back.model;
 
 import com.g1b.station_back.model.enums.PumpChargerStatus;
 import jakarta.persistence.*;
-import java.math.BigDecimal;
 
 @Entity
 @Table(name = "pumps")

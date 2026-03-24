@@ -1,5 +1,6 @@
 import {useState, useEffect, type FC} from "react";
 import {apiUrl} from "../../config/api";
+import { TicketActions } from "../TicketActions"; // Import du nouveau composant
 
 interface Product {
     idItem: number;
@@ -23,6 +24,7 @@ export const TicketWidget: FC = () => {
     const [cart, setCart] = useState<CartItem[]>(emptyCart);
     const [searchResults, setSearchResults] = useState<string[]>([]);
     const [allProducts, setAllProducts] = useState<Product[]>([]);
+    const [ticketStatus, setTicketStatus] = useState<number>(0); // État pour gérer l'affichage des boutons
     const [isSearching, setIsSearching] = useState(false);
     const [showResults, setShowResults] = useState(false);
 
@@ -97,6 +99,43 @@ export const TicketWidget: FC = () => {
         setShowResults(false);
     };
 
+    const handleCancelTicket = () => {
+        setCart([]);
+        setTicketStatus(0); // Réinitialise le statut à l'état initial
+    };
+
+    const validateTicket = async () => {
+        if (ticketStatus !== 0 || cart.length === 0) {
+            return; // Ne valide que si le ticket est en état initial et non vide
+        }
+
+        try {
+            const items = cart.map(item => ({
+                idItem: Number(item.id),
+                quantity: item.quantity
+            }));
+
+            const payload = { type: "products", isFromAutomat: false, lines: items }; // Enveloppe le tableau dans un objet
+
+            const response = await fetch(apiUrl("/transactions/shop"), {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                // Ne vide pas le panier ici, on attend le paiement effectif
+                setTicketStatus(1); // Passe à l'état de sélection du paiement
+            } else {
+                console.error("Erreur lors de la validation du ticket.");
+            }
+        } catch (error) {
+            console.error("Erreur réseau lors de l'envoi du ticket:", error);
+        }
+    };
+
     return (
         <div className="widget-container">
             <div className="widget-toolbar widget-toolbar-relative">
@@ -114,7 +153,8 @@ export const TicketWidget: FC = () => {
                             setShowResults(!!e.target.value);
                         }}
                         onFocus={() => { if (search) setShowResults(true); }}
-                        onBlur={() => setTimeout(() => setShowResults(false), 200)}
+                        onBlur={() => setTimeout(() => setShowResults(false), 200)} // Délai pour permettre le clic sur un résultat
+                        disabled={ticketStatus !== 0} // Désactive la recherche si le ticket est en cours de validation/paiement
                     />
                     {showResults && search && (
                         <div className="search-results-dropdown">
@@ -148,19 +188,21 @@ export const TicketWidget: FC = () => {
                     <div key={item.id} className="ticket-item">
                         <span className="ticket-item-name">{item.name}</span>
                         <div className="ticket-quantity-controls">
-                            <button type="button" onClick={() => updateQuantity(item.id, -1)}>-</button>
+                            <button type="button" onClick={() => updateQuantity(item.id, -1)} disabled={ticketStatus !== 0}>-</button>
                             <span>{item.quantity}</span>
-                            <button type="button" onClick={() => updateQuantity(item.id, 1)}>+</button>
+                            <button type="button" onClick={() => updateQuantity(item.id, 1)} disabled={ticketStatus !== 0}>+</button>
                         </div>
                         <span className="ticket-item-price">{(item.quantity * item.unitPrice).toFixed(2)} €</span>
                     </div>
                 ))}
             </div>
 
-            <div className="ticket-actions">
-                <button className="ticket-action-btn" type="button" onClick={() => setCart([])}>Annuler</button>
-                <button className="ticket-action-btn" type="button">Valider</button>
-            </div>
+            <TicketActions
+                ticketStatus={ticketStatus}
+                onCancel={handleCancelTicket}
+                onValidate={validateTicket}
+                isValidateDisabled={cart.length === 0}
+            />
         </div>
     );
 };
