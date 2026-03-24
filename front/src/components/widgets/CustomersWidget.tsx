@@ -1,7 +1,7 @@
 import {useState, type FC} from "react";
 import {useFetch} from "../../hooks/useFetch.ts";
 import {FetchWrapper} from "../FetchWrapper.tsx";
-import {apiUrl} from "../../api/common.ts";
+import {apiUrl, fetchJsonWithAuth} from "../../api/common.ts";
 
 interface Customer {
     idClient: number;
@@ -13,17 +13,92 @@ interface Customer {
 
 export const CustomersWidget: FC = () => {
     const [search, setSearch] = useState("");
+    const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+    const [editedCustomer, setEditedCustomer] = useState<Partial<Customer>>({});
 
-    const {data: customers, loading, error} = useFetch<Customer[]>(
-        apiUrl("/clients"),
-        5000
+    const {data: customers, loading, error, setData: setCustomers} = useFetch<Customer[]>(
+        apiUrl("/clients")
     );
+
+    const openModal = (customer: Customer) => {
+        setSelectedCustomer(customer);
+        setEditedCustomer(customer);
+    };
+
+    const closeModal = () => {
+        setSelectedCustomer(null);
+        setEditedCustomer({});
+    };
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const {name, value} = e.target;
+        setEditedCustomer(prev => ({...prev, [name]: value}));
+    };
+
+    const handleConfirm = async () => {
+        if (!editedCustomer.idClient) return;
+
+        try {
+            const params = new URLSearchParams({
+                firstname: editedCustomer.firstname || '',
+                lastname: editedCustomer.lastname || '',
+                mail: editedCustomer.mail || '',
+                phoneNumber: editedCustomer.phoneNumber || ''
+            });
+
+            const updatedCustomer = await fetchJsonWithAuth(apiUrl(`/clients/update/${editedCustomer.idClient}?${params.toString()}`), {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            setCustomers(prev => prev?.map(c => c.idClient === editedCustomer.idClient ? updatedCustomer : c) ?? []);
+            closeModal();
+        } catch (error) {
+            console.error("Failed to update customer:", error);
+        }
+    };
 
     const filtered = customers?.filter(c =>
         `${c.lastname} ${c.firstname}`.toLowerCase().includes(search.toLowerCase()) ||
         c.mail.toLowerCase().includes(search.toLowerCase()) ||
         c.phoneNumber.includes(search)
     ) ?? [];
+
+    const renderModal = () => {
+        if (!selectedCustomer) return null;
+
+        return (
+            <div className="modal-overlay">
+                <div className="modal-content">
+                    <h2>Modifier le client</h2>
+                    <div className="form-group">
+                        <label>Nom</label>
+                        <input type="text" name="lastname" value={editedCustomer.lastname || ''}
+                               onChange={handleInputChange}/>
+                    </div>
+                    <div className="form-group">
+                        <label>Prénom</label>
+                        <input type="text" name="firstname" value={editedCustomer.firstname || ''}
+                               onChange={handleInputChange}/>
+                    </div>
+                    <div className="form-group">
+                        <label>Adresse mail</label>
+                        <input type="email" name="mail" value={editedCustomer.mail || ''} onChange={handleInputChange}/>
+                    </div>
+                    <div className="form-group">
+                        <label>N° Tel</label>
+                        <input type="tel" name="phoneNumber" value={editedCustomer.phoneNumber || ''}
+                               onChange={handleInputChange}/>
+                    </div>
+                    <div className="modal-actions">
+                        <button type="button" onClick={closeModal}>Annuler</button>
+                        <button type="button" onClick={handleConfirm}>Confirmer</button>
+                    </div>
+                </div>
+            </div>
+        );
+    };
 
     return (
         <FetchWrapper loading={loading} error={error}>
@@ -66,7 +141,9 @@ export const CustomersWidget: FC = () => {
                                 <td>{c.phoneNumber}</td>
                                 <td>
                                     <div className="row-actions">
-                                        <button className="action-btn" type="button">Modifier</button>
+                                        <button className="action-btn" type="button"
+                                                onClick={() => openModal(c)}>Modifier
+                                        </button>
                                         <button className="action-btn" type="button">Transactions</button>
                                     </div>
                                 </td>
@@ -75,6 +152,7 @@ export const CustomersWidget: FC = () => {
                         </tbody>
                     </table>
                 </div>
+                {renderModal()}
             </div>
         </FetchWrapper>
     );
