@@ -5,6 +5,7 @@ import com.g1b.station_back.service.TransactionService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +24,11 @@ public class TransactionController {
     public ResponseEntity<Integer> createShopTransaction(@Valid @RequestBody TransactionCreationRequestDTO requestDTO) {
         Integer transactionId = transactionService.createShopTransaction(requestDTO);
         return new ResponseEntity<>(transactionId, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/shop/cancel/{transactionId}")
+    public ResponseEntity<Integer> cancelShopTransaction(@PathVariable Integer transactionId) {
+        return ResponseEntity.ok(transactionService.cancelShopTransaction(transactionId));
     }
 
 }

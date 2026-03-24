@@ -1,6 +1,6 @@
 import {useState, useEffect, type FC} from "react";
 import {apiUrl} from "../../config/api";
-import { TicketActions } from "../TicketActions"; // Import du nouveau composant
+import { TicketActions } from "../TicketActions";
 
 interface Product {
     idItem: number;
@@ -24,9 +24,10 @@ export const TicketWidget: FC = () => {
     const [cart, setCart] = useState<CartItem[]>(emptyCart);
     const [searchResults, setSearchResults] = useState<string[]>([]);
     const [allProducts, setAllProducts] = useState<Product[]>([]);
-    const [ticketStatus, setTicketStatus] = useState<number>(0); // État pour gérer l'affichage des boutons
+    const [ticketStatus, setTicketStatus] = useState<number>(0);
     const [isSearching, setIsSearching] = useState(false);
     const [showResults, setShowResults] = useState(false);
+    const [currentTransactionId, setCurrentTransactionId] = useState<number | null>(null);
 
     useEffect(() => {
         fetch(apiUrl("/products"))
@@ -99,14 +100,24 @@ export const TicketWidget: FC = () => {
         setShowResults(false);
     };
 
-    const handleCancelTicket = () => {
+    const handleCancelTicket = async () => {
+        if (currentTransactionId !== null) {
+            try {
+                await fetch(apiUrl(`/transactions/shop/cancel/${currentTransactionId}`), {
+                    method: "POST"
+                });
+            } catch (error) {
+                console.error("Erreur réseau lors de l'annulation:", error);
+            }
+        }
         setCart([]);
-        setTicketStatus(0); // Réinitialise le statut à l'état initial
+        setTicketStatus(0);
+        setCurrentTransactionId(null);
     };
 
     const validateTicket = async () => {
         if (ticketStatus !== 0 || cart.length === 0) {
-            return; // Ne valide que si le ticket est en état initial et non vide
+            return;
         }
 
         try {
@@ -115,7 +126,7 @@ export const TicketWidget: FC = () => {
                 quantity: item.quantity
             }));
 
-            const payload = { type: "products", isFromAutomat: false, lines: items }; // Enveloppe le tableau dans un objet
+            const payload = { type: "products", isFromAutomat: false, lines: items };
 
             const response = await fetch(apiUrl("/transactions/shop"), {
                 method: "POST",
@@ -126,8 +137,9 @@ export const TicketWidget: FC = () => {
             });
 
             if (response.ok) {
-                // Ne vide pas le panier ici, on attend le paiement effectif
-                setTicketStatus(1); // Passe à l'état de sélection du paiement
+                const data = await response.json();
+                setCurrentTransactionId(data);
+                setTicketStatus(1);
             } else {
                 console.error("Erreur lors de la validation du ticket.");
             }

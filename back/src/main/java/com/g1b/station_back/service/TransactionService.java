@@ -59,4 +59,13 @@ public class TransactionService {
         transactionRepository.save(newTransaction);
         return newTransaction.getIdTransaction();
     }
+
+    public Integer cancelShopTransaction(Integer transactionId) {
+        Transaction transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new IllegalArgumentException("Transaction not found"));
+
+        transaction.setStatus(TransactionStatus.canceled);
+        transactionRepository.save(transaction);
+        return transactionId;
+    }
 }
