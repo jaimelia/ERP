@@ -1,6 +1,7 @@
-import {useState, type FC, type FormEvent} from "react";
-import {USERS} from "../data/stationConfig.tsx";
+import {useState, type FC, type SubmitEvent} from "react";
 import type {ThemeKey, User} from "../types";
+import {apiUrl} from "../api/common.ts";
+import {getMe} from "../api/userApi.ts";
 
 interface LoginProps {
     onLogin: (user: User) => void;
@@ -22,18 +23,32 @@ export const Login: FC<LoginProps> = ({onLogin, theme, toggleTheme}) => {
         setBusy(true);
         setError("");
 
-        setTimeout(() => {
-            const user = USERS.find(candidate => candidate.username === username && candidate.password === password);
-            if (user) {
-                onLogin(user);
-            } else {
-                setError("Identifiants incorrects.");
-            }
+        setTimeout(async () => {
+			const response = await fetch(apiUrl("/auth/login"), {
+				method: "POST",
+				headers: {"Content-Type": "application/json"},
+				body: JSON.stringify({username, password})
+			});
+
+			if (response.ok) {
+				const result = await response.json();
+				handleSuccessResponse(result);
+			} else if (response.status === 401) {
+				setError("Identifiants incorrects.");
+			} else {
+				setError(`Erreur API : ${response.status}`);
+			}
             setBusy(false);
         }, 400);
     };
+	
+	const handleSuccessResponse = async (result: {token: string}) => {
+		window.localStorage.setItem("token", result.token);
+		
+		onLogin(await getMe())
+	}
 
-    const handleSubmit = (event: FormEvent<HTMLFormElement>): void => {
+    const handleSubmit = (event: SubmitEvent<HTMLFormElement>): void => {
         event.preventDefault();
         submit();
     };

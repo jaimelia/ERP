@@ -25,7 +25,7 @@ public class User {
     @Column(name = "uses_dark_mode", nullable = false)
     private Boolean usesDarkMode;
 
-    @Column(name = "tile_layout", columnDefinition = "jsonb", nullable = false)
+    @Column(name = "tile_layout", columnDefinition = "TEXT")
     private String tileLayout;
 
     public User() {}
