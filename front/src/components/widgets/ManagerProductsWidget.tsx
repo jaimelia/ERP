@@ -51,7 +51,11 @@ export const ManagerProductsWidget: FC = () => {
                     <option>Carburant</option>
                     <option>Produit</option>
                 </select>
-                <button className="widget-btn-add" type="button" title="Ajouter">+</button>
+                <button className="widget-btn-add" type="button" title="Ajouter">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
+                        <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/>
+                    </svg>
+                </button>
             </div>
 
             <div className="widget-table-wrap">

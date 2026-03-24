@@ -2,7 +2,7 @@ import type {Levels, Role, Size, WidgetDef, WidgetKey} from "../types";
 import {CalculatorWidget} from "../components/widgets/CalculatorWidget.tsx";
 import {CCEWidget} from "../components/widgets/CCEWidget.tsx";
 import {CustomersWidget} from "../components/widgets/CustomersWidget.tsx";
-import {ManagerRestockingWidget} from "../components/widgets/ManagerRestockingWidget.tsx";
+import {ManagerRestockWidget} from "../components/widgets/ManagerRestockWidget.tsx";
 import {TransactionsWidget} from "../components/widgets/TransactionsWidget.tsx";
 import {ManagerProductsWidget} from "../components/widgets/ManagerProductsWidget.tsx";
 import {ChargersWidget} from "../components/widgets/ChargersWidget.tsx";
@@ -21,7 +21,7 @@ export const WIDGETS: Record<string, WidgetDef> = {
 	employee_products: {id: "employee_products", label: "Produits", size: {width: 1, height: 1}},
 	transactions: {id: "transactions", label: "Transactions", size: {width: 1, height: 1}, element: <TransactionsWidget/>},
 	customers: {id: "customers", label: "Clients", size: {width: 1, height: 1}, element: <CustomersWidget/>},
-	manager_restocking: {id: "manager_restocking", label: "Réapprovisionnements", size: {width: 1, height: 2}, element: <ManagerRestockingWidget/>},
+	manager_restocking: {id: "manager_restocking", label: "Réapprovisionnements", size: {width: 1, height: 2}, element: <ManagerRestockWidget/>},
 	manager_products: {id: "manager_products", label: "Marchandises", size: {width: 1, height: 1}, element: <ManagerProductsWidget/>},
 	transaction_table: {id: "transaction_table", label: "Table transactions", size: {width: 1, height: 1}},
 	guidelines: {id: "guidelines", label: "Directives", size: {width: 1, height: 1}},

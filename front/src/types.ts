@@ -3,6 +3,7 @@ import {DEFAULT_LEVELS, WIDGETS} from "./data/stationConfig.tsx";
 
 export type ThemeKey = "light" | "dark";
 export type Role = "employe" | "gerant";
+export type ItemType = "product" | "fuel";
 
 export interface User {
     username: string;
@@ -85,4 +86,13 @@ export const isLayoutValid = (role: Role, levels?: Levels): boolean => {
 	}
 	
 	return valid;
+}
+
+export const formatQuantity = (quantity: number, itemType: ItemType): string => {
+    switch (itemType) {
+        case "fuel":
+            return `${quantity} L`;
+        case "product":
+            return `${quantity}`;
+    }
 }

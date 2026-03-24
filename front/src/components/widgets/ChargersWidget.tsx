@@ -16,6 +16,7 @@ export const ChargersWidget: FC = () => {
 		apiUrl("/chargers"),
 		5000
 	);
+
 	const isSwitchChecked = (charger: Charger): boolean => {
 		return charger.status === "available" || charger.status === "inUse";
 	}

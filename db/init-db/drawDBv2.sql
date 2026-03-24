@@ -371,10 +371,10 @@ INSERT INTO "clients" ("id_client", "firstname", "lastname", "mail", "phone_numb
 INSERT INTO "restocks" ("id_restock", "quantity", "restock_date", "id_item", "status") VALUES
 (1, 400.000, '2025-12-11', 7, 'pending'),
 (2, 300.000, '2025-12-02', 9, 'pending'),
-(3, 500.000, '2025-11-21', 8, 'pending'),
+(3, 500.000, '2025-11-21', 8, 'canceled'),
 (4, 10.000, '2025-11-21', 8, 'delivered'),
 (5, 500.000, '2025-11-21', 8, 'delivered'),
-(6, 500.000, '2025-11-21', 8, 'delivered');
+(6, 500, '2025-11-21', 10, 'delivered');
 
 INSERT INTO "pumps" ("id_pump", "is_automat", "status") VALUES
 (1, false, 'available'),
