@@ -11,40 +11,42 @@ interface CCE {
     montantCredite: string;
 }
 
+type ModalType = "create" | "edit" | "credit" | "transactions" | "reedit_alert" | "reedit" | null;
+
 export const CCEWidget: FC = () => {
     const [search, setSearch] = useState("");
     const [selected, setSelected] = useState<number | null>(null);
     const [cces, setCces] = useState<CCE[]>([]);
 
-    useEffect(() => {
-        const loadCces = async () => {
-            try {
-                const data = await fetchJsonWithAuth(apiUrl("/cce"));
-                const formattedData = data.map((item: any) => ({
-                    id: item.id,
-                    nom: item.nom,
-                    prenom: item.prenom,
-                    numeroCCE: `****${item.code}`,
-                    statut: (item.statut === "activated" || item.statut === "ACTIVATED") ? "Active" : "Désactivée",
-                    dateCreation: new Date(item.dateCreation).toLocaleDateString("fr-FR"),
-                    montantCredite: `${item.montantCredite.toFixed(2)}€`
-                }));
-                setCces(formattedData);
-            } catch (error) {
-                console.error(error);
-            }
-        };
+    const [activeModal, setActiveModal] = useState<ModalType>(null);
+    const [formData, setFormData] = useState<Record<string, string>>({});
 
+    const loadCces = async () => {
+        try {
+            const data = await fetchJsonWithAuth(apiUrl("/cce"));
+            const formattedData = data.map((item: any) => ({
+                id: item.id,
+                nom: item.nom,
+                prenom: item.prenom,
+                numeroCCE: `****${item.code}`,
+                statut: (item.statut === "activated" || item.statut === "ACTIVATED") ? "Active" : "Désactivée",
+                dateCreation: new Date(item.dateCreation).toLocaleDateString("fr-FR"),
+                montantCredite: `${item.montantCredite.toFixed(2)}€`
+            }));
+            setCces(formattedData);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    useEffect(() => {
         loadCces();
     }, []);
 
     const handleToggleStatus = async () => {
         if (!selected) return;
-
         try {
-            // Appel API sans body requis
             await fetchJsonWithAuth(apiUrl(`/cce/${selected}/toggle-status`), { method: "PUT" });
-
             setCces(prev => prev.map(c => {
                 if (c.id === selected) {
                     return { ...c, statut: c.statut === "Active" ? "Désactivée" : "Active" };
@@ -56,6 +58,59 @@ export const CCEWidget: FC = () => {
         }
     };
 
+    const handleOpenModal = (type: ModalType) => {
+        setFormData({});
+        setActiveModal(type);
+    };
+
+    const handleCloseModal = () => {
+        setActiveModal(null);
+        setFormData({});
+    };
+
+    const handleValidateModal = async () => {
+        if (activeModal === "reedit_alert") {
+            setActiveModal("reedit");
+            return;
+        }
+
+        try {
+            let url = "";
+            let method = "POST";
+
+            switch (activeModal) {
+                case "credit":
+                    url = `/cce/${selected}/credit`;
+                    method = "PUT";
+                    break;
+                case "create":
+                    url = `/cce`;
+                    break;
+                case "edit":
+                    url = `/cce/${selected}`;
+                    method = "PUT";
+                    break;
+                case "reedit":
+                    url = `/cce/${selected}/reedit`;
+                    break;
+            }
+
+            if (url) {
+                await fetchJsonWithAuth(apiUrl(url), {
+                    method,
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(formData)
+                });
+                await loadCces();
+                setSelected(null);
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            handleCloseModal();
+        }
+    };
+
     const filtered = cces.filter(c =>
         `${c.nom} ${c.prenom}`.toLowerCase().includes(search.toLowerCase()) ||
         c.numeroCCE.includes(search)
@@ -63,6 +118,64 @@ export const CCEWidget: FC = () => {
 
     const selectedCard = cces.find(c => c.id === selected);
     const toggleButtonText = selectedCard?.statut === "Active" ? "Désactiver" : "Activer";
+
+    const renderModalContent = () => {
+        switch (activeModal) {
+            case "credit":
+                return (
+                    <>
+                        <h3>Créditer la CCE</h3>
+                        <div className="cce-modal-form">
+                            <input
+                                type="number"
+                                placeholder="Montant à créditer (€)"
+                                value={formData.amount || ""}
+                                onChange={e => setFormData({...formData, amount: e.target.value})}
+                            />
+                        </div>
+                    </>
+                );
+            case "create":
+            case "reedit":
+                return (
+                    <>
+                        <h3>{activeModal === "create" ? "Créer une CCE" : "Rééditer la CCE"}</h3>
+                        <div className="cce-modal-form">
+                            <input placeholder="Nom" onChange={e => setFormData({...formData, nom: e.target.value})} />
+                            <input placeholder="Prénom" onChange={e => setFormData({...formData, prenom: e.target.value})} />
+                            <input placeholder="Email" type="email" onChange={e => setFormData({...formData, email: e.target.value})} />
+                            <input placeholder="Téléphone" type="tel" onChange={e => setFormData({...formData, tel: e.target.value})} />
+                            <input placeholder="Code (PIN)" maxLength={4} onChange={e => setFormData({...formData, code: e.target.value})} />
+                            <input type="number" placeholder="Montant initial (€)" onChange={e => setFormData({...formData, montant: e.target.value})} />
+                        </div>
+                    </>
+                );
+            case "edit":
+                return (
+                    <>
+                        <h3>Modifier la CCE</h3>
+                        <div className="cce-modal-form">
+                            <input placeholder="Nom" onChange={e => setFormData({...formData, nom: e.target.value})} />
+                            <input placeholder="Prénom" onChange={e => setFormData({...formData, prenom: e.target.value})} />
+                            <input placeholder="Email" type="email" onChange={e => setFormData({...formData, email: e.target.value})} />
+                            <input placeholder="Téléphone" type="tel" onChange={e => setFormData({...formData, tel: e.target.value})} />
+                            <input placeholder="Nouveau code (PIN)" maxLength={4} onChange={e => setFormData({...formData, code: e.target.value})} />
+                        </div>
+                    </>
+                );
+            case "reedit_alert":
+                return (
+                    <>
+                        <h3>Attention</h3>
+                        <p style={{ marginBottom: "20px", color: "var(--color-text)", fontSize: "14px" }}>
+                            Vous êtes sur le point de rééditer cette carte CCE. L'ancienne carte sera désactivée et une nouvelle sera créée. Voulez-vous continuer ?
+                        </p>
+                    </>
+                );
+            default:
+                return null;
+        }
+    };
 
     return (
         <div className="widget-container">
@@ -79,12 +192,6 @@ export const CCEWidget: FC = () => {
                         onChange={e => setSearch(e.target.value)}
                     />
                 </div>
-                <button className="widget-settings-btn" type="button" title="Paramètres">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <circle cx="12" cy="12" r="3"></circle>
-                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                    </svg>
-                </button>
             </div>
 
             <div className="widget-table-wrap">
@@ -121,15 +228,27 @@ export const CCEWidget: FC = () => {
             </div>
 
             <div className="cce-actions">
-                <button className="cce-action-btn" type="button" disabled={!selected}>Créer</button>
-                <button className="cce-action-btn" type="button" disabled={!selected}>Modifier</button>
-                <button className="cce-action-btn" type="button" disabled={!selected}>Créditer</button>
-                <button className="cce-action-btn" type="button" disabled={!selected} onClick={handleToggleStatus}>
-                    {toggleButtonText}
-                </button>
-                <button className="cce-action-btn" type="button" disabled={!selected}>Voir transactions</button>
-                <button className="cce-action-btn" type="button" disabled={!selected}>Rééditer</button>
+                <button className="cce-action-btn" type="button" onClick={() => handleOpenModal("create")}>Créer</button>
+                <button className="cce-action-btn" type="button" disabled={!selected} onClick={() => handleOpenModal("edit")}>Modifier</button>
+                <button className="cce-action-btn" type="button" disabled={!selected} onClick={() => handleOpenModal("credit")}>Créditer</button>
+                <button className="cce-action-btn" type="button" disabled={!selected} onClick={handleToggleStatus}>{toggleButtonText}</button>
+                <button className="cce-action-btn" type="button" disabled={!selected} onClick={() => handleOpenModal("transactions")}>Voir transactions</button>
+                <button className="cce-action-btn" type="button" disabled={!selected} onClick={() => handleOpenModal("reedit_alert")}>Rééditer</button>
             </div>
+
+            {activeModal && (
+                <div className="cce-modal-overlay">
+                    <div className="cce-modal">
+                        {renderModalContent()}
+                        <div className="cce-modal-actions">
+                            <button className="cce-modal-btn cancel" onClick={handleCloseModal}>Annuler</button>
+                            <button className="cce-modal-btn validate" onClick={handleValidateModal}>
+                                {activeModal === "reedit_alert" ? "Continuer" : "Valider"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

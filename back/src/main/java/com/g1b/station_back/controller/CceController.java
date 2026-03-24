@@ -1,6 +1,9 @@
 package com.g1b.station_back.controller;
 
+import com.g1b.station_back.dto.CceCreateDTO;
+import com.g1b.station_back.dto.CceCreditDTO;
 import com.g1b.station_back.dto.CceDTO;
+import com.g1b.station_back.dto.CceEditDTO;
 import com.g1b.station_back.service.CceCardService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +25,29 @@ public class CceController {
         return ResponseEntity.ok(cceCardService.getAllCceCards());
     }
 
+    @PostMapping
+    public ResponseEntity<Void> createCce(@RequestBody CceCreateDTO request) {
+        cceCardService.createCce(request);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Void> editCce(@PathVariable Integer id, @RequestBody CceEditDTO request) {
+        cceCardService.editCce(id, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{id}/credit")
+    public ResponseEntity<Void> creditCce(@PathVariable Integer id, @RequestBody CceCreditDTO request) {
+        cceCardService.creditCce(id, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{id}/reedit")
+    public ResponseEntity<Void> reeditCce(@PathVariable Integer id, @RequestBody CceCreateDTO request) {
+        cceCardService.reeditCce(id, request);
+        return ResponseEntity.ok().build();
+    }
     @PutMapping("/{id}/toggle-status")
     public ResponseEntity<Void> toggleStatus(@PathVariable Integer id) {
         cceCardService.toggleStatus(id);
