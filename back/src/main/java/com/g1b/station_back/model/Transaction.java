@@ -2,6 +2,8 @@ package com.g1b.station_back.model;
 
 import com.g1b.station_back.model.enums.TransactionStatus;
 import jakarta.persistence.*;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -52,4 +54,25 @@ public class Transaction {
     public void setLines(List<TransactionLine> lines) { this.lines = lines; }
     public List<TransactionPayment> getPayments() { return payments; }
     public void setPayments(List<TransactionPayment> payments) { this.payments = payments; }
+
+    public BigDecimal getTotalAmount() {
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        for (TransactionLine line : lines) {
+            totalAmount = totalAmount.add(line.getTotalAmount());
+        }
+            return totalAmount;
+    }
+
+    public BigDecimal getRemainingAmount() {
+        BigDecimal paidAmount = BigDecimal.ZERO;
+        for (TransactionPayment payment : payments) {
+            paidAmount = paidAmount.add(payment.getAmount());
+        }
+        return getTotalAmount().subtract(paidAmount);
+    }
+
+    public void addPayment(TransactionPayment payment) {
+        payments.add(payment);
+        payment.setTransaction(this);
+    }
 }

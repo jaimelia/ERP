@@ -1,5 +1,5 @@
 import {useState, useEffect, type FC} from "react";
-import {apiUrl} from "../../api/common.ts";
+import {apiUrl, fetchJsonWithAuth} from "../../api/common.ts";
 import { TicketActions } from "../TicketActions";
 
 interface Product {
@@ -30,8 +30,7 @@ export const TicketWidget: FC = () => {
     const [currentTransactionId, setCurrentTransactionId] = useState<number | null>(null);
 
     useEffect(() => {
-        fetch(apiUrl("/products"))
-            .then(res => res.json())
+        fetchJsonWithAuth(apiUrl("/products"))
             .then(data => setAllProducts(data))
             .catch(console.error);
     }, []);
@@ -45,8 +44,7 @@ export const TicketWidget: FC = () => {
 
         const timer = setTimeout(() => {
             if (active) setIsSearching(true);
-            fetch(apiUrl(`/products/available-names?search=${encodeURIComponent(search)}`))
-                .then(res => res.json())
+            fetchJsonWithAuth(apiUrl(`/products/available-names?search=${encodeURIComponent(search)}`))
                 .then(data => {
                     if (active) {
                         setSearchResults(data);
@@ -103,7 +101,7 @@ export const TicketWidget: FC = () => {
     const handleCancelTicket = async () => {
         if (currentTransactionId !== null) {
             try {
-                await fetch(apiUrl(`/transactions/shop/cancel/${currentTransactionId}`), {
+                await fetchJsonWithAuth(apiUrl(`/transactions/shop/cancel/${currentTransactionId}`), {
                     method: "POST"
                 });
             } catch (error) {
@@ -128,7 +126,7 @@ export const TicketWidget: FC = () => {
 
             const payload = { type: "products", isFromAutomat: false, lines: items };
 
-            const response = await fetch(apiUrl("/transactions/shop"), {
+            const data = await fetchJsonWithAuth(apiUrl("/transactions/shop"), {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -136,13 +134,8 @@ export const TicketWidget: FC = () => {
                 body: JSON.stringify(payload)
             });
 
-            if (response.ok) {
-                const data = await response.json();
-                setCurrentTransactionId(data);
-                setTicketStatus(1);
-            } else {
-                console.error("Erreur lors de la validation du ticket.");
-            }
+            setCurrentTransactionId(data);
+            setTicketStatus(1);
         } catch (error) {
             console.error("Erreur réseau lors de l'envoi du ticket:", error);
         }
