@@ -20,10 +20,10 @@ public class PumpFuel {
     @JoinColumn(name = "id_pump", nullable = false)
     private Pump pump;
 
-    @Column(name = "max_volume", precision = 5, scale = 3)
+    @Column(name = "max_volume", precision = 10, scale = 3)
     private BigDecimal maxVolume;
 
-    @Column(name = "available_volume", precision = 5, scale = 3)
+    @Column(name = "available_volume", precision = 10, scale = 3)
     private BigDecimal availableVolume;
 
     public PumpFuel() {}

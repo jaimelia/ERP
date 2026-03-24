@@ -71,8 +71,8 @@ CREATE TABLE IF NOT EXISTS "products" (
 
 CREATE TABLE IF NOT EXISTS "fuels" (
 	"price_per_liter" NUMERIC(5,3) NOT NULL,
-	"stock" NUMERIC(5,3),
-	"alert_threshold" NUMERIC(5,3) NOT NULL,
+	"stock" NUMERIC(10,3),
+	"alert_threshold" NUMERIC(10,3) NOT NULL,
 	"id_item" INTEGER NOT NULL,
 	PRIMARY KEY("id_item")
 );
@@ -143,7 +143,7 @@ CREATE TABLE IF NOT EXISTS "weekly_schedule" (
 
 CREATE TABLE IF NOT EXISTS "cce_cards" (
 	"id_cce_card" INTEGER NOT NULL UNIQUE,
-	"balance" NUMERIC(5,3) NOT NULL,
+	"balance" NUMERIC(10,3) NOT NULL,
 	"created_at" DATE NOT NULL,
 	"expires_at" DATE NOT NULL,
 	"code" INTEGER NOT NULL,
@@ -159,7 +159,7 @@ CREATE TABLE IF NOT EXISTS "transactions_lines" (
 	"id_transaction_line" INTEGER NOT NULL UNIQUE,
 	"quantity" INTEGER NOT NULL,
 	"id_transaction" INTEGER NOT NULL,
-	"total_amount" NUMERIC(5,3),
+	"total_amount" NUMERIC(10,3),
 	"id_item" INTEGER NOT NULL,
 	PRIMARY KEY("id_transaction_line")
 );
@@ -171,8 +171,8 @@ CREATE TABLE IF NOT EXISTS "pumps_fuels" (
 	"id_pump_fuel" INTEGER NOT NULL UNIQUE,
 	"id_fuel" INTEGER NOT NULL,
 	"id_pump" INTEGER NOT NULL,
-	"max_volume" NUMERIC(5,3),
-	"available_volume" NUMERIC(5,3),
+	"max_volume" NUMERIC(10,3),
+	"available_volume" NUMERIC(10,3),
 	PRIMARY KEY("id_pump_fuel")
 );
 
@@ -227,7 +227,7 @@ CREATE TABLE IF NOT EXISTS "transaction_payments" (
 	"id_transaction_payment" INTEGER NOT NULL UNIQUE,
 	"id_transaction" INTEGER NOT NULL,
 	"payment_method" payment_methods NOT NULL,
-	"amount" NUMERIC(5,3) NOT NULL,
+	"amount" NUMERIC(10,3) NOT NULL,
 	"end_num_card" VARCHAR(4),
 	"status" transaction_status NOT NULL,
 	"date" DATE NOT NULL,
@@ -250,7 +250,7 @@ CREATE TABLE IF NOT EXISTS "items" (
 
 CREATE TABLE IF NOT EXISTS "restocks" (
 	"id_restock" INTEGER NOT NULL UNIQUE,
-	"quantity" NUMERIC(5,3) NOT NULL,
+	"quantity" NUMERIC(10,3) NOT NULL,
 	"restock_date" DATE NOT NULL,
 	"id_item" INTEGER NOT NULL,
 	"status" restock_status NOT NULL,
@@ -330,21 +330,21 @@ INSERT INTO "users" ("id_user", "username", "password", "email", "role") VALUES
 (2, 'employe1', '$2a$10$Q4H7dnAln9/nOyQg4hx0e.p8iwMNJAbffD6MVd9VNdtWT2V7E/WgS', 'employe1@example.com', 'employe'),
 (3, 'employe2', '$2a$10$Q4H7dnAln9/nOyQg4hx0e.p8iwMNJAbffD6MVd9VNdtWT2V7E/WgS', 'employe2@example.com', 'employe');
 
-INSERT INTO "items" ("id_item", "name") VALUES
-(7, 'Sans plomb 95'),
-(8, 'Sans plomb 98'),
-(9, 'Diesel'),
-(10, 'Stylo bille BIC'),
-(11, 'Essuie-glace'),
-(12, 'Arbre magique'),
-(13, 'Coca 33 Cl'),
-(14, 'Snack'),
-(15, 'Electricité');
+INSERT INTO "items" ("id_item", "item_type", "name") VALUES
+(7, 'fuel', 'Sans plomb 95'),
+(8, 'fuel', 'Sans plomb 98'),
+(9, 'fuel', 'Diesel'),
+(10, 'product', 'Stylo bille BIC'),
+(11, 'product', 'Essuie-glace'),
+(12, 'product', 'Arbre magique'),
+(13, 'product', 'Coca 33 Cl'),
+(14, 'product', 'Snack'),
+(15, 'electricity', 'Electricité');
 
 INSERT INTO "fuels" ("id_item", "price_per_liter", "stock", "alert_threshold") VALUES
-(7, 1.750, 1200, 500),
-(8, 1.850, 500, 200),
-(9, 1.650, 2000, 500);
+(7, 1.750, 1200.000, 500.000),
+(8, 1.850, 500.000, 200.000),
+(9, 1.650, 2000.000, 500.000);
 
 INSERT INTO "products" ("id_item", "unit_price", "stock", "alert_threshold") VALUES
 (10, 1.570, 196, 50),
@@ -369,12 +369,12 @@ INSERT INTO "clients" ("id_client", "firstname", "lastname", "mail", "phone_numb
 (4, 'Louis', 'BEDETTI', 'louis.bedetti@gmail.com', '06.98.76.54.32', 4);
 
 INSERT INTO "restocks" ("id_restock", "quantity", "restock_date", "id_item", "status") VALUES
-(1, 400, '2025-12-11', 7, 'pending'),
-(2, 300, '2025-12-02', 9, 'pending'),
-(3, 500, '2025-11-21', 8, 'pending'),
-(4, 10, '2025-11-21', 8, 'delivered'),
-(5, 500, '2025-11-21', 8, 'delivered'),
-(6, 500, '2025-11-21', 8, 'delivered');
+(1, 400.000, '2025-12-11', 7, 'pending'),
+(2, 300.000, '2025-12-02', 9, 'pending'),
+(3, 500.000, '2025-11-21', 8, 'pending'),
+(4, 10.000, '2025-11-21', 8, 'delivered'),
+(5, 500.000, '2025-11-21', 8, 'delivered'),
+(6, 500.000, '2025-11-21', 8, 'delivered');
 
 INSERT INTO "pumps" ("id_pump", "is_automat", "status") VALUES
 (1, false, 'available'),
@@ -382,9 +382,9 @@ INSERT INTO "pumps" ("id_pump", "is_automat", "status") VALUES
 (3, false, 'available');
 
 INSERT INTO "pumps_fuels" ("id_pump_fuel", "id_fuel", "id_pump", "max_volume", "available_volume") VALUES
-(1, 7, 1, 5000, 1200),
-(2, 9, 1, 5000, 2000),
-(3, 8, 2, 5000, 500);
+(1, 7, 1, 5000.000, 1200.000),
+(2, 9, 1, 5000.000, 2000.000),
+(3, 8, 2, 5000.000, 500.000);
 
 INSERT INTO "transactions" ("id_transaction", "type", "transaction_date", "is_from_automat", "status") VALUES
 (145, 'Carburant', '2026-02-18', false, 'accepted'),
@@ -402,9 +402,6 @@ INSERT INTO "transaction_payments" ("id_transaction_payment", "id_transaction", 
 (2, 146, 'CreditCard', 2.490, '1234', 'accepted', '2026-02-18', NULL),
 (3, 147, 'Cash', 58.700, NULL, 'accepted', '2026-02-18', NULL);
 
-INSERT INTO "users" ("id_user", "username", "password", "email", "role", "uses_dark_mode", "tile_layout") VALUES
-(1, 'employe1', 'hash1234', 'employe1@station.com', 'employe', false, '{}'),
-(2, 'gerant1', 'hashadmin', 'gerant1@station.com', 'gerant', true, '{}');
 
 INSERT INTO "regional_guidelines" ("id_regional_guideline", "object", "content") VALUES
 (1, 'Procédure nettoyage', 'Nettoyage des pistes tous les mardis matin.'),
