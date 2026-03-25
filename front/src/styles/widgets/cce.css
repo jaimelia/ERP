@@ -112,3 +112,30 @@
 	background: var(--color-accent);
 	color: white;
 }
+
+.cce-modal-form input.error-input {
+	border-color: #ef4444;
+	background-color: #fef2f2;
+}
+
+.cce-error-text {
+	color: #ef4444;
+	font-size: 11px;
+	margin-top: -12px;
+	margin-bottom: 5px;
+	margin-left: 2px;
+	display: block;
+}
+
+.cce-field-group {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.cce-field-label {
+	font-size: 11px;
+	color: var(--color-text-muted, #666);
+	margin-left: 2px;
+	font-weight: 500;
+}

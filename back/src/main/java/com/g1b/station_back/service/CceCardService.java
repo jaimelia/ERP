@@ -32,6 +32,8 @@ public class CceCardService {
                         client.getCceCard().getIdCceCard(),
                         client.getLastname(),
                         client.getFirstname(),
+                        client.getMail(),
+                        client.getPhoneNumber(),
                         client.getCceCard().getCode(),
                         client.getCceCard().getStatus().name(),
                         client.getCceCard().getCreatedAt(),

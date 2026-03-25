@@ -5,6 +5,9 @@ interface CCE {
     id: number;
     nom: string;
     prenom: string;
+    email: string;
+    tel: string;
+    code: string;
     numeroCCE: string;
     statut: "Active" | "Désactivée";
     dateCreation: string;
@@ -20,6 +23,7 @@ export const CCEWidget: FC = () => {
 
     const [activeModal, setActiveModal] = useState<ModalType>(null);
     const [formData, setFormData] = useState<Record<string, string>>({});
+    const [errors, setErrors] = useState<Record<string, boolean>>({});
 
     const loadCces = async () => {
         try {
@@ -28,7 +32,10 @@ export const CCEWidget: FC = () => {
                 id: item.id,
                 nom: item.nom,
                 prenom: item.prenom,
-                numeroCCE: `****${item.code}`,
+                email: item.email,
+                tel: item.tel,
+                code: item.code.toString(),
+                numeroCCE: item.id.toString().padStart(4, '0'),
                 statut: (item.statut === "activated" || item.statut === "ACTIVATED") ? "Active" : "Désactivée",
                 dateCreation: new Date(item.dateCreation).toLocaleDateString("fr-FR"),
                 montantCredite: `${item.montantCredite.toFixed(2)}€`
@@ -59,18 +66,58 @@ export const CCEWidget: FC = () => {
     };
 
     const handleOpenModal = (type: ModalType) => {
-        setFormData({});
+        setErrors({});
+
+        if ((type === "edit" || type === "reedit") && selected) {
+            const currentCce = cces.find(c => c.id === selected);
+            if (currentCce) {
+                setFormData({
+                    nom: currentCce.nom,
+                    prenom: currentCce.prenom,
+                    email: currentCce.email,
+                    tel: currentCce.tel,
+                    code: currentCce.code
+                });
+            }
+        } else {
+            setFormData({});
+        }
+
         setActiveModal(type);
     };
 
     const handleCloseModal = () => {
         setActiveModal(null);
         setFormData({});
+        setErrors({});
     };
 
     const handleValidateModal = async () => {
         if (activeModal === "reedit_alert") {
-            setActiveModal("reedit");
+            handleOpenModal("reedit");
+            return;
+        }
+
+        const newErrors: Record<string, boolean> = {};
+        let isValid = true;
+
+        const checkField = (field: string) => {
+            if (!formData[field] || formData[field].trim() === "") {
+                newErrors[field] = true;
+                isValid = false;
+            }
+        };
+
+        if (activeModal === "create" || activeModal === "reedit") {
+            ["nom", "prenom", "email", "tel", "code", "montant"].forEach(checkField);
+        } else if (activeModal === "edit") {
+            ["nom", "prenom", "email", "tel", "code"].forEach(checkField);
+        } else if (activeModal === "credit") {
+            checkField("amount");
+        }
+
+        if (!isValid) {
+            setErrors(newErrors);
             return;
         }
 
@@ -119,6 +166,24 @@ export const CCEWidget: FC = () => {
     const selectedCard = cces.find(c => c.id === selected);
     const toggleButtonText = selectedCard?.statut === "Active" ? "Désactiver" : "Activer";
 
+    const renderField = (name: string, label: string, type = "text", maxLength?: number) => (
+        <div className="cce-field-group">
+            <label className="cce-field-label">{label}</label>
+            <input
+                type={type}
+                placeholder={label}
+                maxLength={maxLength}
+                value={formData[name] || ""}
+                onChange={e => {
+                    setFormData({ ...formData, [name]: e.target.value });
+                    if (errors[name]) setErrors({ ...errors, [name]: false });
+                }}
+                className={errors[name] ? "error-input" : ""}
+            />
+            {errors[name] && <span className="cce-error-text">Ce champ est requis</span>}
+        </div>
+    );
+
     const renderModalContent = () => {
         switch (activeModal) {
             case "credit":
@@ -126,12 +191,7 @@ export const CCEWidget: FC = () => {
                     <>
                         <h3>Créditer la CCE</h3>
                         <div className="cce-modal-form">
-                            <input
-                                type="number"
-                                placeholder="Montant à créditer (€)"
-                                value={formData.amount || ""}
-                                onChange={e => setFormData({...formData, amount: e.target.value})}
-                            />
+                            {renderField("amount", "Montant à créditer (€)", "number")}
                         </div>
                     </>
                 );
@@ -141,12 +201,12 @@ export const CCEWidget: FC = () => {
                     <>
                         <h3>{activeModal === "create" ? "Créer une CCE" : "Rééditer la CCE"}</h3>
                         <div className="cce-modal-form">
-                            <input placeholder="Nom" onChange={e => setFormData({...formData, nom: e.target.value})} />
-                            <input placeholder="Prénom" onChange={e => setFormData({...formData, prenom: e.target.value})} />
-                            <input placeholder="Email" type="email" onChange={e => setFormData({...formData, email: e.target.value})} />
-                            <input placeholder="Téléphone" type="tel" onChange={e => setFormData({...formData, tel: e.target.value})} />
-                            <input placeholder="Code (PIN)" maxLength={4} onChange={e => setFormData({...formData, code: e.target.value})} />
-                            <input type="number" placeholder="Montant initial (€)" onChange={e => setFormData({...formData, montant: e.target.value})} />
+                            {renderField("nom", "Nom")}
+                            {renderField("prenom", "Prénom")}
+                            {renderField("email", "Email", "email")}
+                            {renderField("tel", "Téléphone", "tel")}
+                            {renderField("code", "Code (PIN)", "text", 4)}
+                            {renderField("montant", "Montant initial (€)", "number")}
                         </div>
                     </>
                 );
@@ -155,11 +215,11 @@ export const CCEWidget: FC = () => {
                     <>
                         <h3>Modifier la CCE</h3>
                         <div className="cce-modal-form">
-                            <input placeholder="Nom" onChange={e => setFormData({...formData, nom: e.target.value})} />
-                            <input placeholder="Prénom" onChange={e => setFormData({...formData, prenom: e.target.value})} />
-                            <input placeholder="Email" type="email" onChange={e => setFormData({...formData, email: e.target.value})} />
-                            <input placeholder="Téléphone" type="tel" onChange={e => setFormData({...formData, tel: e.target.value})} />
-                            <input placeholder="Nouveau code (PIN)" maxLength={4} onChange={e => setFormData({...formData, code: e.target.value})} />
+                            {renderField("nom", "Nom")}
+                            {renderField("prenom", "Prénom")}
+                            {renderField("email", "Email", "email")}
+                            {renderField("tel", "Téléphone", "tel")}
+                            {renderField("code", "Nouveau code (PIN)", "text", 4)}
                         </div>
                     </>
                 );
