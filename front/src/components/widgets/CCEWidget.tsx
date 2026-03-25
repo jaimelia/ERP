@@ -1,5 +1,6 @@
 import {useState, useEffect, type FC} from "react";
 import {apiUrl, fetchJsonWithAuth} from "../../api/common.ts";
+import {Popup} from "../Popup.tsx";
 
 interface CCE {
     id: number;
@@ -14,16 +15,24 @@ interface CCE {
     montantCredite: string;
 }
 
-type ModalType = "create" | "edit" | "credit" | "transactions" | "reedit_alert" | "reedit" | null;
+interface CCETransaction {
+    idTransaction: number;
+    type: string;
+    date: string;
+    amount: number;
+}
+
+type PopupType = "create" | "edit" | "credit" | "transactions" | "reedit_alert" | "reedit" | null;
 
 export const CCEWidget: FC = () => {
     const [search, setSearch] = useState("");
     const [selected, setSelected] = useState<number | null>(null);
     const [cces, setCces] = useState<CCE[]>([]);
 
-    const [activeModal, setActiveModal] = useState<ModalType>(null);
+    const [activePopup, setActivePopup] = useState<PopupType>(null);
     const [formData, setFormData] = useState<Record<string, string>>({});
     const [errors, setErrors] = useState<Record<string, boolean>>({});
+    const [cardTransactions, setCardTransactions] = useState<CCETransaction[]>([]);
 
     const loadCces = async () => {
         try {
@@ -65,7 +74,7 @@ export const CCEWidget: FC = () => {
         }
     };
 
-    const handleOpenModal = (type: ModalType) => {
+    const handleOpenPopup = async (type: PopupType) => {
         setErrors({});
 
         if ((type === "edit" || type === "reedit") && selected) {
@@ -83,18 +92,30 @@ export const CCEWidget: FC = () => {
             setFormData({});
         }
 
-        setActiveModal(type);
+        if (type === "transactions" && selected) {
+            try {
+                const data = await fetchJsonWithAuth(apiUrl(`/cce/${selected}/transactions`));
+                setCardTransactions(data);
+            } catch (error) {
+                console.error(error);
+            }
+        } else {
+            setCardTransactions([]);
+        }
+
+        setActivePopup(type);
     };
 
-    const handleCloseModal = () => {
-        setActiveModal(null);
+    const handleClosePopup = () => {
+        setActivePopup(null);
         setFormData({});
         setErrors({});
+        setCardTransactions([]);
     };
 
-    const handleValidateModal = async () => {
-        if (activeModal === "reedit_alert") {
-            handleOpenModal("reedit");
+    const handleValidatePopup = async () => {
+        if (activePopup === "reedit_alert") {
+            handleOpenPopup("reedit");
             return;
         }
 
@@ -108,11 +129,11 @@ export const CCEWidget: FC = () => {
             }
         };
 
-        if (activeModal === "create" || activeModal === "reedit") {
+        if (activePopup === "create" || activePopup === "reedit") {
             ["nom", "prenom", "email", "tel", "code", "montant"].forEach(checkField);
-        } else if (activeModal === "edit") {
+        } else if (activePopup === "edit") {
             ["nom", "prenom", "email", "tel", "code"].forEach(checkField);
-        } else if (activeModal === "credit") {
+        } else if (activePopup === "credit") {
             checkField("amount");
         }
 
@@ -125,7 +146,7 @@ export const CCEWidget: FC = () => {
             let url = "";
             let method = "POST";
 
-            switch (activeModal) {
+            switch (activePopup) {
                 case "credit":
                     url = `/cce/${selected}/credit`;
                     method = "PUT";
@@ -154,7 +175,7 @@ export const CCEWidget: FC = () => {
         } catch (error) {
             console.error(error);
         } finally {
-            handleCloseModal();
+            handleClosePopup();
         }
     };
 
@@ -166,9 +187,9 @@ export const CCEWidget: FC = () => {
     const selectedCard = cces.find(c => c.id === selected);
     const toggleButtonText = selectedCard?.statut === "Active" ? "Désactiver" : "Activer";
 
-    const renderField = (name: string, label: string, type = "text", maxLength?: number) => (
-        <div className="cce-field-group">
-            <label className="cce-field-label">{label}</label>
+    const renderField = (name: string, label: string, type = "text", maxLength?: number, fullSpan = false) => (
+        <div className={`field-group ${fullSpan ? 'full-span' : ''}`}>
+            <label className="field-label">{label}</label>
             <input
                 type={type}
                 placeholder={label}
@@ -180,62 +201,126 @@ export const CCEWidget: FC = () => {
                 }}
                 className={errors[name] ? "error-input" : ""}
             />
-            {errors[name] && <span className="cce-error-text">Ce champ est requis</span>}
+            {errors[name] && <span className="error-text">Ce champ est requis</span>}
         </div>
     );
 
-    const renderModalContent = () => {
-        switch (activeModal) {
+    // Retourne la configuration complète pour le composant Popup selon l'état actuel
+    const getPopupConfig = () => {
+        if (!activePopup) return null;
+
+        const baseFooter = (text: string, className = "") => (
+            <>
+                <button className="popup-btn cancel" onClick={handleClosePopup}>Annuler</button>
+                <button className={`popup-btn validate ${className}`} onClick={handleValidatePopup}>{text}</button>
+            </>
+        );
+
+        switch (activePopup) {
             case "credit":
-                return (
-                    <>
-                        <h3>Créditer la CCE</h3>
-                        <div className="cce-modal-form">
-                            {renderField("amount", "Montant à créditer (€)", "number")}
+                return {
+                    icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>,
+                    title: "Créditer la CCE",
+                    subtitle: `Ajouter des fonds à la carte N° ${selectedCard?.numeroCCE}`,
+                    content: (
+                        <div className="popup-form">
+                            {renderField("amount", "Montant à créditer (€)", "number", undefined, true)}
                         </div>
-                    </>
-                );
+                    ),
+                    footer: baseFooter("Confirmer l'action")
+                };
             case "create":
             case "reedit":
-                return (
-                    <>
-                        <h3>{activeModal === "create" ? "Créer une CCE" : "Rééditer la CCE"}</h3>
-                        <div className="cce-modal-form">
+                { const isCreate = activePopup === "create";
+                return {
+                    icon: isCreate ?
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="17" y1="11" x2="23" y2="11"/></svg> :
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>,
+                    title: isCreate ? "Créer un nouveau compte CCE" : "Rééditer une CCE",
+                    subtitle: isCreate ? "Saisir les informations du client et de la carte" : `Remplacer la carte N° ${selectedCard?.numeroCCE}`,
+                    content: (
+                        <div className="popup-form">
                             {renderField("nom", "Nom")}
                             {renderField("prenom", "Prénom")}
                             {renderField("email", "Email", "email")}
                             {renderField("tel", "Téléphone", "tel")}
                             {renderField("code", "Code (PIN)", "text", 4)}
-                            {renderField("montant", "Montant initial (€)", "number")}
+                            {renderField("montant", "Montant initial (€)", "number", undefined, true)}
                         </div>
-                    </>
-                );
+                    ),
+                    footer: baseFooter("Confirmer l'action")
+                }; }
             case "edit":
-                return (
-                    <>
-                        <h3>Modifier la CCE</h3>
-                        <div className="cce-modal-form">
+                return {
+                    icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
+                    title: "Modifier les informations",
+                    subtitle: `Mise à jour du client lié à la carte N° ${selectedCard?.numeroCCE}`,
+                    content: (
+                        <div className="popup-form">
                             {renderField("nom", "Nom")}
                             {renderField("prenom", "Prénom")}
-                            {renderField("email", "Email", "email")}
-                            {renderField("tel", "Téléphone", "tel")}
-                            {renderField("code", "Nouveau code (PIN)", "text", 4)}
+                            {renderField("email", "Email", "email", undefined, true)}
+                            {renderField("tel", "Téléphone", "tel", undefined, true)}
+                            {renderField("code", "Nouveau code (PIN)", "text", 4, true)}
                         </div>
-                    </>
-                );
+                    ),
+                    footer: baseFooter("Confirmer l'action")
+                };
             case "reedit_alert":
-                return (
-                    <>
-                        <h3>Attention</h3>
-                        <p style={{ marginBottom: "20px", color: "var(--color-text)", fontSize: "14px" }}>
-                            Vous êtes sur le point de rééditer cette carte CCE. L'ancienne carte sera désactivée et une nouvelle sera créée. Voulez-vous continuer ?
-                        </p>
-                    </>
-                );
-            default:
-                return null;
+                return {
+                    icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
+                    title: "Action irréversible",
+                    subtitle: "Confirmation de réédition requise",
+                    content: (
+                        <div className="alert-content">
+                            <p className="alert-text">
+                                Vous êtes sur le point de rééditer la carte CCE <strong style={{color:'var(--color-accent)'}}>N° {selectedCard?.numeroCCE}</strong>.<br/>
+                                L'ancienne carte sera <strong>définitivement désactivée</strong> et une nouvelle carte sera créée avec les informations que vous allez saisir.<br/><br/>
+                                Voulez-vous continuer ?
+                            </p>
+                        </div>
+                    ),
+                    footer: baseFooter("Continuer vers la réédition", "warning")
+                };
+            case "transactions":
+                return {
+                    icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>,
+                    title: "Historique des transactions",
+                    subtitle: `Activité de la carte N° ${selectedCard?.numeroCCE}`,
+                    content: (
+                        <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                            {cardTransactions.length > 0 ? (
+                                <table className="widget-table" style={{ width: '100%', borderBottom: 'none' }}>
+                                    <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Type</th>
+                                        <th>Montant</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {cardTransactions.map(t => (
+                                        <tr key={t.idTransaction}>
+                                            <td>{new Date(t.date).toLocaleDateString("fr-FR")}</td>
+                                            <td>{t.type}</td>
+                                            <td style={{ fontWeight: '500' }}>{t.amount.toFixed(2)}€</td>
+                                        </tr>
+                                    ))}
+                                    </tbody>
+                                </table>
+                            ) : (
+                                <p style={{ textAlign: "center", color: "var(--color-text-muted)", padding: "20px 0" }}>
+                                    Aucune transaction trouvée pour cette carte.
+                                </p>
+                            )}
+                        </div>
+                    ),
+                    footer: <button className="popup-btn cancel" onClick={handleClosePopup}>Fermer</button>
+                };
         }
     };
+
+    const popupConfig = getPopupConfig();
 
     return (
         <div className="widget-container">
@@ -247,7 +332,7 @@ export const CCEWidget: FC = () => {
                     </svg>
                     <input
                         type="text"
-                        placeholder="Rechercher CCE"
+                        placeholder="Rechercher par nom ou numéro..."
                         value={search}
                         onChange={e => setSearch(e.target.value)}
                     />
@@ -288,26 +373,25 @@ export const CCEWidget: FC = () => {
             </div>
 
             <div className="cce-actions">
-                <button className="cce-action-btn" type="button" onClick={() => handleOpenModal("create")}>Créer</button>
-                <button className="cce-action-btn" type="button" disabled={!selected} onClick={() => handleOpenModal("edit")}>Modifier</button>
-                <button className="cce-action-btn" type="button" disabled={!selected} onClick={() => handleOpenModal("credit")}>Créditer</button>
+                <button className="cce-action-btn" type="button" onClick={() => handleOpenPopup("create")}>Créer</button>
+                <button className="cce-action-btn" type="button" disabled={!selected} onClick={() => handleOpenPopup("edit")}>Modifier</button>
+                <button className="cce-action-btn" type="button" disabled={!selected} onClick={() => handleOpenPopup("credit")}>Créditer</button>
                 <button className="cce-action-btn" type="button" disabled={!selected} onClick={handleToggleStatus}>{toggleButtonText}</button>
-                <button className="cce-action-btn" type="button" disabled={!selected} onClick={() => handleOpenModal("transactions")}>Voir transactions</button>
-                <button className="cce-action-btn" type="button" disabled={!selected} onClick={() => handleOpenModal("reedit_alert")}>Rééditer</button>
+                <button className="cce-action-btn" type="button" disabled={!selected} onClick={() => handleOpenPopup("transactions")}>Voir transactions</button>
+                <button className="cce-action-btn" type="button" disabled={!selected} onClick={() => handleOpenPopup("reedit_alert")}>Rééditer</button>
             </div>
 
-            {activeModal && (
-                <div className="cce-modal-overlay">
-                    <div className="cce-modal">
-                        {renderModalContent()}
-                        <div className="cce-modal-actions">
-                            <button className="cce-modal-btn cancel" onClick={handleCloseModal}>Annuler</button>
-                            <button className="cce-modal-btn validate" onClick={handleValidateModal}>
-                                {activeModal === "reedit_alert" ? "Continuer" : "Valider"}
-                            </button>
-                        </div>
-                    </div>
-                </div>
+            {popupConfig && (
+                <Popup
+                    isOpen={activePopup !== null}
+                    onClose={handleClosePopup}
+                    icon={popupConfig.icon}
+                    title={popupConfig.title}
+                    subtitle={popupConfig.subtitle}
+                    footer={popupConfig.footer}
+                >
+                    {popupConfig.content}
+                </Popup>
             )}
         </div>
     );

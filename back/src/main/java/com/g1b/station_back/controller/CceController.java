@@ -1,9 +1,6 @@
 package com.g1b.station_back.controller;
 
-import com.g1b.station_back.dto.CceCreateDTO;
-import com.g1b.station_back.dto.CceCreditDTO;
-import com.g1b.station_back.dto.CceDTO;
-import com.g1b.station_back.dto.CceEditDTO;
+import com.g1b.station_back.dto.*;
 import com.g1b.station_back.service.CceCardService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -52,5 +49,10 @@ public class CceController {
     public ResponseEntity<Void> toggleStatus(@PathVariable Integer id) {
         cceCardService.toggleStatus(id);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{id}/transactions")
+    public ResponseEntity<List<CceTransactionDTO>> getCceTransactions(@PathVariable Integer id) {
+        return ResponseEntity.ok(cceCardService.getCceTransactions(id));
     }
 }

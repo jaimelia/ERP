@@ -1,14 +1,12 @@
 package com.g1b.station_back.service;
 
-import com.g1b.station_back.dto.CceCreateDTO;
-import com.g1b.station_back.dto.CceCreditDTO;
-import com.g1b.station_back.dto.CceDTO;
-import com.g1b.station_back.dto.CceEditDTO;
+import com.g1b.station_back.dto.*;
 import com.g1b.station_back.model.CceCard;
 import com.g1b.station_back.model.Client;
 import com.g1b.station_back.model.enums.CceStatus;
 import com.g1b.station_back.repository.CceCardRepository;
 import com.g1b.station_back.repository.ClientRepository;
+import com.g1b.station_back.repository.TransactionPaymentRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -19,10 +17,12 @@ import java.util.List;
 public class CceCardService {
     private final ClientRepository clientRepository;
     private final CceCardRepository cceCardRepository;
+    private final TransactionPaymentRepository transactionPaymentRepository;
 
-    public CceCardService(ClientRepository clientRepository, CceCardRepository cceCardRepository) {
+    public CceCardService(ClientRepository clientRepository, CceCardRepository cceCardRepository, TransactionPaymentRepository transactionPaymentRepository) {
         this.clientRepository = clientRepository;
         this.cceCardRepository = cceCardRepository;
+        this.transactionPaymentRepository = transactionPaymentRepository;
     }
 
     public List<CceDTO> getAllCceCards() {
@@ -38,6 +38,17 @@ public class CceCardService {
                         client.getCceCard().getStatus().name(),
                         client.getCceCard().getCreatedAt(),
                         client.getCceCard().getBalance()
+                ))
+                .toList();
+    }
+
+    public List<CceTransactionDTO> getCceTransactions(Integer idCceCard) {
+        return transactionPaymentRepository.findByCceCard_IdCceCard(idCceCard).stream()
+                .map(payment -> new CceTransactionDTO(
+                        payment.getTransaction().getIdTransaction(),
+                        payment.getTransaction().getType(),
+                        payment.getDate(),
+                        payment.getAmount()
                 ))
                 .toList();
     }
@@ -66,7 +77,6 @@ public class CceCardService {
             card.setCode(request.code());
             cceCardRepository.save(card);
 
-            // Recherche du client lié à cette carte pour le mettre à jour
             clientRepository.findAll().stream()
                     .filter(c -> c.getCceCard() != null && c.getCceCard().getIdCceCard().equals(id))
                     .findFirst()
