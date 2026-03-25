@@ -14,15 +14,15 @@ public class CceBonusTier {
     @Column(name = "min_amount", nullable = false, precision = 10, scale = 3)
     private BigDecimal minAmount;
 
-    @Column(name = "bonus", nullable = false, precision = 5, scale = 2)
-    private BigDecimal bonus;
+    @Column(name = "bonus_amount", nullable = false, precision = 10, scale = 3)
+    private BigDecimal bonusAmount;
 
     public CceBonusTier() {}
-    public CceBonusTier(BigDecimal minAmount, BigDecimal bonusPercentage) { this.minAmount = minAmount; this.bonus = bonusPercentage; }
+    public CceBonusTier(BigDecimal minAmount, BigDecimal bonusAmount) { this.minAmount = minAmount; this.bonusAmount = bonusAmount; }
     public Integer getIdTier() { return idTier; }
     public void setIdTier(Integer idTier) { this.idTier = idTier; }
     public BigDecimal getMinAmount() { return minAmount; }
     public void setMinAmount(BigDecimal minAmount) { this.minAmount = minAmount; }
-    public BigDecimal getBonusPercentage() { return bonus; }
-    public void setBonusPercentage(BigDecimal bonusPercentage) { this.bonus = bonusPercentage; }
+    public BigDecimal getBonusAmount() { return bonusAmount; }
+    public void setBonusAmount(BigDecimal bonusAmount) { this.bonusAmount = bonusAmount; }
 }

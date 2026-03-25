@@ -24,7 +24,7 @@ public class CceSettingsService {
     public CceSettingsDTO getGlobalSettings() {
         CceSetting setting = settingRepository.findAll().stream().findFirst().orElse(new CceSetting());
         List<BonusTierDTO> tiers = tierRepository.findAll().stream()
-                .map(t -> new BonusTierDTO(t.getIdTier(), t.getMinAmount(), t.getBonusPercentage()))
+                .map(t -> new BonusTierDTO(t.getIdTier(), t.getMinAmount(), t.getBonusAmount()))
                 .toList();
         return new CceSettingsDTO(setting.getMinimumCreditAmount(), tiers);
     }
@@ -37,7 +37,7 @@ public class CceSettingsService {
 
         tierRepository.deleteAll();
         List<CceBonusTier> newTiers = dto.bonusTiers().stream()
-                .map(t -> new CceBonusTier(t.minAmount(), t.bonusPercentage()))
+                .map(t -> new CceBonusTier(t.minAmount(), t.bonusAmount()))
                 .toList();
         tierRepository.saveAll(newTiers);
     }

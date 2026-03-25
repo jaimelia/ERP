@@ -25,7 +25,7 @@ interface CCETransaction {
 interface BonusTier {
     id?: number;
     minAmount: string;
-    bonusPercentage: string;
+    bonusAmount: string;
 }
 
 interface CCESettingsData {
@@ -75,7 +75,7 @@ export const CCEWidget: FC = () => {
                 bonusTiers: data.bonusTiers?.map((t: any) => ({
                     id: t.id,
                     minAmount: t.minAmount.toString(),
-                    bonusPercentage: t.bonusPercentage.toString()
+                    bonusAmount: t.bonusAmount.toString()
                 })) || []
             });
         } catch (error) {
@@ -132,6 +132,10 @@ export const CCEWidget: FC = () => {
             setCardTransactions([]);
         }
 
+        if (type === "settings" || type === "credit") {
+            await loadSettings();
+        }
+
         setActivePopup(type);
     };
 
@@ -157,7 +161,7 @@ export const CCEWidget: FC = () => {
                         minimumCreditAmount: parseFloat(settingsData.minimumCreditAmount) || 0,
                         bonusTiers: settingsData.bonusTiers.map(t => ({
                             minAmount: parseFloat(t.minAmount) || 0,
-                            bonusPercentage: parseFloat(t.bonusPercentage) || 0
+                            bonusAmount: parseFloat(t.bonusAmount) || 0
                         }))
                     })
                 });
@@ -179,9 +183,9 @@ export const CCEWidget: FC = () => {
             }
         };
 
-        if (activePopup === "create" || activePopup === "reedit") {
+        if (activePopup === "create") {
             ["nom", "prenom", "email", "tel", "code", "montant"].forEach(checkField);
-        } else if (activePopup === "edit") {
+        } else if (activePopup === "reedit" || activePopup === "edit") {
             ["nom", "prenom", "email", "tel", "code"].forEach(checkField);
         } else if (activePopup === "credit") {
             checkField("amount");
@@ -230,7 +234,7 @@ export const CCEWidget: FC = () => {
     };
 
     const handleAddTier = () => {
-        setSettingsData(prev => ({ ...prev, bonusTiers: [...prev.bonusTiers, { minAmount: "", bonusPercentage: "" }] }));
+        setSettingsData(prev => ({ ...prev, bonusTiers: [...prev.bonusTiers, { minAmount: "", bonusAmount: "" }] }));
     };
 
     const handleUpdateTier = (index: number, field: keyof BonusTier, value: string) => {
@@ -258,8 +262,7 @@ export const CCEWidget: FC = () => {
             .sort((a, b) => parseFloat(b.minAmount) - parseFloat(a.minAmount));
 
         if (applicableTiers.length > 0) {
-            const percent = parseFloat(applicableTiers[0].bonusPercentage);
-            return amount * (percent / 100);
+            return parseFloat(applicableTiers[0].bonusAmount) || 0;
         }
         return 0;
     };
@@ -272,6 +275,13 @@ export const CCEWidget: FC = () => {
     const selectedCard = cces.find(c => c.id === selected);
     const toggleButtonText = selectedCard?.statut === "Active" ? "Désactiver" : "Activer";
 
+    // Bloque la saisie des caractères e, E, + et -
+    const blockInvalidChar = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (["e", "E", "+", "-"].includes(e.key)) {
+            e.preventDefault();
+        }
+    };
+
     const renderField = (name: string, label: string, type = "text", maxLength?: number, fullSpan = false) => (
         <div className={`field-group ${fullSpan ? 'full-span' : ''}`}>
             <label className="field-label">{label}</label>
@@ -279,9 +289,12 @@ export const CCEWidget: FC = () => {
                 type={type}
                 placeholder={label}
                 maxLength={maxLength}
+                min={type === "number" ? "0" : undefined}
+                onKeyDown={type === "number" ? blockInvalidChar : undefined}
                 value={formData[name] || ""}
                 onChange={e => {
-                    setFormData({ ...formData, [name]: e.target.value });
+                    const val = type === "number" ? e.target.value.replace(",", ".") : e.target.value;
+                    setFormData({ ...formData, [name]: val });
                     if (errors[name]) setErrors({ ...errors, [name]: false });
                 }}
                 className={errors[name] ? "error-input" : ""}
@@ -312,9 +325,11 @@ export const CCEWidget: FC = () => {
                                 <label className="field-label">Montant de crédit minimum (€)</label>
                                 <input
                                     type="number"
+                                    min="0"
                                     placeholder="Ex: 15.00"
+                                    onKeyDown={blockInvalidChar}
                                     value={settingsData.minimumCreditAmount}
-                                    onChange={e => setSettingsData({ ...settingsData, minimumCreditAmount: e.target.value })}
+                                    onChange={e => setSettingsData({ ...settingsData, minimumCreditAmount: e.target.value.replace(",", ".") })}
                                 />
                             </div>
                             <div style={{ borderTop: "1px solid var(--color-border)", paddingTop: "15px" }}>
@@ -325,24 +340,29 @@ export const CCEWidget: FC = () => {
                                             <span style={{ fontSize: "13px" }}>À partir de</span>
                                             <input
                                                 type="number"
+                                                min="0"
                                                 style={{ width: "80px", padding: "6px" }}
                                                 value={tier.minAmount}
-                                                onChange={e => handleUpdateTier(index, "minAmount", e.target.value)}
+                                                onKeyDown={blockInvalidChar}
+                                                onChange={e => handleUpdateTier(index, "minAmount", e.target.value.replace(",", "."))}
                                             />
                                             <span style={{ fontSize: "13px" }}>€</span>
                                             <span style={{ margin: "0 5px" }}>&rarr;</span>
                                             <span style={{ fontSize: "13px" }}>Bonus de</span>
                                             <input
                                                 type="number"
+                                                min="0"
                                                 style={{ width: "70px", padding: "6px" }}
-                                                value={tier.bonusPercentage}
-                                                onChange={e => handleUpdateTier(index, "bonusPercentage", e.target.value)}
+                                                value={tier.bonusAmount}
+                                                onKeyDown={blockInvalidChar}
+                                                onChange={e => handleUpdateTier(index, "bonusAmount", e.target.value.replace(",", "."))}
                                             />
-                                            <span style={{ fontSize: "13px" }}>%</span>
+                                            <span style={{ fontSize: "13px" }}>€</span>
                                             <button
                                                 type="button"
                                                 onClick={() => handleRemoveTier(index)}
                                                 style={{ background: "none", border: "none", color: "#ef4444", cursor: "pointer", padding: "5px" }}
+                                                title="Supprimer la tranche"
                                             >
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                                             </button>
@@ -374,10 +394,12 @@ export const CCEWidget: FC = () => {
                                 <div style={{ position: "relative", display: "flex", alignItems: "center", gap: "10px" }}>
                                     <input
                                         type="number"
+                                        min="0"
                                         placeholder="Montant à créditer (€)"
                                         value={formData.amount || ""}
+                                        onKeyDown={blockInvalidChar}
                                         onChange={e => {
-                                            setFormData({ ...formData, amount: e.target.value });
+                                            setFormData({ ...formData, amount: e.target.value.replace(",", ".") });
                                             if (errors["amount"]) setErrors({ ...errors, amount: false });
                                         }}
                                         className={errors["amount"] ? "error-input" : ""}
@@ -396,14 +418,10 @@ export const CCEWidget: FC = () => {
                     footer: baseFooter("Confirmer l'action")
                 }; }
             case "create":
-            case "reedit":
-                { const isCreate = activePopup === "create";
                 return {
-                    icon: isCreate ?
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="17" y1="11" x2="23" y2="11"/></svg> :
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>,
-                    title: isCreate ? "Créer un nouveau compte CCE" : "Rééditer une CCE",
-                    subtitle: isCreate ? "Saisir les informations du client et de la carte" : `Remplacer la carte N° ${selectedCard?.numeroCCE}`,
+                    icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="17" y1="11" x2="23" y2="11"/></svg>,
+                    title: "Créer un nouveau compte CCE",
+                    subtitle: "Saisir les informations du client et de la carte",
                     content: (
                         <div className="popup-form">
                             {renderField("nom", "Nom")}
@@ -415,7 +433,23 @@ export const CCEWidget: FC = () => {
                         </div>
                     ),
                     footer: baseFooter("Confirmer l'action")
-                }; }
+                };
+            case "reedit":
+                return {
+                    icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>,
+                    title: "Rééditer une CCE",
+                    subtitle: `Remplacer la carte N° ${selectedCard?.numeroCCE}`,
+                    content: (
+                        <div className="popup-form">
+                            {renderField("nom", "Nom")}
+                            {renderField("prenom", "Prénom")}
+                            {renderField("email", "Email", "email")}
+                            {renderField("tel", "Téléphone", "tel")}
+                            {renderField("code", "Code (PIN)", "text", 4)}
+                        </div>
+                    ),
+                    footer: baseFooter("Confirmer l'action")
+                };
             case "edit":
                 return {
                     icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,

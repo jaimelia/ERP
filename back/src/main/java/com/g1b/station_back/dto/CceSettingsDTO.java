@@ -3,5 +3,5 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public record CceSettingsDTO(BigDecimal minimumCreditAmount, List<BonusTierDTO> bonusTiers) {
-    public record BonusTierDTO(Integer id, BigDecimal minAmount, BigDecimal bonusPercentage) {}
+    public record BonusTierDTO(Integer id, BigDecimal minAmount, BigDecimal bonusAmount) {}
 }
