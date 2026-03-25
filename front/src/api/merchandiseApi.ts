@@ -75,6 +75,10 @@ export async function updateFuel(id: number, dto: Omit<FuelDTO, "idItem">): Prom
     });
 }
 
+export async function deleteFuel(id: number): Promise<void> {
+    await fetchJsonWithAuth(apiUrl(`/merchandise/fuels/${id}`), { method: "DELETE" });
+}
+
 // ── Stock combiné (Produits + Carburants) ─────────────────────────────────────
 
 export async function getStock(): Promise<StockItemDTO[]> {

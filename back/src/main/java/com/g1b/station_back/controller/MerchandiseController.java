@@ -7,6 +7,7 @@ import com.g1b.station_back.dto.StockItemDTO;
 import com.g1b.station_back.service.FuelService;
 import com.g1b.station_back.service.ProductService;
 import com.g1b.station_back.service.RestockService;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -61,6 +62,12 @@ public class MerchandiseController {
     @PutMapping("/fuels/{id}")
     public ResponseEntity<FuelDTO> updateFuel(@PathVariable Long id, @RequestBody FuelDTO dto) {
         return ResponseEntity.ok(fuelService.updateFuel(id, dto));
+    }
+
+    @DeleteMapping("/fuels/{id}")
+    public ResponseEntity<Void> deleteFuel(@PathVariable Long id) {
+        fuelService.deleteFuel(id);
+        return ResponseEntity.noContent().build();
     }
 
     // ── Stock combiné (Produits + Carburants) ─────────────────────────────────

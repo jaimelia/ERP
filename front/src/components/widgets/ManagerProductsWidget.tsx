@@ -6,6 +6,7 @@ import { apiUrl } from "../../api/common.ts";
 import {
     createProduct,
     deleteProduct,
+    deleteFuel,
     updateFuel,
     updateProduct,
     type StockItemDTO,
@@ -100,7 +101,11 @@ export const ManagerProductsWidget: FC = () => {
     const handleDelete = async (item: StockItemDTO) => {
         if (!confirm(`Supprimer "${item.name}" ?`)) return;
         try {
-            await deleteProduct(item.id);
+            if (item.type === "Carburant") {
+                await deleteFuel(item.id);
+            } else {
+                await deleteProduct(item.id);
+            }
             success(`"${item.name}" supprimé.`);
             refetch();
         } catch (err) {

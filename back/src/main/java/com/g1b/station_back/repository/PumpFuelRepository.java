@@ -5,4 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface PumpFuelRepository extends JpaRepository<PumpFuel, Integer> {}
+public interface PumpFuelRepository extends JpaRepository<PumpFuel, Integer> {
+    void deleteByFuel_IdItem(Integer fuelId);
+}
