@@ -1,5 +1,19 @@
 package com.g1b.station_back.controller;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.g1b.station_back.dto.FuelDTO;
 import com.g1b.station_back.dto.ProductDTO;
 import com.g1b.station_back.dto.RestockDTO;
@@ -7,12 +21,6 @@ import com.g1b.station_back.dto.StockItemDTO;
 import com.g1b.station_back.service.FuelService;
 import com.g1b.station_back.service.ProductService;
 import com.g1b.station_back.service.RestockService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/merchandise")
@@ -61,6 +69,12 @@ public class MerchandiseController {
     @PutMapping("/fuels/{id}")
     public ResponseEntity<FuelDTO> updateFuel(@PathVariable Long id, @RequestBody FuelDTO dto) {
         return ResponseEntity.ok(fuelService.updateFuel(id, dto));
+    }
+
+    @DeleteMapping("/fuels/{id}")
+    public ResponseEntity<Void> deleteFuel(@PathVariable Long id) {
+        fuelService.deleteFuel(id);
+        return ResponseEntity.noContent().build();
     }
 
     // ── Stock combiné (Produits + Carburants) ─────────────────────────────────

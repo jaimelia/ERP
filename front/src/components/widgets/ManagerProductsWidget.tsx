@@ -6,6 +6,7 @@ import { apiUrl } from "../../api/common.ts";
 import {
     createProduct,
     deleteProduct,
+    deleteFuel,
     updateFuel,
     updateProduct,
     type StockItemDTO,
@@ -100,7 +101,11 @@ export const ManagerProductsWidget: FC = () => {
     const handleDelete = async (item: StockItemDTO) => {
         if (!confirm(`Supprimer "${item.name}" ?`)) return;
         try {
-            await deleteProduct(item.id);
+            if (item.type === "Carburant") {
+                await deleteFuel(item.id);
+            } else {
+                await deleteProduct(item.id);
+            }
             success(`"${item.name}" supprimé.`);
             refetch();
         } catch (err) {
@@ -178,9 +183,7 @@ export const ManagerProductsWidget: FC = () => {
                                     <td>
                                         <div className="row-actions">
                                             <button className="icon-btn" type="button" title="Modifier" onClick={() => openEdit(m)}>✏️</button>
-                                            {m.type === "Produit" && (
-                                                <button className="icon-btn delete" type="button" title="Supprimer" onClick={() => handleDelete(m)}>🗑️</button>
-                                            )}
+                                            <button className="icon-btn delete" type="button" title="Supprimer" onClick={() => handleDelete(m)}>🗑️</button>
                                         </div>
                                     </td>
                                 </tr>
