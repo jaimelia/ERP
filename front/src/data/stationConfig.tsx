@@ -8,6 +8,7 @@ import {ManagerProductsWidget} from "../components/widgets/ManagerProductsWidget
 import {ChargersWidget} from "../components/widgets/ChargersWidget.tsx";
 import {PumpsWidget} from "../components/widgets/PumpsWidget.tsx";
 import {TicketWidget} from "../components/widgets/TicketWidget.tsx";
+import {GuidelinesWidget} from "../components/widgets/GuidelinesWidget.tsx";
 
 
 export const WIDGETS: Record<string, WidgetDef> = {
@@ -24,7 +25,7 @@ export const WIDGETS: Record<string, WidgetDef> = {
 	manager_restocking: {id: "manager_restocking", label: "Réapprovisionnements", size: {width: 1, height: 2}, element: <ManagerRestockingWidget/>},
 	manager_products: {id: "manager_products", label: "Marchandises", size: {width: 1, height: 1}, element: <ManagerProductsWidget/>},
 	transaction_table: {id: "transaction_table", label: "Table transactions", size: {width: 1, height: 1}},
-	guidelines: {id: "guidelines", label: "Directives", size: {width: 1, height: 1}},
+	guidelines: {id: "guidelines", label: "Directives Régionales", size: {width: 1, height: 1}, element: <GuidelinesWidget/>},
 	management_documents: {id: "management_documents", label: "Documents De Gestion", size: {width: 1, height: 1}},
 	incident: {id: "incident", label: "Incident", size: {width: 1, height: 1}},
 };
