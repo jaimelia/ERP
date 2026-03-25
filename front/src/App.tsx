@@ -1,10 +1,11 @@
-import {useState, type FC} from "react";
+import {type FC, useState} from "react";
 import {Dashboard} from "./components/Dashboard";
 import {Login} from "./components/Login";
 import {isLayoutValid, type Levels, type ThemeKey, type User} from "./types";
 import "./App.css";
 import {DEFAULT_LEVELS} from "./data/stationConfig.tsx";
 import {savePreferences} from "./api/userApi.ts";
+import {ModalProvider} from "./context/ModalContext.tsx";
 
 const App: FC = () => {
     const [user, setUser] = useState<User | null>(null);
@@ -38,23 +39,25 @@ const App: FC = () => {
                     toggleTheme={toggleTheme}
                 />
             ) : (
-                <Dashboard
-                    key={`${user.role}_${level}`}
-                    user={user}
-                    level={level}
-					levels={levels}
-					onSaveLevels={setLevels}
-                    onLevel={setLevel}
-                    onLogout={() => {
-                        setUser(null);
-                        setLevel(1);
-						window.localStorage.removeItem("token");
-                    }}
-                    editingLayout={editingLayout}
-                    onEditLayout={setEditingLayout}
-                    theme={theme}
-                    toggleTheme={toggleTheme}
-                />
+                <ModalProvider>
+                    <Dashboard
+                        key={`${user.role}_${level}`}
+                        user={user}
+                        level={level}
+                        levels={levels}
+                        onSaveLevels={setLevels}
+                        onLevel={setLevel}
+                        onLogout={() => {
+                            setUser(null);
+                            setLevel(1);
+                            window.localStorage.removeItem("token");
+                        }}
+                        editingLayout={editingLayout}
+                        onEditLayout={setEditingLayout}
+                        theme={theme}
+                        toggleTheme={toggleTheme}
+                    />
+                </ModalProvider>
             )}
         </div>
     );

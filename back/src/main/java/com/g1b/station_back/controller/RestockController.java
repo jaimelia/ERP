@@ -1,12 +1,11 @@
 package com.g1b.station_back.controller;
 
+import com.g1b.station_back.dto.PostRestockDTO;
 import com.g1b.station_back.dto.RestockDTO;
 import com.g1b.station_back.service.RestockService;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -22,5 +21,10 @@ public class RestockController {
 	@GetMapping
 	public ResponseEntity<List<RestockDTO>> getAllRestocks() {
 		return ResponseEntity.ok(restockService.getAllRestocks());
+	}
+
+	@PostMapping
+	public ResponseEntity<RestockDTO> createRestock(@RequestBody PostRestockDTO dto) {
+		return ResponseEntity.ok(restockService.createRestock(dto));
 	}
 }

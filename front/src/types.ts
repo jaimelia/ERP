@@ -96,3 +96,13 @@ export const formatQuantity = (quantity: number, itemType: ItemType): string => 
             return `${quantity}`;
     }
 }
+
+export const formatPrice = (price: number, itemType?: ItemType): string => {
+    switch (itemType) {
+        case undefined:
+        case "product":
+            return `${price} €`;
+        case "fuel":
+            return `${price} €/L`;
+    }
+}

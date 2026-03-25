@@ -1,9 +1,11 @@
-import {useState, type FC} from "react";
+import {type FC, useState} from "react";
 import {useFetch} from "../../hooks/useFetch.ts";
-import {apiUrl} from "../../api/common.ts";
+import {apiUrl, fetchJsonWithAuth} from "../../api/common.ts";
 import {FetchWrapper} from "../FetchWrapper.tsx";
 import {formatQuantity, type ItemType} from "../../types.ts";
 import {useModal} from "../../context/ModalContext.tsx";
+import {NewRestockModal} from "../modal/NewRestockModal.tsx";
+import {ThresholdModal} from "../modal/ThresholdModal.tsx";
 
 interface Restock {
     id: number;
@@ -16,7 +18,7 @@ interface Restock {
 
 export const ManagerRestockWidget: FC = () => {
     const [search, setSearch] = useState("");
-    const {openModal, closeModal} = useModal();
+    const {openModal} = useModal();
 
     const {data: restocks, setData: setRestocks, loading, error} = useFetch<Restock[]>(
         apiUrl("/restocks"),
@@ -40,26 +42,30 @@ export const ManagerRestockWidget: FC = () => {
 
     const openNewRestockModal = () => {
         openModal(
-            <div className="modal-content">
-                <h2>Nouveau réapprovisionnement</h2>
-                <div>
+            <NewRestockModal
+                onConfirm={async (product, quantity) => {
+                    const result = await fetchJsonWithAuth(apiUrl("/restocks"), {
+                        method: "POST",
+                        headers: {"Content-Type": "application/json"},
+                        body: JSON.stringify({
+                            idItem: product.id,
+                            quantity: quantity,
+                        }),
+                    });
 
-                </div>
-                <div className="modal-actions">
-                    <button className="modal-button modal-button--cancel" onClick={closeModal}>
-                        Annuler
-                    </button>
-                    <button
-                        className={`modal-button "modal-button--confirm"`}
-                        onClick={() => {
-                            //onConfirm();
-                            closeModal();
-                        }}
-                    >
-                        Valider
-                    </button>
-                </div>
-            </div>
+                    setRestocks(prev => prev ? [...prev, result] : [result]);
+                }}
+            />
+        )
+    }
+
+    const openThresholdModal = () => {
+        openModal(
+            <ThresholdModal
+                onConfirm={(threshold) => {
+                    console.log(threshold);
+                }}
+            />
         )
     }
 
@@ -80,8 +86,8 @@ export const ManagerRestockWidget: FC = () => {
                             onChange={e => setSearch(e.target.value)}
                         />
                     </div>
-                    <button className="widget-btn" type="button">Seuils</button>
-                    <button className="widget-btn-add" type="button" title="Ajouter">
+                    <button className="widget-btn" type="button" onClick={openThresholdModal}>Seuils</button>
+                    <button className="widget-btn-add" type="button" title="Ajouter" onClick={openNewRestockModal}>
                         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
                             <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/>
                         </svg>
