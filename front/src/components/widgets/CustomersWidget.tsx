@@ -38,25 +38,15 @@ export const CustomersWidget: FC = () => {
     const handleConfirm = async () => {
         if (!editedCustomer.idClient) return;
 
-        try {
-            const params = new URLSearchParams({
-                firstname: editedCustomer.firstname || '',
-                lastname: editedCustomer.lastname || '',
-                mail: editedCustomer.mail || '',
-                phoneNumber: editedCustomer.phoneNumber || ''
-            });
-
-            const updatedCustomer = await fetchJsonWithAuth(apiUrl(`/clients/update/${editedCustomer.idClient}?${params.toString()}`), {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-            setCustomers(prev => prev?.map(c => c.idClient === editedCustomer.idClient ? updatedCustomer : c) ?? []);
-            closeModal();
-        } catch (error) {
-            console.error("Failed to update customer:", error);
-        }
+        const updatedCustomer = await fetchJsonWithAuth(apiUrl(`/clients/${editedCustomer.idClient}`), {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(editedCustomer)
+        });
+        setCustomers(prev => prev?.map(c => c.idClient === editedCustomer.idClient ? updatedCustomer : c) ?? []);
+        closeModal();
     };
 
     const filtered = customers?.filter(c =>
