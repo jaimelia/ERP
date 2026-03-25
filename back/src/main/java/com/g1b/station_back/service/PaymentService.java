@@ -2,13 +2,12 @@ package com.g1b.station_back.service;
 
 import com.g1b.station_back.dto.PaymentRequestDTO;
 import com.g1b.station_back.dto.PaymentResponseDTO;
-import com.g1b.station_back.dto.PaymentStatus;
 import com.g1b.station_back.exception.PaymentExcessException;
 import com.g1b.station_back.model.CceCard;
 import com.g1b.station_back.model.Transaction;
 import com.g1b.station_back.model.TransactionPayment;
 import com.g1b.station_back.model.enums.PaymentMethod;
-import com.g1b.station_back.model.enums.TransactionStatus;
+import com.g1b.station_back.model.enums.PaymentStatus;
 import com.g1b.station_back.repository.CceCardRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
@@ -57,11 +56,11 @@ public class PaymentService {
             newPayment.setCceCard(cceCard);
         }
 
-        TransactionStatus paymentStatus = TransactionStatus.accepted;
+        PaymentStatus paymentStatus = PaymentStatus.accepted;
 
         if (newPayment.getPaymentMethod() == PaymentMethod.CreditCard) {
             if (ThreadLocalRandom.current().nextDouble() >= 0.9) {
-                paymentStatus = TransactionStatus.canceled;
+                paymentStatus = PaymentStatus.canceled;
             }
         }
         newPayment.setStatus(paymentStatus);
@@ -69,17 +68,24 @@ public class PaymentService {
         transaction.addPayment(newPayment);
         transactionPaymentRepository.save(newPayment);
 
-        if (paymentStatus == TransactionStatus.canceled) {
-            return new PaymentResponseDTO(PaymentStatus.CANCELED, totalToPay, "Payment refused.");
+        if (paymentStatus == PaymentStatus.canceled) {
+            return new PaymentResponseDTO(newPayment.getIdTransactionPayment(), PaymentResponseDTO.PaymentStatus.CANCELED, totalToPay, "Payment refused.");
         }
 
         if (amountPaid.compareTo(totalToPay) == 0) {
-            return new PaymentResponseDTO(PaymentStatus.VALIDATED, BigDecimal.ZERO, "Payment successful, transaction completed.");
+            return new PaymentResponseDTO(newPayment.getIdTransactionPayment(), PaymentResponseDTO.PaymentStatus.VALIDATED, BigDecimal.ZERO, "Payment successful, transaction completed.");
         }
 
         BigDecimal newRemaining = totalToPay.subtract(amountPaid);
-        return new PaymentResponseDTO(PaymentStatus.VALIDATED, newRemaining, "Partial payment successful.");
+        return new PaymentResponseDTO(newPayment.getIdTransactionPayment(), PaymentResponseDTO.PaymentStatus.PARTIAL, newRemaining, "Partial payment successful.");
     }
 
+    public Integer cancelPayment(Integer paymentId) {
+        TransactionPayment payment = transactionPaymentRepository.findById(paymentId)
+                .orElseThrow(() -> new IllegalArgumentException("Payment not found"));
+        payment.setStatus(PaymentStatus.canceled);
+        transactionPaymentRepository.save(payment);
+        return paymentId;
+    }
 
 }

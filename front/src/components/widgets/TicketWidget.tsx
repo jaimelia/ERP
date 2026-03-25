@@ -1,6 +1,7 @@
-import {useState, useEffect, type FC} from "react";
+import {type FC, type SubmitEvent, useEffect, useState} from "react";
 import {apiUrl, fetchJsonWithAuth} from "../../api/common.ts";
-import { TicketActions } from "../TicketActions";
+import {TicketActions} from "../TicketActions";
+import type {TicketStatus} from "../../types.ts";
 
 interface Product {
     idItem: number;
@@ -24,10 +25,12 @@ export const TicketWidget: FC = () => {
     const [cart, setCart] = useState<CartItem[]>(emptyCart);
     const [searchResults, setSearchResults] = useState<string[]>([]);
     const [allProducts, setAllProducts] = useState<Product[]>([]);
-    const [ticketStatus, setTicketStatus] = useState<number>(0);
+    const [ticketStatus, setTicketStatus] = useState<TicketStatus>("initial");
     const [isSearching, setIsSearching] = useState(false);
     const [showResults, setShowResults] = useState(false);
     const [currentTransactionId, setCurrentTransactionId] = useState<number | null>(null);
+    const [currentPaymentId, setCurrentPaymentId] = useState<number | null>(null);
+    const [paymentResponse, setPaymentResponse] = useState<JSON>(JSON);
 
     useEffect(() => {
         fetchJsonWithAuth(apiUrl("/products"))
@@ -98,7 +101,7 @@ export const TicketWidget: FC = () => {
         setShowResults(false);
     };
 
-    const handleCancelTicket = async () => {
+    const cancelTicket = async () => {
         if (currentTransactionId !== null) {
             try {
                 await fetchJsonWithAuth(apiUrl(`/transactions/shop/cancel/${currentTransactionId}`), {
@@ -109,12 +112,12 @@ export const TicketWidget: FC = () => {
             }
         }
         setCart([]);
-        setTicketStatus(0);
+        setTicketStatus("initial");
         setCurrentTransactionId(null);
     };
 
     const validateTicket = async () => {
-        if (ticketStatus !== 0 || cart.length === 0) {
+        if (ticketStatus !== "initial" || cart.length === 0) {
             return;
         }
 
@@ -135,12 +138,81 @@ export const TicketWidget: FC = () => {
             });
 
             setCurrentTransactionId(data);
-            setTicketStatus(1);
+            setTicketStatus("paymentSelection");
         } catch (error) {
             console.error("Erreur réseau lors de l'envoi du ticket:", error);
         }
     };
 
+    const processCardPayment = async (e: SubmitEvent<HTMLFormElement>) => {
+        try {
+            const endCardNumber: string = Math.floor(Math.random() * 10000)
+                .toString()
+                .padStart(4, '0');
+            e.preventDefault();
+
+            const formData = new FormData(e.target as HTMLFormElement);
+            const amount = formData.get("amount");
+
+            setTicketStatus("processingCard");
+
+            const payload = { transactionId: currentTransactionId, paymentMethod: "CreditCard", amount: amount, endNumCard: endCardNumber };
+
+            const data = await fetchJsonWithAuth(apiUrl("/payments/process"), {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+            setPaymentResponse(data);
+            setCurrentPaymentId(data.paymentId);
+        }
+        catch (error) {
+            setTicketStatus("paymentSelection");
+            console.error("Erreur réseau lors du paiement en carte:", error);
+        }
+    }
+
+    const processCashPayment = async (e: SubmitEvent<HTMLFormElement>) => {
+        try {
+            const formData = new FormData(e.target as HTMLFormElement);
+            const amount = formData.get("amount");
+
+            setTicketStatus("processingCash");
+
+            const payload = { transactionId: currentTransactionId, paymentMethod: "Cash", amount: amount };
+
+            const data = await fetchJsonWithAuth(apiUrl("/payments/process"), {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+            setPaymentResponse(data);
+            setCurrentPaymentId(data.paymentId);
+        }
+        catch (error) {
+            setTicketStatus("paymentSelection");
+            console.error("Erreur réseau lors du paiement en espèces:", error);
+        }
+    }
+
+    const cancelPayment = async () => {
+        if (currentPaymentId !== null) {
+            try {
+                await fetchJsonWithAuth(apiUrl(`/payments/cancel/${currentPaymentId}`), {
+                    method: "POST"
+                });
+            } catch (error) {
+                console.error("Erreur réseau lors de l'annulation:", error);
+            }
+        }
+        setCart([]);
+        setTicketStatus("initial");
+        setCurrentTransactionId(null);
+    }
     return (
         <div className="widget-container">
             <div className="widget-toolbar widget-toolbar-relative">
@@ -159,7 +231,7 @@ export const TicketWidget: FC = () => {
                         }}
                         onFocus={() => { if (search) setShowResults(true); }}
                         onBlur={() => setTimeout(() => setShowResults(false), 200)} // Délai pour permettre le clic sur un résultat
-                        disabled={ticketStatus !== 0} // Désactive la recherche si le ticket est en cours de validation/paiement
+                        disabled={ticketStatus !== "initial"} // Désactive la recherche si le ticket est en cours de validation/paiement
                     />
                     {showResults && search && (
                         <div className="search-results-dropdown">
@@ -188,14 +260,19 @@ export const TicketWidget: FC = () => {
                 <span>{total.toFixed(2)} €</span>
             </div>
 
+            <div className="ticket-total-row">
+                <span>Reste à payer</span>
+                <span>{total.toFixed(2)} €</span>
+            </div>
+
             <div className="ticket-items-list">
                 {cart.map(item => (
                     <div key={item.id} className="ticket-item">
                         <span className="ticket-item-name">{item.name}</span>
                         <div className="ticket-quantity-controls">
-                            <button type="button" onClick={() => updateQuantity(item.id, -1)} disabled={ticketStatus !== 0}>-</button>
+                            <button type="button" onClick={() => updateQuantity(item.id, -1)} disabled={ticketStatus !== "initial"}>-</button>
                             <span>{item.quantity}</span>
-                            <button type="button" onClick={() => updateQuantity(item.id, 1)} disabled={ticketStatus !== 0}>+</button>
+                            <button type="button" onClick={() => updateQuantity(item.id, 1)} disabled={ticketStatus !== "initial"}>+</button>
                         </div>
                         <span className="ticket-item-price">{(item.quantity * item.unitPrice).toFixed(2)} €</span>
                     </div>
@@ -204,8 +281,12 @@ export const TicketWidget: FC = () => {
 
             <TicketActions
                 ticketStatus={ticketStatus}
-                onCancel={handleCancelTicket}
+                onCancelTicket={cancelTicket}
+                onCancelPayment={cancelPayment}
                 onValidate={validateTicket}
+                onPayByCard={processCardPayment}
+                onPayByCash={processCashPayment}
+                setTicketStatus={setTicketStatus}
                 isValidateDisabled={cart.length === 0}
             />
         </div>

@@ -8,6 +8,7 @@
     border-bottom: 1px solid var(--color-border);
 }
 
+
 .ticket-items-list {
     flex: 1;
     overflow-y: auto;
@@ -66,6 +67,21 @@
     border-top: 1px solid var(--color-border);
     flex-shrink: 0;
     background: var(--color-surface-alt);
+}
+
+.ticket-payment-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    padding: 8px 10px;
+    border-top: 1px solid var(--color-border);
+    flex-shrink: 0;
+    background: var(--color-surface-alt);
+}
+
+.ticket-amount-input {
+    flex: 1;
+    padding: 8px;
 }
 
 .ticket-action-btn {

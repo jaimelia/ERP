@@ -2,7 +2,7 @@ package com.g1b.station_back.model;
 
 
 import com.g1b.station_back.model.enums.PaymentMethod;
-import com.g1b.station_back.model.enums.TransactionStatus;
+import com.g1b.station_back.model.enums.PaymentStatus;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -32,7 +32,7 @@ public class TransactionPayment {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private TransactionStatus status;
+    private PaymentStatus status;
 
     @Column(nullable = false)
     private LocalDate date;
@@ -42,7 +42,7 @@ public class TransactionPayment {
     private CceCard cceCard;
 
     public TransactionPayment() {}
-    public TransactionPayment(Integer idTransactionPayment, Transaction transaction, PaymentMethod paymentMethod, BigDecimal amount, String endNumCard, TransactionStatus status, LocalDate date, CceCard cceCard) {
+    public TransactionPayment(Integer idTransactionPayment, Transaction transaction, PaymentMethod paymentMethod, BigDecimal amount, String endNumCard, PaymentStatus status, LocalDate date, CceCard cceCard) {
         this.idTransactionPayment = idTransactionPayment; this.transaction = transaction; this.paymentMethod = paymentMethod; this.amount = amount; this.endNumCard = endNumCard; this.status = status; this.date = date; this.cceCard = cceCard;
     }
 
@@ -57,8 +57,8 @@ public class TransactionPayment {
     public void setAmount(BigDecimal amount) { this.amount = amount; }
     public String getEndNumCard() { return endNumCard; }
     public void setEndNumCard(String endNumCard) { this.endNumCard = endNumCard; }
-    public TransactionStatus getStatus() { return status; }
-    public void setStatus(TransactionStatus status) { this.status = status; }
+    public PaymentStatus getStatus() { return status; }
+    public void setStatus(PaymentStatus status) { this.status = status; }
     public LocalDate getDate() { return date; }
     public void setDate(LocalDate date) { this.date = date; }
     public CceCard getCceCard() { return cceCard; }

@@ -3,6 +3,7 @@ import {DEFAULT_LEVELS, WIDGETS} from "./data/stationConfig.tsx";
 
 export type ThemeKey = "light" | "dark";
 export type Role = "employe" | "gerant";
+export type TicketStatus = "initial" | "paymentSelection" | "payingByCard" | "payingByCash" | "payingByCCE" | "processingCard" | "processingCash" | "validated";
 
 export interface User {
     username: string;

@@ -1,5 +1,6 @@
 package com.g1b.station_back.model;
 
+import com.g1b.station_back.model.enums.PaymentStatus;
 import com.g1b.station_back.model.enums.TransactionStatus;
 import jakarta.persistence.*;
 
@@ -66,7 +67,7 @@ public class Transaction {
     public BigDecimal getRemainingAmount() {
         BigDecimal paidAmount = BigDecimal.ZERO;
         for (TransactionPayment payment : payments) {
-            paidAmount = paidAmount.add(payment.getAmount());
+            if (payment.getStatus().equals(PaymentStatus.accepted)) paidAmount = paidAmount.add(payment.getAmount());
         }
         return getTotalAmount().subtract(paidAmount);
     }
