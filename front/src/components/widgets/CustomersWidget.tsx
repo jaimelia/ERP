@@ -2,6 +2,7 @@ import {useState, type FC} from "react";
 import {useFetch} from "../../hooks/useFetch.ts";
 import {FetchWrapper} from "../FetchWrapper.tsx";
 import {apiUrl, fetchJsonWithAuth} from "../../api/common.ts";
+import {Popup} from "../Popup.tsx";
 
 interface Customer {
     idClient: number;
@@ -20,12 +21,12 @@ export const CustomersWidget: FC = () => {
         apiUrl("/clients")
     );
 
-    const openModal = (customer: Customer) => {
+    const handleOpenPopup = (customer: Customer) => {
         setSelectedCustomer(customer);
         setEditedCustomer(customer);
     };
 
-    const closeModal = () => {
+    const handleClosePopup = () => {
         setSelectedCustomer(null);
         setEditedCustomer({});
     };
@@ -38,71 +39,59 @@ export const CustomersWidget: FC = () => {
     const handleConfirm = async () => {
         if (!editedCustomer.idClient) return;
 
-        const updatedCustomer = await fetchJsonWithAuth(apiUrl(`/clients/${editedCustomer.idClient}`), {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(editedCustomer)
-        });
-        setCustomers(prev => prev?.map(c => c.idClient === editedCustomer.idClient ? updatedCustomer : c) ?? []);
-        closeModal();
+        try {
+            const updatedCustomer = await fetchJsonWithAuth(apiUrl(`/clients/${editedCustomer.idClient}`), {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(editedCustomer)
+            });
+
+            if (customers) {
+                setCustomers(customers.map(c => c.idClient === updatedCustomer.idClient ? updatedCustomer : c));
+            }
+            handleClosePopup();
+        } catch (err) {
+            console.error(err);
+        }
     };
 
-    const filtered = customers?.filter(c =>
+    const filtered = (customers || []).filter(c =>
         `${c.lastname} ${c.firstname}`.toLowerCase().includes(search.toLowerCase()) ||
-        c.mail.toLowerCase().includes(search.toLowerCase()) ||
-        c.phoneNumber.includes(search)
-    ) ?? [];
+        c.mail.toLowerCase().includes(search.toLowerCase())
+    );
 
-    const renderModal = () => {
-        if (!selectedCustomer) return null;
+    const renderField = (name: keyof Customer, label: string, type = "text") => (
+        <div className="field-group">
+            <label className="field-label">{label}</label>
+            <input
+                type={type}
+                name={name}
+                placeholder={label}
+                value={(editedCustomer[name] as string) || ""}
+                onChange={handleInputChange}
+            />
+        </div>
+    );
 
-        return (
-            <div className="modal-overlay">
-                <div className="modal-content">
-                    <h2>Modifier le client</h2>
-                    <div className="form-group">
-                        <label>Nom</label>
-                        <input type="text" name="lastname" value={editedCustomer.lastname || ''}
-                               onChange={handleInputChange}/>
-                    </div>
-                    <div className="form-group">
-                        <label>Prénom</label>
-                        <input type="text" name="firstname" value={editedCustomer.firstname || ''}
-                               onChange={handleInputChange}/>
-                    </div>
-                    <div className="form-group">
-                        <label>Adresse mail</label>
-                        <input type="email" name="mail" value={editedCustomer.mail || ''} onChange={handleInputChange}/>
-                    </div>
-                    <div className="form-group">
-                        <label>N° Tel</label>
-                        <input type="tel" name="phoneNumber" value={editedCustomer.phoneNumber || ''}
-                               onChange={handleInputChange}/>
-                    </div>
-                    <div className="modal-actions">
-                        <button type="button" onClick={closeModal}>Annuler</button>
-                        <button type="button" onClick={handleConfirm}>Confirmer</button>
-                    </div>
-                </div>
-            </div>
-        );
-    };
+    const popupFooter = (
+        <>
+            <button className="popup-btn cancel" onClick={handleClosePopup}>Annuler</button>
+            <button className="popup-btn validate" onClick={handleConfirm}>Sauvegarder</button>
+        </>
+    );
 
     return (
-        <FetchWrapper loading={loading} error={error}>
-            <div className="widget-container">
+        <div className="widget-container">
+            <FetchWrapper loading={loading} error={error}>
                 <div className="widget-toolbar">
                     <div className="widget-search">
-                        <svg className="widget-search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" strokeWidth="2.5">
+                        <svg className="widget-search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                             <circle cx="11" cy="11" r="8"/>
                             <line x1="21" y1="21" x2="16.65" y2="16.65"/>
                         </svg>
                         <input
                             type="text"
-                            placeholder="Rechercher un client"
+                            placeholder="Rechercher un client..."
                             value={search}
                             onChange={e => setSearch(e.target.value)}
                         />
@@ -131,9 +120,7 @@ export const CustomersWidget: FC = () => {
                                 <td>{c.phoneNumber}</td>
                                 <td>
                                     <div className="row-actions">
-                                        <button className="action-btn" type="button"
-                                                onClick={() => openModal(c)}>Modifier
-                                        </button>
+                                        <button className="action-btn" type="button" onClick={() => handleOpenPopup(c)}>Modifier</button>
                                         <button className="action-btn" type="button">Transactions</button>
                                     </div>
                                 </td>
@@ -142,8 +129,23 @@ export const CustomersWidget: FC = () => {
                         </tbody>
                     </table>
                 </div>
-                {renderModal()}
-            </div>
-        </FetchWrapper>
+
+                <Popup
+                    isOpen={selectedCustomer !== null}
+                    onClose={handleClosePopup}
+                    icon={<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>}
+                    title="Modifier le client"
+                    subtitle={`Mise à jour des informations de ${selectedCustomer?.firstname} ${selectedCustomer?.lastname}`}
+                    footer={popupFooter}
+                >
+                    <div className="popup-form">
+                        {renderField("lastname", "Nom")}
+                        {renderField("firstname", "Prénom")}
+                        {renderField("mail", "Email", "email")}
+                        {renderField("phoneNumber", "Téléphone", "tel")}
+                    </div>
+                </Popup>
+            </FetchWrapper>
+        </div>
     );
 };
