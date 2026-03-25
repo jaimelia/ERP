@@ -360,13 +360,15 @@ INSERT INTO "cce_cards" ("id_cce_card", "balance", "created_at", "expires_at", "
 (1, 35.250, '2025-12-11', '2026-12-11', 9999, 10, 'activated'),
 (2, 12.640, '2025-12-02', '2026-12-02', 8888, 10, 'deactivated'),
 (3, 10.680, '2025-11-01', '2026-11-01', 7777, 10, 'activated'),
-(4, 152.660, '2025-10-04', '2026-10-04', 5555, 10, 'deactivated');
+(4, 152.660, '2025-10-04', '2026-10-04', 5555, 10, 'deactivated'),
+(5, 1000.000, '2025-10-04', '2026-10-04', 4444, 10, 'deactivated');
 
 INSERT INTO "clients" ("id_client", "firstname", "lastname", "mail", "phone_number", "id_cce_card") VALUES
 (1, 'Mathéo', 'CARLI', 'matheo.carli@gmail.com', '06.95.90.41.23', 1),
 (2, 'Matthéo', 'POMEL', 'mattheo.pomel@gmail.com', '06.09.25.43.03', 2),
 (3, 'Bryan', 'LACHAL', 'bryan.lachal@gmail.com', '06.12.34.56.78', 3),
-(4, 'Louis', 'BEDETTI', 'louis.bedetti@gmail.com', '06.98.76.54.32', 4);
+(4, 'Louis', 'BEDETTI', 'louis.bedetti@gmail.com', '06.98.76.54.32', 4),
+(5, 'Quentin', 'BONNAFFOUX', 'quentin.bonnaffoux@gmail.com', '06.52.67.94.73', 5);
 
 INSERT INTO "restocks" ("id_restock", "quantity", "restock_date", "id_item", "status") VALUES
 (1, 400.000, '2025-12-11', 7, 'pending'),
