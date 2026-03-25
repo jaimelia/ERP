@@ -2,6 +2,9 @@ package com.g1b.station_back.model;
 
 import com.g1b.station_back.model.enums.CceStatus;
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -29,6 +32,7 @@ public class CceCard {
     private Integer minimumCreditAmount;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(nullable = false)
     private CceStatus status;
 
@@ -52,4 +56,3 @@ public class CceCard {
     public CceStatus getStatus() { return status; }
     public void setStatus(CceStatus status) { this.status = status; }
 }
-

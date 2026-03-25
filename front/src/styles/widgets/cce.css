@@ -42,3 +42,25 @@
 	border-color: var(--color-border);
 	color: var(--color-text-muted);
 }
+
+.cce-error-text {
+	color: #ef4444;
+	font-size: 11px;
+	margin-top: -12px;
+	margin-bottom: 5px;
+	margin-left: 2px;
+	display: block;
+}
+
+.cce-field-group {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.cce-field-label {
+	font-size: 11px;
+	color: var(--color-text-muted, #666);
+	margin-left: 2px;
+	font-weight: 500;
+}
