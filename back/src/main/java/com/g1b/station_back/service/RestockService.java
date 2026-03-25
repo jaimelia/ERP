@@ -9,6 +9,7 @@ import com.g1b.station_back.repository.FuelRepository;
 import com.g1b.station_back.repository.ItemRepository;
 import com.g1b.station_back.repository.RestockRepository;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;

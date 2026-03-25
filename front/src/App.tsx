@@ -5,6 +5,8 @@ import {isLayoutValid, type Levels, type ThemeKey, type User} from "./types";
 import "./App.css";
 import {DEFAULT_LEVELS} from "./data/stationConfig.tsx";
 import {savePreferences} from "./api/userApi.ts";
+import {ToastProvider} from "./contexts/ToastContext.tsx";
+import {ToastContainer} from "./components/ToastContainer.tsx";
 import {ModalProvider} from "./context/ModalContext.tsx";
 
 const App: FC = () => {
@@ -23,6 +25,7 @@ const App: FC = () => {
 	}
 
     return (
+        <ToastProvider>
         <div className="app-shell" data-theme={theme}>
             {!user ? (
                 <Login
@@ -60,6 +63,8 @@ const App: FC = () => {
                 </ModalProvider>
             )}
         </div>
+        <ToastContainer />
+        </ToastProvider>
     );
 };
 

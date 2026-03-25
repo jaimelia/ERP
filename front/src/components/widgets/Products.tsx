@@ -1,29 +1,27 @@
-import {type FC, useEffect, useState} from "react";
-
-interface Product {
-    nom : string;
-    type : string;
-    quantity: number;
-    price: number;
-}
+import { type FC, useEffect, useState } from "react";
+import { getStock, deleteProduct, updateProduct, updateFuel, type StockItemDTO } from "../../api/merchandiseApi.ts";
 
 export const Products: FC = () => {
-    const [products, setProducts] = useState<Product[]>([]);
-    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+    const [products, setProducts] = useState<StockItemDTO[]>([]);
+    const [selectedProduct, setSelectedProduct] = useState<StockItemDTO | null>(null);
     const [modalAction, setModalAction] = useState<string>("");
+    const [editName, setEditName] = useState("");
+    const [editPrice, setEditPrice] = useState("");
+    const [editStock, setEditStock] = useState("");
 
-    useEffect(() => {
-        const fetchProducts = async () => {
-            const res = await fetch("la url");
-            const data = await res.json();
-            setProducts(data);
-        }
-        fetchProducts()
-    }, []);
+    const load = async () => {
+        const data = await getStock();
+        setProducts(data);
+    };
 
-    const openModal = (product: Product, action: string) => {
+    useEffect(() => { load(); }, []);
+
+    const openModal = (product: StockItemDTO, action: string) => {
         setSelectedProduct(product);
         setModalAction(action);
+        setEditName(product.name);
+        setEditPrice(String(product.price));
+        setEditStock(String(product.stock));
     };
 
     const closeModal = () => {
@@ -31,94 +29,95 @@ export const Products: FC = () => {
         setModalAction("");
     };
 
-    const renderModal = () => {
-        if (selectedProduct === null) {
-            return null;
-        }
-
-        let titre = "";
+    const confirmAction = async () => {
+        if (!selectedProduct) return;
         if (modalAction === "edit") {
-            titre = "Modifier le produit";
-        } else if (modalAction === "delete") {
-            titre = "Supprimer le produit";
+            if (selectedProduct.type === "Produit") {
+                await updateProduct(selectedProduct.id, {
+                    name: editName,
+                    unitPrice: parseFloat(editPrice),
+                    stock: parseInt(editStock),
+                    alertThreshold: 0,
+                });
+            } else {
+                await updateFuel(selectedProduct.id, {
+                    name: editName,
+                    pricePerLiter: parseFloat(editPrice),
+                    stock: parseFloat(editStock),
+                    alertThreshold: 0,
+                });
+            }
+        } else if (modalAction === "delete" && selectedProduct.type === "Produit") {
+            await deleteProduct(selectedProduct.id);
         }
+        closeModal();
+        await load();
+    };
+
+    const renderModal = () => {
+        if (!selectedProduct) return null;
+
+        const titre = modalAction === "edit" ? "Modifier le produit" : "Supprimer le produit";
 
         return (
             <div className="modal-overlay">
                 <div className="modal-content">
                     <h2>{titre}</h2>
-                    <p>Produit sélectionné : {"caca"}</p>
-
+                    {modalAction === "edit" ? (
+                        <>
+                            <input placeholder="Nom" value={editName} onChange={e => setEditName(e.target.value)} />
+                            <input placeholder="Prix" type="number" step="0.001" value={editPrice} onChange={e => setEditPrice(e.target.value)} />
+                            <input placeholder="Stock" type="number" step="0.001" value={editStock} onChange={e => setEditStock(e.target.value)} />
+                        </>
+                    ) : (
+                        <p>Supprimer "{selectedProduct.name}" ?</p>
+                    )}
                     <div className="modal-actions">
                         <button type="button" onClick={closeModal}>Annuler</button>
-                        <button type="button">Confirmer</button>
+                        <button type="button" onClick={confirmAction}>Confirmer</button>
                     </div>
                 </div>
             </div>
         );
     };
-     // const handleFilterChange = () =>{}
 
     return (
-        <div className={"widget-products"}>
-            <div className={"researchBar"}>
-                <input
-                    type={"text"}
-                    placeholder={"Rechercher une marchandise"}
-                    // onChange={(e) => handleFilterChange()}
-                />
-
+        <div className="widget-products">
+            <div className="researchBar">
+                <input type="text" placeholder="Rechercher une marchandise" />
                 <select>
-                    <option value={""}>Tous</option>
-                    <option value={"carburant"}>Carburants</option>
-                    <option value={"produit"}>Produit</option>
+                    <option value="">Tous</option>
+                    <option value="carburant">Carburants</option>
+                    <option value="produit">Produit</option>
                 </select>
             </div>
 
             <div className="products-list">
                 <table>
                     <thead>
-                    <tr>
-                        <th>Produit</th>
-                        <th>Quantité</th>
-                        <th>Type</th>
-                        <th>Prix</th>
-                        <th>Actions</th>
-                    </tr>
+                        <tr>
+                            <th>Produit</th>
+                            <th>Quantité</th>
+                            <th>Type</th>
+                            <th>Prix</th>
+                            <th>Actions</th>
+                        </tr>
                     </thead>
                     <tbody>
-                    <tr key={1}>
-                        <td>{"Sans plomb 95"}</td>
-                        <td>{1667}{"L"}</td>
-                        <td>{"Carburant"}</td>
-                        <td>{1.667} {"€/L"}</td>
-                        <td>
-                            <button type="button" onClick={() => openModal(products[1], "edit")}>Editer</button>
-                            <button type="button" onClick={() => openModal(products[1], "delete")}>Supprimer</button>
-                        </td>
-                    </tr>
-                    {products.map((product, index) => {
-                        let uniteQuantite = "";
-                        let unitePrix = "€";
-
-                        if (product.type === "Carburant") {
-                            uniteQuantite = "L";
-                            unitePrix = "€/L";
-                        }
-
-                        return (
-                            <tr key={index}>
-                                <td>{product.nom}</td>
-                                <td>{product.quantity}{uniteQuantite}</td>
+                        {products.map(product => (
+                            <tr key={product.id}>
+                                <td>{product.name}</td>
+                                <td>{product.stock}{product.type === "Carburant" ? " L" : ""}</td>
                                 <td>{product.type}</td>
-                                <td>{product.price} {unitePrix}</td>
+                                <td>{product.price} {product.type === "Carburant" ? "€/L" : "€"}</td>
                                 <td>
-                                    <button type="button">Editer</button>
-                                    <button type="button">Supprimer</button>
+                                    <button type="button" onClick={() => openModal(product, "edit")}>Editer</button>
+                                    {product.type === "Produit" && (
+                                        <button type="button" onClick={() => openModal(product, "delete")}>Supprimer</button>
+                                    )}
                                 </td>
                             </tr>
-                        );
-                    })}
+                        ))}
                     </tbody>
                 </table>
             </div>
@@ -126,4 +125,4 @@ export const Products: FC = () => {
             {renderModal()}
         </div>
     );
-}
+};
