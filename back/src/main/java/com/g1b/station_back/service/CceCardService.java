@@ -1,9 +1,11 @@
 package com.g1b.station_back.service;
 
 import com.g1b.station_back.dto.*;
+import com.g1b.station_back.model.CceBonusTier;
 import com.g1b.station_back.model.CceCard;
 import com.g1b.station_back.model.Client;
 import com.g1b.station_back.model.enums.CceStatus;
+import com.g1b.station_back.repository.CceBonusTierRepository;
 import com.g1b.station_back.repository.CceCardRepository;
 import com.g1b.station_back.repository.ClientRepository;
 import com.g1b.station_back.repository.TransactionPaymentRepository;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -18,11 +21,13 @@ public class CceCardService {
     private final ClientRepository clientRepository;
     private final CceCardRepository cceCardRepository;
     private final TransactionPaymentRepository transactionPaymentRepository;
+    private final CceBonusTierRepository tierRepository;
 
-    public CceCardService(ClientRepository clientRepository, CceCardRepository cceCardRepository, TransactionPaymentRepository transactionPaymentRepository) {
+    public CceCardService(ClientRepository clientRepository, CceCardRepository cceCardRepository, TransactionPaymentRepository transactionPaymentRepository, CceBonusTierRepository tierRepository) {
         this.clientRepository = clientRepository;
         this.cceCardRepository = cceCardRepository;
         this.transactionPaymentRepository = transactionPaymentRepository;
+        this.tierRepository = tierRepository;
     }
 
     public List<CceDTO> getAllCceCards() {
@@ -59,7 +64,6 @@ public class CceCardService {
         card.setCreatedAt(LocalDate.now());
         card.setExpiresAt(LocalDate.now().plusYears(3));
         card.setCode(request.code());
-        card.setMinimumCreditAmount(request.montant());
         card.setStatus(CceStatus.activated);
         CceCard savedCard = cceCardRepository.save(card);
 
@@ -92,7 +96,15 @@ public class CceCardService {
 
     public void creditCce(Integer id, CceCreditDTO request) {
         cceCardRepository.findById(id).ifPresent(card -> {
-            card.setBalance(card.getBalance().add(request.amount()));
+            BigDecimal amount = request.amount();
+
+            BigDecimal bonus = tierRepository.findAll().stream()
+                    .filter(t -> amount.compareTo(t.getMinAmount()) >= 0)
+                    .max(Comparator.comparing(CceBonusTier::getMinAmount))
+                    .map(t -> amount.multiply(t.getBonusPercentage()).divide(BigDecimal.valueOf(100)))
+                    .orElse(BigDecimal.ZERO);
+
+            card.setBalance(card.getBalance().add(amount).add(bonus));
             cceCardRepository.save(card);
         });
     }

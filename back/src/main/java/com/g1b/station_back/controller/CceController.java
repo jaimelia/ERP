@@ -2,6 +2,7 @@ package com.g1b.station_back.controller;
 
 import com.g1b.station_back.dto.*;
 import com.g1b.station_back.service.CceCardService;
+import com.g1b.station_back.service.CceSettingsService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,9 +13,11 @@ import java.util.List;
 public class CceController {
 
     private final CceCardService cceCardService;
+    private final CceSettingsService cceSettingsService;
 
-    public CceController(CceCardService cceCardService) {
+    public CceController(CceCardService cceCardService, CceSettingsService cceSettingsService) {
         this.cceCardService = cceCardService;
+        this.cceSettingsService = cceSettingsService;
     }
 
     @GetMapping
@@ -54,5 +57,16 @@ public class CceController {
     @GetMapping("/{id}/transactions")
     public ResponseEntity<List<CceTransactionDTO>> getCceTransactions(@PathVariable Integer id) {
         return ResponseEntity.ok(cceCardService.getCceTransactions(id));
+    }
+
+    @GetMapping("/settings")
+    public ResponseEntity<CceSettingsDTO> getSettings() {
+        return ResponseEntity.ok(cceSettingsService.getGlobalSettings());
+    }
+
+    @PutMapping("/settings")
+    public ResponseEntity<Void> updateSettings(@RequestBody CceSettingsDTO request) {
+        cceSettingsService.updateGlobalSettings(request);
+        return ResponseEntity.ok().build();
     }
 }
