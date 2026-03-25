@@ -28,17 +28,14 @@ public class CceCard {
     @Column(nullable = false)
     private Integer code;
 
-    @Column(name = "minimum_credit_amount", nullable = false)
-    private Integer minimumCreditAmount;
-
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(nullable = false)
     private CceStatus status;
 
     public CceCard() {}
-    public CceCard(Integer idCceCard, BigDecimal balance, LocalDate createdAt, LocalDate expiresAt, Integer code, Integer minimumCreditAmount, CceStatus status) {
-        this.idCceCard = idCceCard; this.balance = balance; this.createdAt = createdAt; this.expiresAt = expiresAt; this.code = code; this.minimumCreditAmount = minimumCreditAmount; this.status = status;
+    public CceCard(Integer idCceCard, BigDecimal balance, LocalDate createdAt, LocalDate expiresAt, Integer code, CceStatus status) {
+        this.idCceCard = idCceCard; this.balance = balance; this.createdAt = createdAt; this.expiresAt = expiresAt; this.code = code; this.status = status;
     }
 
     public Integer getIdCceCard() { return idCceCard; }
@@ -51,8 +48,6 @@ public class CceCard {
     public void setExpiresAt(LocalDate expiresAt) { this.expiresAt = expiresAt; }
     public Integer getCode() { return code; }
     public void setCode(Integer code) { this.code = code; }
-    public Integer getMinimumCreditAmount() { return minimumCreditAmount; }
-    public void setMinimumCreditAmount(Integer minimumCreditAmount) { this.minimumCreditAmount = minimumCreditAmount; }
     public CceStatus getStatus() { return status; }
     public void setStatus(CceStatus status) { this.status = status; }
 }

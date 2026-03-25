@@ -22,7 +22,18 @@ interface CCETransaction {
     amount: number;
 }
 
-type PopupType = "create" | "edit" | "credit" | "transactions" | "reedit_alert" | "reedit" | null;
+interface BonusTier {
+    id?: number;
+    minAmount: string;
+    bonusAmount: string;
+}
+
+interface CCESettingsData {
+    minimumCreditAmount: string;
+    bonusTiers: BonusTier[];
+}
+
+type PopupType = "create" | "edit" | "credit" | "transactions" | "reedit_alert" | "reedit" | "settings" | null;
 
 export const CCEWidget: FC = () => {
     const [search, setSearch] = useState("");
@@ -33,6 +44,7 @@ export const CCEWidget: FC = () => {
     const [formData, setFormData] = useState<Record<string, string>>({});
     const [errors, setErrors] = useState<Record<string, boolean>>({});
     const [cardTransactions, setCardTransactions] = useState<CCETransaction[]>([]);
+    const [settingsData, setSettingsData] = useState<CCESettingsData>({ minimumCreditAmount: "", bonusTiers: [] });
 
     const loadCces = async () => {
         try {
@@ -55,8 +67,25 @@ export const CCEWidget: FC = () => {
         }
     };
 
+    const loadSettings = async () => {
+        try {
+            const data = await fetchJsonWithAuth(apiUrl("/cce/settings"));
+            setSettingsData({
+                minimumCreditAmount: data.minimumCreditAmount?.toString() || "",
+                bonusTiers: data.bonusTiers?.map((t: any) => ({
+                    id: t.id,
+                    minAmount: t.minAmount.toString(),
+                    bonusAmount: t.bonusAmount.toString()
+                })) || []
+            });
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     useEffect(() => {
         loadCces();
+        loadSettings();
     }, []);
 
     const handleToggleStatus = async () => {
@@ -103,6 +132,10 @@ export const CCEWidget: FC = () => {
             setCardTransactions([]);
         }
 
+        if (type === "settings" || type === "credit") {
+            await loadSettings();
+        }
+
         setActivePopup(type);
     };
 
@@ -116,6 +149,27 @@ export const CCEWidget: FC = () => {
     const handleValidatePopup = async () => {
         if (activePopup === "reedit_alert") {
             handleOpenPopup("reedit");
+            return;
+        }
+
+        if (activePopup === "settings") {
+            try {
+                await fetchJsonWithAuth(apiUrl("/cce/settings"), {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        minimumCreditAmount: parseFloat(settingsData.minimumCreditAmount) || 0,
+                        bonusTiers: settingsData.bonusTiers.map(t => ({
+                            minAmount: parseFloat(t.minAmount) || 0,
+                            bonusAmount: parseFloat(t.bonusAmount) || 0
+                        }))
+                    })
+                });
+                handleClosePopup();
+                await loadSettings();
+            } catch (error) {
+                console.error(error);
+            }
             return;
         }
 
@@ -179,6 +233,40 @@ export const CCEWidget: FC = () => {
         }
     };
 
+    const handleAddTier = () => {
+        setSettingsData(prev => ({ ...prev, bonusTiers: [...prev.bonusTiers, { minAmount: "", bonusAmount: "" }] }));
+    };
+
+    const handleUpdateTier = (index: number, field: keyof BonusTier, value: string) => {
+        setSettingsData(prev => {
+            const newTiers = [...prev.bonusTiers];
+            newTiers[index] = { ...newTiers[index], [field]: value };
+            return { ...prev, bonusTiers: newTiers };
+        });
+    };
+
+    const handleRemoveTier = (index: number) => {
+        setSettingsData(prev => {
+            const newTiers = [...prev.bonusTiers];
+            newTiers.splice(index, 1);
+            return { ...prev, bonusTiers: newTiers };
+        });
+    };
+
+    const calculateBonus = (amountStr: string) => {
+        const amount = parseFloat(amountStr);
+        if (isNaN(amount) || amount <= 0) return 0;
+
+        const applicableTiers = settingsData.bonusTiers
+            .filter(t => amount >= parseFloat(t.minAmount))
+            .sort((a, b) => parseFloat(b.minAmount) - parseFloat(a.minAmount));
+
+        if (applicableTiers.length > 0) {
+            return parseFloat(applicableTiers[0].bonusAmount) || 0;
+        }
+        return 0;
+    };
+
     const filtered = cces.filter(c =>
         `${c.nom} ${c.prenom}`.toLowerCase().includes(search.toLowerCase()) ||
         c.numeroCCE.includes(search)
@@ -187,6 +275,13 @@ export const CCEWidget: FC = () => {
     const selectedCard = cces.find(c => c.id === selected);
     const toggleButtonText = selectedCard?.statut === "Active" ? "Désactiver" : "Activer";
 
+    // Bloque la saisie des caractères e, E, + et -
+    const blockInvalidChar = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (["e", "E", "+", "-"].includes(e.key)) {
+            e.preventDefault();
+        }
+    };
+
     const renderField = (name: string, label: string, type = "text", maxLength?: number, fullSpan = false) => (
         <div className={`field-group ${fullSpan ? 'full-span' : ''}`}>
             <label className="field-label">{label}</label>
@@ -194,9 +289,12 @@ export const CCEWidget: FC = () => {
                 type={type}
                 placeholder={label}
                 maxLength={maxLength}
+                min={type === "number" ? "0" : undefined}
+                onKeyDown={type === "number" ? blockInvalidChar : undefined}
                 value={formData[name] || ""}
                 onChange={e => {
-                    setFormData({ ...formData, [name]: e.target.value });
+                    const val = type === "number" ? e.target.value.replace(",", ".") : e.target.value;
+                    setFormData({ ...formData, [name]: val });
                     if (errors[name]) setErrors({ ...errors, [name]: false });
                 }}
                 className={errors[name] ? "error-input" : ""}
@@ -205,7 +303,6 @@ export const CCEWidget: FC = () => {
         </div>
     );
 
-    // Retourne la configuration complète pour le composant Popup selon l'état actuel
     const getPopupConfig = () => {
         if (!activePopup) return null;
 
@@ -217,18 +314,109 @@ export const CCEWidget: FC = () => {
         );
 
         switch (activePopup) {
+            case "settings":
+                return {
+                    icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>,
+                    title: "Paramètres globaux CCE",
+                    subtitle: "Configuration commune à toutes les cartes",
+                    content: (
+                        <div className="popup-form" style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                            <div className="field-group full-span">
+                                <label className="field-label">Montant de crédit minimum (€)</label>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    placeholder="Ex: 15.00"
+                                    onKeyDown={blockInvalidChar}
+                                    value={settingsData.minimumCreditAmount}
+                                    onChange={e => setSettingsData({ ...settingsData, minimumCreditAmount: e.target.value.replace(",", ".") })}
+                                />
+                            </div>
+                            <div style={{ borderTop: "1px solid var(--color-border)", paddingTop: "15px" }}>
+                                <h4 style={{ margin: "0 0 15px 0", fontSize: "14px", color: "var(--color-text)" }}>Tranches de bonus</h4>
+                                <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                                    {settingsData.bonusTiers.map((tier, index) => (
+                                        <div key={index} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                                            <span style={{ fontSize: "13px" }}>À partir de</span>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                style={{ width: "80px", padding: "6px" }}
+                                                value={tier.minAmount}
+                                                onKeyDown={blockInvalidChar}
+                                                onChange={e => handleUpdateTier(index, "minAmount", e.target.value.replace(",", "."))}
+                                            />
+                                            <span style={{ fontSize: "13px" }}>€</span>
+                                            <span style={{ margin: "0 5px" }}>&rarr;</span>
+                                            <span style={{ fontSize: "13px" }}>Bonus de</span>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                style={{ width: "70px", padding: "6px" }}
+                                                value={tier.bonusAmount}
+                                                onKeyDown={blockInvalidChar}
+                                                onChange={e => handleUpdateTier(index, "bonusAmount", e.target.value.replace(",", "."))}
+                                            />
+                                            <span style={{ fontSize: "13px" }}>€</span>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRemoveTier(index)}
+                                                style={{ background: "none", border: "none", color: "#ef4444", cursor: "pointer", padding: "5px" }}
+                                                title="Supprimer la tranche"
+                                            >
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                            </button>
+                                        </div>
+                                    ))}
+                                    <button
+                                        type="button"
+                                        onClick={handleAddTier}
+                                        style={{ marginTop: "10px", padding: "8px", background: "var(--color-surface-alt)", border: "1px dashed var(--color-border)", borderRadius: "6px", color: "var(--color-text)", cursor: "pointer", fontSize: "13px" }}
+                                    >
+                                        + Ajouter une tranche
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    ),
+                    footer: baseFooter("Sauvegarder")
+                };
             case "credit":
+                { const bonusAmount = calculateBonus(formData.amount || "0");
                 return {
                     icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>,
                     title: "Créditer la CCE",
                     subtitle: `Ajouter des fonds à la carte N° ${selectedCard?.numeroCCE}`,
                     content: (
                         <div className="popup-form">
-                            {renderField("amount", "Montant à créditer (€)", "number", undefined, true)}
+                            <div className="field-group full-span">
+                                <label className="field-label">Montant à créditer (€)</label>
+                                <div style={{ position: "relative", display: "flex", alignItems: "center", gap: "10px" }}>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        placeholder="Montant à créditer (€)"
+                                        value={formData.amount || ""}
+                                        onKeyDown={blockInvalidChar}
+                                        onChange={e => {
+                                            setFormData({ ...formData, amount: e.target.value.replace(",", ".") });
+                                            if (errors["amount"]) setErrors({ ...errors, amount: false });
+                                        }}
+                                        className={errors["amount"] ? "error-input" : ""}
+                                        style={{ flex: 1 }}
+                                    />
+                                    {bonusAmount > 0 && (
+                                        <span style={{ color: "#10b981", fontWeight: 600, fontSize: "14px", minWidth: "80px" }}>
+                                            (+{bonusAmount.toFixed(2)}€)
+                                        </span>
+                                    )}
+                                </div>
+                                {errors["amount"] && <span className="error-text">Ce champ est requis</span>}
+                            </div>
                         </div>
                     ),
                     footer: baseFooter("Confirmer l'action")
-                };
+                }; }
             case "create":
             case "reedit":
                 { const isCreate = activePopup === "create";
@@ -337,6 +525,12 @@ export const CCEWidget: FC = () => {
                         onChange={e => setSearch(e.target.value)}
                     />
                 </div>
+                <button className="widget-settings-btn" type="button" title="Paramètres" onClick={() => handleOpenPopup("settings")}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                </button>
             </div>
 
             <div className="widget-table-wrap">
