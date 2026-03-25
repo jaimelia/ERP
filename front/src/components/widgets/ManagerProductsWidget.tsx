@@ -1,17 +1,17 @@
-import { useState, type FC } from "react";
-import { useFetch } from "../../hooks/useFetch.ts";
-import { FetchWrapper } from "../FetchWrapper.tsx";
-import { useToast } from "../../contexts/ToastContext.tsx";
-import { apiUrl } from "../../api/common.ts";
+import {type FC, useState} from "react";
+import {useFetch} from "../../hooks/useFetch.ts";
+import {FetchWrapper} from "../FetchWrapper.tsx";
+import {useToast} from "../../contexts/ToastContext.tsx";
+import {apiUrl} from "../../api/common.ts";
 import {
     createProduct,
-    deleteProduct,
     deleteFuel,
+    deleteProduct,
+    type StockItemDTO,
     updateFuel,
     updateProduct,
-    type StockItemDTO,
-} from "../../api/merchandiseApi.ts";
-import type { ApiError } from "../../types.ts";
+} from "../../api/itemsApi.ts";
+import type {ApiError} from "../../types.ts";
 
 // ─── Types internes ───────────────────────────────────────────────────────────
 
@@ -78,14 +78,14 @@ export const ManagerProductsWidget: FC = () => {
             if (editing.type === "Produit") {
                 await updateProduct(editing.id, {
                     name:           editForm.name,
-                    unitPrice:      parseFloat(editForm.price),
+                    price:      parseFloat(editForm.price),
                     stock:          parseInt(editForm.stock),
                     alertThreshold: parseInt(editForm.threshold) || 0,
                 });
             } else {
                 await updateFuel(editing.id, {
                     name:           editForm.name,
-                    pricePerLiter:  parseFloat(editForm.price),
+                    price:  parseFloat(editForm.price),
                     stock:          parseFloat(editForm.stock),
                     alertThreshold: parseFloat(editForm.threshold) || 0,
                 });
@@ -120,7 +120,7 @@ export const ManagerProductsWidget: FC = () => {
         try {
             await createProduct({
                 name:           addForm.name,
-                unitPrice:      parseFloat(addForm.price),
+                price:      parseFloat(addForm.price),
                 stock:          parseInt(addForm.stock),
                 alertThreshold: parseInt(addForm.threshold) || 0,
             });

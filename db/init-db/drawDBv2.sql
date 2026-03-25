@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS "products" (
 	"unit_price" NUMERIC(5,3) NOT NULL,
 	"stock" INTEGER NOT NULL,
 	"alert_threshold" INTEGER NOT NULL,
-	"id_item" INTEGER NOT NULL,
+	"id_item" INTEGER NOT NULL UNIQUE,
 	PRIMARY KEY("id_item")
 );
 
@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS "fuels" (
 	"price_per_liter" NUMERIC(5,3) NOT NULL,
 	"stock" NUMERIC(10,3),
 	"alert_threshold" NUMERIC(10,3) NOT NULL,
-	"id_item" INTEGER NOT NULL,
+	"id_item" INTEGER NOT NULL UNIQUE,
 	PRIMARY KEY("id_item")
 );
 

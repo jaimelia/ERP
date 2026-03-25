@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface FuelRepository extends JpaRepository<Fuel, Long> {
-	List<Fuel> findByIdItem(Integer idItem);
+	Fuel findByIdItem(Integer idItem);
 }

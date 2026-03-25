@@ -3,7 +3,7 @@ import {DEFAULT_LEVELS, WIDGETS} from "./data/stationConfig.tsx";
 
 export type ThemeKey = "light" | "dark";
 export type Role = "employe" | "gerant";
-export type ItemType = "product" | "fuel";
+export type ItemType = "product" | "fuel" | "electricity";
 
 export interface User {
     username: string;
@@ -94,6 +94,8 @@ export const formatQuantity = (quantity: number, itemType: ItemType): string => 
             return `${quantity} L`;
         case "product":
             return `${quantity}`;
+        case "electricity":
+            return `${quantity} kWh`;
     }
 }
 
@@ -104,5 +106,7 @@ export const formatPrice = (price: number, itemType?: ItemType): string => {
             return `${price} €`;
         case "fuel":
             return `${price} €/L`;
+        case "electricity":
+            return `${price} €/kWh`
     }
 }

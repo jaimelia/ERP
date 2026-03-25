@@ -23,11 +23,13 @@ public class RestockService {
 	private final RestockRepository restockRepository;
 	private final FuelRepository fuelRepository;
 	private final ItemRepository itemRepository;
+	private final ItemService itemService;
 
-	public RestockService(RestockRepository restockRepository, FuelRepository fuelRepository, ItemRepository itemRepository) {
+	public RestockService(RestockRepository restockRepository, FuelRepository fuelRepository, ItemRepository itemRepository, ItemService itemService) {
 		this.restockRepository = restockRepository;
 		this.fuelRepository = fuelRepository;
 		this.itemRepository = itemRepository;
+		this.itemService = itemService;
 	}
 
 	public List<RestockDTO> getAllRestocks() {
@@ -39,7 +41,7 @@ public class RestockService {
 						r.getQuantity(),
 						r.getStatus(),
 						r.getRestockDate(),
-						!fuelRepository.findByIdItem(r.getItem().getIdItem()).isEmpty() ? "fuel" : "product"))
+						fuelRepository.findByIdItem(r.getItem().getIdItem()) != null ? "fuel" : "product"))
 				.toList();
 	}
 
@@ -59,8 +61,8 @@ public class RestockService {
 				saved.getItem().getName(), 
 				saved.getQuantity(), 
 				saved.getStatus(), 
-				saved.getRestockDate(), 
-				!fuelRepository.findByIdItem(saved.getItem().getIdItem()).isEmpty() ? "fuel" : "product"
+				saved.getRestockDate(),
+				itemService.getItemType(item)
 		);
 	}
 
@@ -82,7 +84,7 @@ public class RestockService {
 				saved.getQuantity(),
 				saved.getStatus(),
 				saved.getRestockDate(),
-				!fuelRepository.findByIdItem(saved.getItem().getIdItem()).isEmpty() ? "fuel" : "product"
+				itemService.getItemType(item)
 		);
 	}
 }

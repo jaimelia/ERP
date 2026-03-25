@@ -3,8 +3,9 @@ package com.g1b.station_back.controller;
 import com.g1b.station_back.dto.FuelDTO;
 import com.g1b.station_back.dto.ProductDTO;
 import com.g1b.station_back.dto.RestockDTO;
-import com.g1b.station_back.dto.StockItemDTO;
+import com.g1b.station_back.dto.RestockableItemDTO;
 import com.g1b.station_back.service.FuelService;
+import com.g1b.station_back.service.ItemService;
 import com.g1b.station_back.service.ProductService;
 import com.g1b.station_back.service.RestockService;
 
@@ -16,18 +17,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/merchandise")
-public class MerchandiseController {
+@RequestMapping("/api/items")
+public class ItemController {
 
+	private final ItemService itemService;
     private final ProductService productService;
     private final FuelService fuelService;
-    private final RestockService restockService;
 
-    public MerchandiseController(ProductService productService, FuelService fuelService, RestockService restockService) {
+    public ItemController(ItemService itemService, ProductService productService, FuelService fuelService, ) {
+		this.itemService = itemService;
         this.productService = productService;
         this.fuelService = fuelService;
-        this.restockService = restockService;
-    }
+	}
+	
+	@GetMapping("/restockables")
+	public ResponseEntity<List<RestockableItemDTO>> getRestockableItems() {
+		return ResponseEntity.ok(itemService.getRestockableItems());
+	}
 
     // ── Produits ──────────────────────────────────────────────────────────────
 
@@ -95,28 +101,5 @@ public class MerchandiseController {
                         f.getAlertThreshold())));
 
         return ResponseEntity.ok(stock);
-    }
-
-    // ── Réapprovisionnements ──────────────────────────────────────────────────
-
-    @GetMapping("/restocks")
-    public ResponseEntity<List<RestockDTO>> getAllRestocks() {
-        return ResponseEntity.ok(restockService.getAllRestocks());
-    }
-
-    @PostMapping("/restocks")
-    public ResponseEntity<RestockDTO> createRestock(@RequestBody RestockDTO dto) {
-        return ResponseEntity.ok(restockService.createRestock(dto));
-    }
-
-    @PutMapping("/restocks/{id}")
-    public ResponseEntity<RestockDTO> updateRestock(@PathVariable Integer id, @RequestBody RestockDTO dto) {
-        return ResponseEntity.ok(restockService.updateRestock(id, dto));
-    }
-
-    @DeleteMapping("/restocks/{id}")
-    public ResponseEntity<Void> deleteRestock(@PathVariable Integer id) {
-        restockService.deleteRestock(id);
-        return ResponseEntity.noContent().build();
     }
 }

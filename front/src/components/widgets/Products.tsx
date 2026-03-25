@@ -1,5 +1,5 @@
-import { type FC, useEffect, useState } from "react";
-import { getStock, deleteProduct, updateProduct, updateFuel, type StockItemDTO } from "../../api/merchandiseApi.ts";
+import {type FC, useEffect, useState} from "react";
+import {deleteProduct, getStock, type StockItemDTO, updateFuel, updateProduct} from "../../api/itemsApi.ts";
 
 export const Products: FC = () => {
     const [products, setProducts] = useState<StockItemDTO[]>([]);
@@ -35,14 +35,14 @@ export const Products: FC = () => {
             if (selectedProduct.type === "Produit") {
                 await updateProduct(selectedProduct.id, {
                     name: editName,
-                    unitPrice: parseFloat(editPrice),
+                    price: parseFloat(editPrice),
                     stock: parseInt(editStock),
                     alertThreshold: 0,
                 });
             } else {
                 await updateFuel(selectedProduct.id, {
                     name: editName,
-                    pricePerLiter: parseFloat(editPrice),
+                    price: parseFloat(editPrice),
                     stock: parseFloat(editStock),
                     alertThreshold: 0,
                 });
