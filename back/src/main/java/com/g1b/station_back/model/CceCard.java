@@ -33,9 +33,14 @@ public class CceCard {
     @Column(nullable = false)
     private CceStatus status;
 
+    @ManyToOne
+    @JoinColumn(name = "id_client", nullable = false)
+    private Client client;
+
+
     public CceCard() {}
-    public CceCard(Integer idCceCard, BigDecimal balance, LocalDate createdAt, LocalDate expiresAt, Integer code, CceStatus status) {
-        this.idCceCard = idCceCard; this.balance = balance; this.createdAt = createdAt; this.expiresAt = expiresAt; this.code = code; this.status = status;
+    public CceCard(Integer idCceCard, BigDecimal balance, LocalDate createdAt, LocalDate expiresAt, Integer code, CceStatus status, Client client) {
+        this.idCceCard = idCceCard; this.balance = balance; this.createdAt = createdAt; this.expiresAt = expiresAt; this.code = code; this.status = status; this.client = client;
     }
 
     public Integer getIdCceCard() { return idCceCard; }
@@ -50,4 +55,6 @@ public class CceCard {
     public void setCode(Integer code) { this.code = code; }
     public CceStatus getStatus() { return status; }
     public void setStatus(CceStatus status) { this.status = status; }
+    public Client getClient() {return client;}
+    public void setClient(Client client) {this.client = client;}
 }

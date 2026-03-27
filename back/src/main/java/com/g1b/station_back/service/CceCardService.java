@@ -4,15 +4,18 @@ import com.g1b.station_back.dto.*;
 import com.g1b.station_back.model.CceBonusTier;
 import com.g1b.station_back.model.CceCard;
 import com.g1b.station_back.model.Client;
+import com.g1b.station_back.model.TransactionPayment;
 import com.g1b.station_back.model.enums.CceStatus;
 import com.g1b.station_back.repository.CceBonusTierRepository;
 import com.g1b.station_back.repository.CceCardRepository;
 import com.g1b.station_back.repository.ClientRepository;
 import com.g1b.station_back.repository.TransactionPaymentRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -31,49 +34,55 @@ public class CceCardService {
     }
 
     public List<CceDTO> getAllCceCards() {
-        return clientRepository.findAll().stream()
-                .filter(client -> client.getCceCard() != null)
-                .map(client -> new CceDTO(
-                        client.getCceCard().getIdCceCard(),
-                        client.getLastname(),
-                        client.getFirstname(),
-                        client.getMail(),
-                        client.getPhoneNumber(),
-                        client.getCceCard().getCode(),
-                        client.getCceCard().getStatus().name(),
-                        client.getCceCard().getCreatedAt(),
-                        client.getCceCard().getBalance()
+        return cceCardRepository.findAll().stream()
+                .map(card -> new CceDTO(
+                        card.getIdCceCard(),
+                        card.getClient().getLastname(),
+                        card.getClient().getFirstname(),
+                        card.getClient().getMail(),
+                        card.getClient().getPhoneNumber(),
+                        card.getCode(),
+                        card.getStatus().name(),
+                        card.getCreatedAt(),
+                        card.getBalance()
                 ))
                 .toList();
     }
 
     public List<CceTransactionDTO> getCceTransactions(Integer idCceCard) {
-        return transactionPaymentRepository.findByCceCard_IdCceCard(idCceCard).stream()
-                .map(payment -> new CceTransactionDTO(
-                        payment.getTransaction().getIdTransaction(),
-                        payment.getTransaction().getType(),
-                        payment.getDate(),
-                        payment.getAmount()
-                ))
-                .toList();
+        List<CceTransactionDTO> transactions = new ArrayList<>();
+        List<TransactionPayment> payments = transactionPaymentRepository.findByCceCard_IdCceCard(idCceCard);
+
+        for (TransactionPayment payment : payments) {
+            transactions.add(new CceTransactionDTO(
+                    payment.getTransaction().getIdTransaction(),
+                    payment.getTransaction().getType(),
+                    payment.getDate(),
+                    payment.getAmount()
+            ));
+        }
+
+        return transactions;
     }
 
+    @Transactional
     public void createCce(CceCreateDTO request) {
-        CceCard card = new CceCard();
-        card.setBalance(new BigDecimal(request.montant()));
-        card.setCreatedAt(LocalDate.now());
-        card.setExpiresAt(LocalDate.now().plusYears(3));
-        card.setCode(request.code());
-        card.setStatus(CceStatus.activated);
-        CceCard savedCard = cceCardRepository.save(card);
-
         Client client = new Client();
         client.setLastname(request.nom());
         client.setFirstname(request.prenom());
         client.setMail(request.email());
         client.setPhoneNumber(request.tel());
-        client.setCceCard(savedCard);
-        clientRepository.save(client);
+        // Sauvegarde immédiate pour générer l'ID
+        client = clientRepository.save(client);
+
+        CceCard card = new CceCard();
+        card.setClient(client);
+        card.setBalance(new BigDecimal(request.montant()));
+        card.setCreatedAt(LocalDate.now());
+        card.setExpiresAt(LocalDate.now().plusYears(3));
+        card.setCode(request.code());
+        card.setStatus(CceStatus.activated);
+        cceCardRepository.save(card);
     }
 
     public void editCce(Integer id, CceEditDTO request) {
@@ -81,16 +90,12 @@ public class CceCardService {
             card.setCode(request.code());
             cceCardRepository.save(card);
 
-            clientRepository.findAll().stream()
-                    .filter(c -> c.getCceCard() != null && c.getCceCard().getIdCceCard().equals(id))
-                    .findFirst()
-                    .ifPresent(client -> {
-                        client.setLastname(request.nom());
-                        client.setFirstname(request.prenom());
-                        client.setMail(request.email());
-                        client.setPhoneNumber(request.tel());
-                        clientRepository.save(client);
-                    });
+            Client client = card.getClient();
+            client.setLastname(request.nom());
+            client.setFirstname(request.prenom());
+            client.setMail(request.email());
+            client.setPhoneNumber(request.tel());
+            clientRepository.save(client);
         });
     }
 
@@ -100,7 +105,7 @@ public class CceCardService {
 
             BigDecimal bonus = tierRepository.findAll().stream()
                     .filter(t -> amount.compareTo(t.getMinAmount()) >= 0)
-                    .max(java.util.Comparator.comparing(CceBonusTier::getMinAmount))
+                    .max(Comparator.comparing(CceBonusTier::getMinAmount))
                     .map(CceBonusTier::getBonusAmount)
                     .orElse(BigDecimal.ZERO);
 
@@ -109,13 +114,30 @@ public class CceCardService {
         });
     }
 
+    @Transactional
     public void reeditCce(Integer oldId, CceCreateDTO request) {
-        cceCardRepository.findById(oldId).ifPresent(oldCard -> {
-            oldCard.setStatus(CceStatus.deactivated);
-            cceCardRepository.save(oldCard);
-        });
+        CceCard oldCard = cceCardRepository.findById(oldId).orElseThrow(() -> new RuntimeException("Ancienne carte introuvable"));
+        Client client = oldCard.getClient();
 
-        createCce(request);
+        client.setLastname(request.nom());
+        client.setFirstname(request.prenom());
+        client.setMail(request.email());
+        client.setPhoneNumber(request.tel());
+        clientRepository.save(client);
+
+        BigDecimal transferredBalance = oldCard.getBalance();
+        oldCard.setBalance(BigDecimal.ZERO);
+        oldCard.setStatus(CceStatus.deactivated);
+        cceCardRepository.save(oldCard);
+
+        CceCard newCard = new CceCard();
+        newCard.setClient(client);
+        newCard.setBalance(transferredBalance);
+        newCard.setCreatedAt(LocalDate.now());
+        newCard.setExpiresAt(LocalDate.now().plusYears(3));
+        newCard.setCode(request.code());
+        newCard.setStatus(CceStatus.activated);
+        cceCardRepository.save(newCard);
     }
 
     public void toggleStatus(Integer id) {

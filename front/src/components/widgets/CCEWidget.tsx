@@ -183,9 +183,9 @@ export const CCEWidget: FC = () => {
             }
         };
 
-        if (activePopup === "create" || activePopup === "reedit") {
+        if (activePopup === "create") {
             ["nom", "prenom", "email", "tel", "code", "montant"].forEach(checkField);
-        } else if (activePopup === "edit") {
+        } else if (activePopup === "reedit" || activePopup === "edit") {
             ["nom", "prenom", "email", "tel", "code"].forEach(checkField);
         } else if (activePopup === "credit") {
             checkField("amount");
@@ -418,14 +418,10 @@ export const CCEWidget: FC = () => {
                     footer: baseFooter("Confirmer l'action")
                 }; }
             case "create":
-            case "reedit":
-                { const isCreate = activePopup === "create";
                 return {
-                    icon: isCreate ?
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="17" y1="11" x2="23" y2="11"/></svg> :
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>,
-                    title: isCreate ? "Créer un nouveau compte CCE" : "Rééditer une CCE",
-                    subtitle: isCreate ? "Saisir les informations du client et de la carte" : `Remplacer la carte N° ${selectedCard?.numeroCCE}`,
+                    icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="17" y1="11" x2="23" y2="11"/></svg>,
+                    title: "Créer un nouveau compte CCE",
+                    subtitle: "Saisir les informations du client et de la carte",
                     content: (
                         <div className="popup-form">
                             {renderField("nom", "Nom")}
@@ -437,7 +433,23 @@ export const CCEWidget: FC = () => {
                         </div>
                     ),
                     footer: baseFooter("Confirmer l'action")
-                }; }
+                };
+            case "reedit":
+                return {
+                    icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>,
+                    title: "Rééditer une CCE",
+                    subtitle: `Remplacer la carte N° ${selectedCard?.numeroCCE}`,
+                    content: (
+                        <div className="popup-form">
+                            {renderField("nom", "Nom")}
+                            {renderField("prenom", "Prénom")}
+                            {renderField("email", "Email", "email")}
+                            {renderField("tel", "Téléphone", "tel")}
+                            {renderField("code", "Code (PIN)", "text", 4)}
+                        </div>
+                    ),
+                    footer: baseFooter("Confirmer l'action")
+                };
             case "edit":
                 return {
                     icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
