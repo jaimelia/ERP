@@ -10,20 +10,20 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/payments")
 public class PaymentController {
-    private final PaymentService paymentService;
+  private final PaymentService paymentService;
 
-    public PaymentController(PaymentService paymentService) {
-        this.paymentService = paymentService;
-    }
+  public PaymentController(PaymentService paymentService) {
+    this.paymentService = paymentService;
+  }
 
-    @PostMapping("/process")
-    public ResponseEntity<PaymentResponseDTO> processPayment(@Valid @RequestBody PaymentRequestDTO paymentRequestDTO) {
-        return org.springframework.http.ResponseEntity.ok(paymentService.handlePaymentRequest(paymentRequestDTO));
-    }
+  @PostMapping("/process")
+  public ResponseEntity<PaymentResponseDTO> processPayment(@Valid @RequestBody PaymentRequestDTO paymentRequestDTO) {
+    return org.springframework.http.ResponseEntity.ok(paymentService.handlePaymentRequest(paymentRequestDTO));
+  }
 
-    @PostMapping("/cancel/{paymentId}")
-    public ResponseEntity<Integer> cancelPayment(@PathVariable Integer paymentId) {
-        return ResponseEntity.ok(paymentService.cancelPayment(paymentId));
-    }
+  @PostMapping("/cancel/{paymentId}")
+  public ResponseEntity<PaymentResponseDTO> cancelPayment(@PathVariable Integer paymentId) {
+    return ResponseEntity.ok(paymentService.cancelPayment(paymentId));
+  }
 
 }

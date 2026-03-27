@@ -21,71 +21,77 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 public class PaymentService {
-    private final TransactionRepository transactionRepository;
-    private final TransactionPaymentRepository transactionPaymentRepository;
-    private final CceCardRepository cceCardRepository;
+  private final TransactionRepository transactionRepository;
+  private final TransactionPaymentRepository transactionPaymentRepository;
+  private final CceCardRepository cceCardRepository;
 
+  public PaymentService(TransactionRepository transactionRepository,
+      TransactionPaymentRepository transactionPaymentRepository, CceCardRepository cceCardRepository) {
+    this.transactionRepository = transactionRepository;
+    this.transactionPaymentRepository = transactionPaymentRepository;
+    this.cceCardRepository = cceCardRepository;
+  }
 
-    public PaymentService(TransactionRepository transactionRepository, TransactionPaymentRepository transactionPaymentRepository, CceCardRepository cceCardRepository) {
-        this.transactionRepository = transactionRepository;
-        this.transactionPaymentRepository = transactionPaymentRepository;
-        this.cceCardRepository = cceCardRepository;
+  @Transactional
+  public PaymentResponseDTO handlePaymentRequest(PaymentRequestDTO paymentRequestDTO) {
+    Transaction transaction = transactionRepository.findById(paymentRequestDTO.transactionId())
+        .orElseThrow(() -> new IllegalArgumentException("Transaction id not found"));
+
+    BigDecimal totalToPay = transaction.getRemainingAmount();
+    BigDecimal amountPaid = paymentRequestDTO.amount();
+
+    if (amountPaid.compareTo(totalToPay) > 0) {
+      throw new PaymentExcessException();
+    }
+    TransactionPayment newPayment = new TransactionPayment();
+    newPayment.setTransaction(transaction);
+    newPayment.setPaymentMethod(PaymentMethod.valueOf(paymentRequestDTO.paymentMethod()));
+    newPayment.setAmount(amountPaid);
+    newPayment.setEndNumCard(paymentRequestDTO.endNumCard());
+    newPayment.setDate(LocalDate.now());
+
+    if (paymentRequestDTO.id_cce_card() != null) {
+      CceCard cceCard = cceCardRepository.findById(paymentRequestDTO.id_cce_card())
+          .orElseThrow(() -> new IllegalArgumentException("CCE Card not found"));
+      newPayment.setCceCard(cceCard);
     }
 
-    @Transactional
-    public PaymentResponseDTO handlePaymentRequest(PaymentRequestDTO paymentRequestDTO) {
-        Transaction transaction = transactionRepository.findById(paymentRequestDTO.transactionId())
-                .orElseThrow(() -> new IllegalArgumentException("Transaction id not found"));
+    PaymentStatus paymentStatus = PaymentStatus.accepted;
 
-        BigDecimal totalToPay = transaction.getRemainingAmount();
-        BigDecimal amountPaid = paymentRequestDTO.amount();
+    if (newPayment.getPaymentMethod() == PaymentMethod.CreditCard) {
+      if (ThreadLocalRandom.current().nextDouble() >= 0.9) {
+        paymentStatus = PaymentStatus.canceled;
+      }
+    }
+    newPayment.setStatus(paymentStatus);
 
-        if (amountPaid.compareTo(totalToPay) > 0) {
-            throw new PaymentExcessException();
-        }
-        TransactionPayment newPayment = new TransactionPayment();
-        newPayment.setTransaction(transaction);
-        newPayment.setPaymentMethod(PaymentMethod.valueOf(paymentRequestDTO.paymentMethod()));
-        newPayment.setAmount(amountPaid);
-        newPayment.setEndNumCard(paymentRequestDTO.endNumCard());
-        newPayment.setDate(LocalDate.now());
+    transaction.addPayment(newPayment);
+    transactionPaymentRepository.save(newPayment);
 
-        if (paymentRequestDTO.id_cce_card() != null) {
-            CceCard cceCard = cceCardRepository.findById(paymentRequestDTO.id_cce_card())
-                    .orElseThrow(() -> new IllegalArgumentException("CCE Card not found"));
-            newPayment.setCceCard(cceCard);
-        }
-
-        PaymentStatus paymentStatus = PaymentStatus.accepted;
-
-        if (newPayment.getPaymentMethod() == PaymentMethod.CreditCard) {
-            if (ThreadLocalRandom.current().nextDouble() >= 0.9) {
-                paymentStatus = PaymentStatus.canceled;
-            }
-        }
-        newPayment.setStatus(paymentStatus);
-
-        transaction.addPayment(newPayment);
-        transactionPaymentRepository.save(newPayment);
-
-        if (paymentStatus == PaymentStatus.canceled) {
-            return new PaymentResponseDTO(newPayment.getIdTransactionPayment(), PaymentResponseDTO.PaymentStatus.CANCELED, totalToPay, "Payment refused.");
-        }
-
-        if (amountPaid.compareTo(totalToPay) == 0) {
-            return new PaymentResponseDTO(newPayment.getIdTransactionPayment(), PaymentResponseDTO.PaymentStatus.VALIDATED, BigDecimal.ZERO, "Payment successful, transaction completed.");
-        }
-
-        BigDecimal newRemaining = totalToPay.subtract(amountPaid);
-        return new PaymentResponseDTO(newPayment.getIdTransactionPayment(), PaymentResponseDTO.PaymentStatus.PARTIAL, newRemaining, "Partial payment successful.");
+    if (paymentStatus == PaymentStatus.canceled) {
+      return new PaymentResponseDTO(newPayment.getIdTransactionPayment(), PaymentResponseDTO.PaymentStatus.CANCELED,
+          totalToPay, "Payment refused.");
     }
 
-    public Integer cancelPayment(Integer paymentId) {
-        TransactionPayment payment = transactionPaymentRepository.findById(paymentId)
-                .orElseThrow(() -> new IllegalArgumentException("Payment not found"));
-        payment.setStatus(PaymentStatus.canceled);
-        transactionPaymentRepository.save(payment);
-        return paymentId;
+    if (amountPaid.compareTo(totalToPay) == 0) {
+      return new PaymentResponseDTO(newPayment.getIdTransactionPayment(), PaymentResponseDTO.PaymentStatus.VALIDATED,
+          BigDecimal.ZERO, "Payment successful, transaction completed.");
     }
+
+    BigDecimal newRemaining = totalToPay.subtract(amountPaid);
+    return new PaymentResponseDTO(newPayment.getIdTransactionPayment(), PaymentResponseDTO.PaymentStatus.PARTIAL,
+        newRemaining, "Partial payment successful.");
+  }
+
+  public PaymentResponseDTO cancelPayment(Integer paymentId) {
+    TransactionPayment payment = transactionPaymentRepository.findById(paymentId)
+        .orElseThrow(() -> new IllegalArgumentException("Payment not found"));
+    Transaction transaction = payment.getTransaction();
+    payment.setStatus(PaymentStatus.canceled);
+    BigDecimal remainingAmount = transaction.getRemainingAmount();
+    transactionPaymentRepository.save(payment);
+    return new PaymentResponseDTO(paymentId, PaymentResponseDTO.PaymentStatus.CANCELED, remainingAmount,
+        "Payment canceled.");
+  }
 
 }
