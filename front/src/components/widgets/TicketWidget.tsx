@@ -39,6 +39,7 @@ export const TicketWidget: FC = () => {
   const [currentPaymentId, setCurrentPaymentId] = useState<number | null>(null);
   const [paymentResponse, setPaymentResponse] = useState<PaymentResponseDTO | null>(null);
   const [remainingAmount, setRemainingAmount] = useState(0.00);
+  const [notification, setNotification] = useState<{ message: string; type: "success" | "error" | "warning" | "info" } | null>(null);
 
   useEffect(() => {
     fetchJsonWithAuth(apiUrl("/products"))
@@ -75,6 +76,15 @@ export const TicketWidget: FC = () => {
       clearTimeout(timer);
     };
   }, [search]);
+
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => {
+        setNotification(null);
+      }, 5000); // Disparaît après 5 secondes
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
 
   const total = cart.reduce((acc, item) => acc + (item.quantity * item.unitPrice), 0);
 
@@ -120,6 +130,7 @@ export const TicketWidget: FC = () => {
       }
     }
     setCart([]);
+    setNotification(null);
     setRemainingAmount(0.00);
     setTicketStatus("initial");
     setCurrentTransactionId(null);
@@ -227,10 +238,19 @@ export const TicketWidget: FC = () => {
 
     if (status === "VALIDATED") {
       setTicketStatus("validated");
+      setNotification({ message: responseToUse.message, type: "success" });
       setCart([]);
-    } else {
+    } else if (status === "PARTIAL") {
       setTicketStatus("paymentSelection");
+      setNotification({ message: responseToUse.message, type: "warning" });
       setPaymentResponse(null);
+    } else if (status === "CANCELED") {
+      setTicketStatus("paymentSelection");
+      setNotification({ message: responseToUse.message, type: "error" });
+      setPaymentResponse(null);
+    } else if (status === "EXCESS") {
+      setTicketStatus("paymentSelection");
+      setNotification({ message: responseToUse.message, type: "error" });
     }
   }
 
@@ -240,9 +260,11 @@ export const TicketWidget: FC = () => {
         const data = await fetchJsonWithAuth(apiUrl(`/payments/cancel/${currentPaymentId}`), {
           method: "POST"
         });
+        setNotification({ message: "Paiement annulé.", type: "info" });
         setPaymentResponse(data);
         paymentProcessed(data);
       } catch (error) {
+        setNotification({ message: "Erreur lors de l'annulation.", type: "error" });
         console.error("Erreur réseau lors de l'annulation:", error);
       }
     }
@@ -294,7 +316,7 @@ export const TicketWidget: FC = () => {
         <span>{total.toFixed(2)} €</span>
       </div>
 
-      <div className="ticket-total-row">
+      <div className="ticket-remaining-row">
         <span>Reste à payer</span>
         <span>{(remainingAmount ?? 0).toFixed(2)} €</span>
       </div>
@@ -312,6 +334,12 @@ export const TicketWidget: FC = () => {
           </div>
         ))}
       </div>
+
+      {notification && (
+        <div className={`ticket-notification notification-${notification.type}`}>
+          {notification.message}
+        </div>
+      )}
 
       <TicketActions
         ticketStatus={ticketStatus}
