@@ -1,5 +1,6 @@
 package com.g1b.station_back.service;
 
+import com.g1b.station_back.dto.CceTransactionDTO;
 import com.g1b.station_back.model.Client;
 import com.g1b.station_back.repository.ClientRepository;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,7 @@ public class ClientService {
     public List<Client> getAllClients() {
         return clientRepository.findAllByOrderByIdClientAsc()
                 .stream()
-                .map(c -> new Client(c.getIdClient(), c.getFirstname(), c.getLastname(), c.getMail(), c.getPhoneNumber(), c.getCceCard()))
+                .map(c -> new Client(c.getIdClient(), c.getFirstname(), c.getLastname(), c.getMail(), c.getPhoneNumber(), c.getCceCards()))
                 .toList();
     }
 
@@ -32,7 +33,22 @@ public class ClientService {
         existingClient.setPhoneNumber(updatedClient.getPhoneNumber());
 
         Client savedClient = clientRepository.save(existingClient);
-        return new Client(savedClient.getIdClient(), savedClient.getFirstname(), savedClient.getLastname(), savedClient.getMail(), savedClient.getPhoneNumber(), savedClient.getCceCard());
+        return new Client(savedClient.getIdClient(), savedClient.getFirstname(), savedClient.getLastname(), savedClient.getMail(), savedClient.getPhoneNumber(), savedClient.getCceCards());
+    }
+
+    public List<CceTransactionDTO> getClientTransactions(Integer idClient) {
+        Client client = clientRepository.findById(idClient).orElseThrow();
+        if (client.getCceCards() == null || client.getCceCards().isEmpty()) return List.of();
+
+        return client.getCceCards().stream()
+                .flatMap(card -> transactionPaymentRepository.findByCceCard_IdCceCard(card.getIdCceCard()).stream())
+                .map(payment -> new CceTransactionDTO(
+                        payment.getTransaction().getIdTransaction(),
+                        payment.getTransaction().getType(),
+                        payment.getDate(),
+                        payment.getAmount()
+                ))
+                .toList();
     }
 
     //TODO : récuperer les transactions d'un utilisateur
