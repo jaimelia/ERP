@@ -1,6 +1,10 @@
 package com.g1b.station_back.model;
 
 import com.g1b.station_back.model.enums.RestockStatus;
+
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.dialect.type.PostgreSQLEnumJdbcType;
+
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -13,7 +17,7 @@ public class Restock {
     @Column(name = "id_restock")
     private Integer idRestock;
 
-    @Column(nullable = false, precision = 5, scale = 3)
+    @Column(nullable = false, precision = 10, scale = 3)
     private BigDecimal quantity;
 
     @Column(name = "restock_date", nullable = false)
@@ -24,6 +28,7 @@ public class Restock {
     private Item item;
 
     @Enumerated(EnumType.STRING)
+	@JdbcType(PostgreSQLEnumJdbcType.class)
     @Column(nullable = false)
     private RestockStatus status;
 

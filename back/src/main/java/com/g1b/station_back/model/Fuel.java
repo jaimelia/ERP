@@ -10,15 +10,18 @@ public class Fuel extends Item {
     @Column(name = "price_per_liter", nullable = false, precision = 5, scale = 3)
     private BigDecimal pricePerLiter;
 
-    @Column(precision = 5, scale = 3)
+    @Column(precision = 10, scale = 3)
     private BigDecimal stock;
 
-    @Column(name = "alert_threshold", nullable = false, precision = 5, scale = 3)
+    @Column(name = "alert_threshold", precision = 10, scale = 3)
     private BigDecimal alertThreshold;
+	
+	@Column(name = "auto_restock_quantity", precision = 10, scale = 3)
+	private BigDecimal autoRestockQuantity;
 
     public Fuel() {}
-    public Fuel(Integer idItem, String itemType, String name, BigDecimal pricePerLiter, BigDecimal stock, BigDecimal alertThreshold) {
-        super(idItem, itemType, name);
+    public Fuel(Integer idItem, String name, BigDecimal pricePerLiter, BigDecimal stock, BigDecimal alertThreshold) {
+        super(idItem, name);
         this.pricePerLiter = pricePerLiter; this.stock = stock; this.alertThreshold = alertThreshold;
     }
 
@@ -28,4 +31,6 @@ public class Fuel extends Item {
     public void setStock(BigDecimal stock) { this.stock = stock; }
     public BigDecimal getAlertThreshold() { return alertThreshold; }
     public void setAlertThreshold(BigDecimal alertThreshold) { this.alertThreshold = alertThreshold; }
+	public BigDecimal getAutoRestockQuantity() { return autoRestockQuantity; }
+	public void setAutoRestockQuantity(BigDecimal autoRestockQuantity) { this.autoRestockQuantity = autoRestockQuantity; }
 }

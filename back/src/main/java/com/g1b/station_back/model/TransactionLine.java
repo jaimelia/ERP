@@ -19,7 +19,7 @@ public class TransactionLine {
     @JoinColumn(name = "id_transaction", nullable = false)
     private Transaction transaction;
 
-    @Column(name = "total_amount", precision = 5, scale = 3)
+    @Column(name = "total_amount", precision = 10, scale = 3)
     private BigDecimal totalAmount;
 
     @ManyToOne

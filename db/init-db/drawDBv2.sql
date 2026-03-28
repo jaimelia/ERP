@@ -47,7 +47,7 @@ CREATE TYPE schedule AS (
 
 
 CREATE TABLE IF NOT EXISTS "transactions" (
-	"id_transaction" INTEGER NOT NULL UNIQUE,
+	"id_transaction" INTEGER NOT NULL UNIQUE GENERATED ALWAYS AS IDENTITY,
 	"type" VARCHAR(255) NOT NULL,
 	"transaction_date" DATE,
 	"is_from_automat" BOOLEAN NOT NULL,
@@ -61,8 +61,9 @@ CREATE TABLE IF NOT EXISTS "transactions" (
 CREATE TABLE IF NOT EXISTS "products" (
 	"unit_price" NUMERIC(5,3) NOT NULL,
 	"stock" INTEGER NOT NULL,
-	"alert_threshold" INTEGER NOT NULL,
-	"id_item" INTEGER NOT NULL,
+	"alert_threshold" INTEGER,
+	"auto_restock_quantity" INTEGER,
+	"id_item" INTEGER NOT NULL UNIQUE,
 	PRIMARY KEY("id_item")
 );
 
@@ -71,9 +72,10 @@ CREATE TABLE IF NOT EXISTS "products" (
 
 CREATE TABLE IF NOT EXISTS "fuels" (
 	"price_per_liter" NUMERIC(5,3) NOT NULL,
-	"stock" NUMERIC(5,3),
-	"alert_threshold" NUMERIC(5,3) NOT NULL,
-	"id_item" INTEGER NOT NULL,
+	"stock" NUMERIC(10,3),
+	"alert_threshold" NUMERIC(10,3),
+	"auto_restock_quantity" NUMERIC(10,3),
+	"id_item" INTEGER NOT NULL UNIQUE,
 	PRIMARY KEY("id_item")
 );
 
@@ -81,7 +83,7 @@ CREATE TABLE IF NOT EXISTS "fuels" (
 
 
 CREATE TABLE IF NOT EXISTS "pumps" (
-	"id_pump" INTEGER NOT NULL UNIQUE,
+	"id_pump" INTEGER NOT NULL UNIQUE GENERATED ALWAYS AS IDENTITY,
 	"is_automat" BOOLEAN NOT NULL,
 	"status" pump_charger_status NOT NULL,
 	PRIMARY KEY("id_pump")
@@ -91,7 +93,7 @@ CREATE TABLE IF NOT EXISTS "pumps" (
 
 
 CREATE TABLE IF NOT EXISTS "ev_chargers" (
-	"id_ev_charger" INTEGER NOT NULL UNIQUE,
+	"id_ev_charger" INTEGER NOT NULL UNIQUE GENERATED ALWAYS AS IDENTITY,
 	"is_fast" BOOLEAN NOT NULL,
 	"status" pump_charger_status NOT NULL,
 	PRIMARY KEY("id_ev_charger")
@@ -101,7 +103,7 @@ CREATE TABLE IF NOT EXISTS "ev_chargers" (
 
 
 CREATE TABLE IF NOT EXISTS "clients" (
-	"id_client" INTEGER NOT NULL UNIQUE,
+	"id_client" INTEGER NOT NULL UNIQUE GENERATED ALWAYS AS IDENTITY,
 	"firstname" VARCHAR(255) NOT NULL,
 	"lastname" VARCHAR(255) NOT NULL,
 	"mail" VARCHAR(255) NOT NULL,
@@ -114,13 +116,13 @@ CREATE TABLE IF NOT EXISTS "clients" (
 
 
 CREATE TABLE IF NOT EXISTS "users" (
-	"id_user" INTEGER NOT NULL UNIQUE,
+	"id_user" INTEGER NOT NULL UNIQUE GENERATED ALWAYS AS IDENTITY,
 	"username" VARCHAR(255) NOT NULL,
 	"password" VARCHAR(255) NOT NULL,
 	"email" VARCHAR(255) NOT NULL,
 	"role" VARCHAR(255) NOT NULL,
-	"uses_dark_mode" BOOLEAN NOT NULL,
-	"tile_layout" JSONB NOT NULL,
+	"uses_dark_mode" BOOLEAN NOT NULL DEFAULT false,
+	"tile_layout" TEXT,
 	PRIMARY KEY("id_user")
 );
 
@@ -128,7 +130,7 @@ CREATE TABLE IF NOT EXISTS "users" (
 
 
 CREATE TABLE IF NOT EXISTS "weekly_schedule" (
-	"id_weekly_schedule" INTEGER NOT NULL UNIQUE,
+	"id_weekly_schedule" INTEGER NOT NULL UNIQUE GENERATED ALWAYS AS IDENTITY,
 	"monday" SCHEDULE,
 	"tuesday" SCHEDULE,
 	"wednesday" SCHEDULE,
@@ -142,8 +144,8 @@ CREATE TABLE IF NOT EXISTS "weekly_schedule" (
 
 
 CREATE TABLE IF NOT EXISTS "cce_cards" (
-	"id_cce_card" INTEGER NOT NULL UNIQUE,
-	"balance" NUMERIC(5,3) NOT NULL,
+	"id_cce_card" INTEGER NOT NULL UNIQUE GENERATED ALWAYS AS IDENTITY,
+	"balance" NUMERIC(10,3) NOT NULL,
 	"created_at" DATE NOT NULL,
 	"expires_at" DATE NOT NULL,
 	"code" INTEGER NOT NULL,
@@ -156,10 +158,10 @@ CREATE TABLE IF NOT EXISTS "cce_cards" (
 
 
 CREATE TABLE IF NOT EXISTS "transactions_lines" (
-	"id_transaction_line" INTEGER NOT NULL UNIQUE,
+	"id_transaction_line" INTEGER NOT NULL UNIQUE GENERATED ALWAYS AS IDENTITY,
 	"quantity" INTEGER NOT NULL,
 	"id_transaction" INTEGER NOT NULL,
-	"total_amount" NUMERIC(5,3),
+	"total_amount" NUMERIC(10,3),
 	"id_item" INTEGER NOT NULL,
 	PRIMARY KEY("id_transaction_line")
 );
@@ -168,11 +170,11 @@ CREATE TABLE IF NOT EXISTS "transactions_lines" (
 
 
 CREATE TABLE IF NOT EXISTS "pumps_fuels" (
-	"id_pump_fuel" INTEGER NOT NULL UNIQUE,
+	"id_pump_fuel" INTEGER NOT NULL UNIQUE GENERATED ALWAYS AS IDENTITY,
 	"id_fuel" INTEGER NOT NULL,
 	"id_pump" INTEGER NOT NULL,
-	"max_volume" NUMERIC(5,3),
-	"available_volume" NUMERIC(5,3),
+	"max_volume" NUMERIC(10,3),
+	"available_volume" NUMERIC(10,3),
 	PRIMARY KEY("id_pump_fuel")
 );
 
@@ -180,7 +182,7 @@ CREATE TABLE IF NOT EXISTS "pumps_fuels" (
 
 
 CREATE TABLE IF NOT EXISTS "management_documents" (
-	"id_management_document" INTEGER NOT NULL UNIQUE,
+	"id_management_document" INTEGER NOT NULL UNIQUE GENERATED ALWAYS AS IDENTITY,
 	"name" VARCHAR(255) NOT NULL,
 	"last_modified" DATE,
 	"content" TEXT,
@@ -192,7 +194,7 @@ CREATE TABLE IF NOT EXISTS "management_documents" (
 
 
 CREATE TABLE IF NOT EXISTS "daily_transactions_reports" (
-	"id_daily_transaction_report" INTEGER NOT NULL UNIQUE,
+	"id_daily_transaction_report" INTEGER NOT NULL UNIQUE GENERATED ALWAYS AS IDENTITY,
 	"total_fuel_volume" DECIMAL NOT NULL,
 	"total_electricity_volume" DECIMAL NOT NULL,
 	"total_product_volume" DECIMAL NOT NULL,
@@ -211,7 +213,7 @@ CREATE TABLE IF NOT EXISTS "daily_transactions_reports" (
 
 
 CREATE TABLE IF NOT EXISTS "incident_reports" (
-	"id_incident_report" INTEGER NOT NULL UNIQUE,
+	"id_incident_report" INTEGER NOT NULL UNIQUE GENERATED ALWAYS AS IDENTITY,
 	"type" VARCHAR(255),
 	"date" DATE,
 	"technical_detail" VARCHAR(255),
@@ -224,10 +226,10 @@ CREATE TABLE IF NOT EXISTS "incident_reports" (
 
 
 CREATE TABLE IF NOT EXISTS "transaction_payments" (
-	"id_transaction_payment" INTEGER NOT NULL UNIQUE,
+	"id_transaction_payment" INTEGER NOT NULL UNIQUE GENERATED ALWAYS AS IDENTITY,
 	"id_transaction" INTEGER NOT NULL,
 	"payment_method" payment_methods NOT NULL,
-	"amount" NUMERIC(5,3) NOT NULL,
+	"amount" NUMERIC(10,3) NOT NULL,
 	"end_num_card" VARCHAR(4),
 	"status" transaction_status NOT NULL,
 	"date" DATE NOT NULL,
@@ -239,8 +241,7 @@ CREATE TABLE IF NOT EXISTS "transaction_payments" (
 
 
 CREATE TABLE IF NOT EXISTS "items" (
-	"id_item" INTEGER NOT NULL UNIQUE,
-	"item_type" VARCHAR(255) NOT NULL,
+	"id_item" INTEGER NOT NULL UNIQUE GENERATED ALWAYS AS IDENTITY,
 	"name" VARCHAR(255) NOT NULL,
 	PRIMARY KEY("id_item")
 );
@@ -249,8 +250,8 @@ CREATE TABLE IF NOT EXISTS "items" (
 
 
 CREATE TABLE IF NOT EXISTS "restocks" (
-	"id_restock" INTEGER NOT NULL UNIQUE,
-	"quantity" NUMERIC(5,3) NOT NULL,
+	"id_restock" INTEGER NOT NULL UNIQUE GENERATED ALWAYS AS IDENTITY,
+	"quantity" NUMERIC(10,3) NOT NULL,
 	"restock_date" DATE NOT NULL,
 	"id_item" INTEGER NOT NULL,
 	"status" restock_status NOT NULL,
@@ -261,7 +262,7 @@ CREATE TABLE IF NOT EXISTS "restocks" (
 
 
 CREATE TABLE IF NOT EXISTS "regional_guidelines" (
-	"id_regional_guideline" INTEGER NOT NULL UNIQUE,
+	"id_regional_guideline" INTEGER NOT NULL UNIQUE GENERATED ALWAYS AS IDENTITY,
 	"object" VARCHAR(255) NOT NULL,
 	"content" VARCHAR(255) NOT NULL,
 	PRIMARY KEY("id_regional_guideline")
@@ -271,7 +272,7 @@ CREATE TABLE IF NOT EXISTS "regional_guidelines" (
 
 
 CREATE TABLE IF NOT EXISTS "electricity" (
-	"id_item" INTEGER NOT NULL UNIQUE GENERATED BY DEFAULT AS IDENTITY,
+	"id_item" INTEGER NOT NULL UNIQUE,
 	"fast_price" NUMERIC(5,3) NOT NULL,
 	"normal_price" NUMERIC(5,3) NOT NULL,
 	PRIMARY KEY("id_item")
@@ -313,14 +314,99 @@ ALTER TABLE "transaction_payments"
 ADD FOREIGN KEY("id_cce_card") REFERENCES "cce_cards"("id_cce_card")
 ON UPDATE NO ACTION ON DELETE NO ACTION;
 
-INSERT INTO "ev_chargers" ("id_ev_charger", "is_fast", "status") VALUES
-(1, true, 'available'),
-(2, true, 'available'),
-(3, true, 'inUse'),
-(4, true, 'inUse'),
-(5, true, 'available'),
-(6, true, 'available'),
-(7, true, 'outOfOrder'),
-(8, true, 'available'),
-(9, false, 'available'),
-(10, false, 'available');
+INSERT INTO "ev_chargers" ("is_fast", "status") VALUES
+(true, 'available'),
+(true, 'available'),
+(true, 'inUse'),
+(true, 'inUse'),
+(true, 'available'),
+(true, 'available'),
+(true, 'outOfOrder'),
+(true, 'available'),
+(false, 'available'),
+(false, 'available');
+
+INSERT INTO "users" ("username", "password", "email", "role") VALUES
+('gerant1', '$2a$10$2IBaa5RyHYQyz6qNdWfmteVIWJUbFKSq8KOnuUyY89k43tKMTWd8C', 'admin@example.com', 'gerant'),
+('employe1', '$2a$10$Q4H7dnAln9/nOyQg4hx0e.p8iwMNJAbffD6MVd9VNdtWT2V7E/WgS', 'employe1@example.com', 'employe'),
+('employe2', '$2a$10$Q4H7dnAln9/nOyQg4hx0e.p8iwMNJAbffD6MVd9VNdtWT2V7E/WgS', 'employe2@example.com', 'employe');
+
+INSERT INTO "items" ("name") VALUES
+('Sans plomb 95'),
+('Sans plomb 98'),
+('Diesel'),
+('Stylo bille BIC'),
+('Essuie-glace'),
+('Arbre magique'),
+('Coca 33 Cl'),
+('Snack'),
+('Electricité');
+
+INSERT INTO "fuels" ("id_item", "price_per_liter", "stock", "alert_threshold", "auto_restock_quantity") VALUES
+(1, 1.750, 1200.000, 500.000, 100.000),
+(2, 1.850, 500.000, 200.000, 100.000),
+(3, 1.650, 2000.000, 500.000, 100.000);
+
+INSERT INTO "products" ("id_item", "unit_price", "stock", "alert_threshold", "auto_restock_quantity") VALUES
+(4, 1.570, 196, 50, 20),
+(5, 24.500, 15, 5, 30),
+(6, 0.990, 37, 10, 10),
+(7, 1.245, 100, 20, 50),
+(8, 2.500, 50, 10, 100);
+
+INSERT INTO "electricity" ("id_item", "fast_price", "normal_price") VALUES
+(9, 0.550, 0.350);
+
+INSERT INTO "cce_cards" ("balance", "created_at", "expires_at", "code", "minimum_credit_amount", "status") VALUES
+(35.250, '2025-12-11', '2026-12-11', 9999, 10, 'activated'),
+(12.640, '2025-12-02', '2026-12-02', 8888, 10, 'deactivated'),
+(10.680, '2025-11-01', '2026-11-01', 7777, 10, 'activated'),
+(152.660, '2025-10-04', '2026-10-04', 5555, 10, 'deactivated');
+
+INSERT INTO "clients" ("firstname", "lastname", "mail", "phone_number", "id_cce_card") VALUES
+('Mathéo', 'CARLI', 'matheo.carli@gmail.com', '06.95.90.41.23', 1),
+('Matthéo', 'POMEL', 'mattheo.pomel@gmail.com', '06.09.25.43.03', 2),
+('Bryan', 'LACHAL', 'bryan.lachal@gmail.com', '06.12.34.56.78', 3),
+('Louis', 'BEDETTI', 'louis.bedetti@gmail.com', '06.98.76.54.32', 4);
+
+INSERT INTO "restocks" ("quantity", "restock_date", "id_item", "status") VALUES
+(400.000, '2025-12-11', 1, 'pending'),
+(300.000, '2025-12-02', 3, 'pending'),
+(500.000, '2025-11-21', 2, 'canceled'),
+(10.000, '2025-11-21', 2, 'delivered'),
+(500.000, '2025-11-21', 2, 'delivered'),
+(500, '2025-11-21', 4, 'delivered');
+
+INSERT INTO "pumps" ("is_automat", "status") VALUES
+(false, 'available'),
+(true, 'inUse'),
+(false, 'available');
+
+INSERT INTO "pumps_fuels" ("id_fuel", "id_pump", "max_volume", "available_volume") VALUES
+(1, 1, 5000.000, 1200.000),
+(2, 1, 5000.000, 2000.000),
+(3, 2, 5000.000, 500.000);
+
+INSERT INTO "transactions" ("type", "transaction_date", "is_from_automat", "status") VALUES
+('Carburant', '2026-02-18', false, 'accepted'),
+('Boutique', '2026-02-18', false, 'accepted'),
+('Mixte', '2026-02-18', false, 'accepted');
+
+INSERT INTO "transactions_lines" ("quantity", "id_transaction", "total_amount", "id_item") VALUES
+(42, 1, 61.410, 3),
+(2, 2, 2.490, 7),
+(35, 3, 56.200, 1),
+(1, 3, 2.500, 8);
+
+INSERT INTO "transaction_payments" ("id_transaction", "payment_method", "amount", "end_num_card", "status", "date", "id_cce_card") VALUES
+(1, 'CCE', 61.410, '9999', 'accepted', '2026-02-18', 1),
+(2, 'CreditCard', 2.490, '1234', 'accepted', '2026-02-18', NULL),
+(3, 'Cash', 58.700, NULL, 'accepted', '2026-02-18', NULL);
+
+
+INSERT INTO "regional_guidelines" ("object", "content") VALUES
+('Procédure nettoyage', 'Nettoyage des pistes tous les mardis matin.'),
+('Sécurité incendie', 'Vérification mensuelle des extincteurs.');
+
+INSERT INTO "incident_reports" ("type", "date", "technical_detail", "resolution", "status") VALUES
+('Panne pompe', '2026-02-10', 'Erreur TPE sur pompe 2', 'Redémarrage du système', 'locked');

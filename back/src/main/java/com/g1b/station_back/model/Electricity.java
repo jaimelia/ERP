@@ -16,8 +16,8 @@ public class Electricity extends Item {
     private BigDecimal normalPrice;
 
     public Electricity() {}
-    public Electricity(Integer idItem, String itemType, String name, BigDecimal fastPrice, BigDecimal normalPrice) {
-        super(idItem, itemType, name);
+    public Electricity(Integer idItem, String name, BigDecimal fastPrice, BigDecimal normalPrice) {
+        super(idItem, name);
         this.fastPrice = fastPrice; this.normalPrice = normalPrice;
     }
 

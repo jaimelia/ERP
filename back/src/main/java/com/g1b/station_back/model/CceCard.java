@@ -13,7 +13,7 @@ public class CceCard {
     @Column(name = "id_cce_card")
     private Integer idCceCard;
 
-    @Column(nullable = false, precision = 5, scale = 3)
+    @Column(nullable = false, precision = 10, scale = 3)
     private BigDecimal balance;
 
     @Column(name = "created_at", nullable = false)
