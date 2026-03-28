@@ -157,6 +157,11 @@ export const TicketWidget: FC = () => {
         body: JSON.stringify(payload)
       });
 
+      if (data === -1) {
+        setNotification({ message: "Stock insuffisant pour un des produits.", type: "error" });
+        return;
+      }
+
       setCurrentTransactionId(data);
       setRemainingAmount(total);
       setTicketStatus("paymentSelection");
