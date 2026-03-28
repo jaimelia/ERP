@@ -5,6 +5,7 @@ import com.g1b.station_back.service.EvChargerService;
 
 import org.hibernate.tool.schema.internal.exec.ScriptTargetOutputToUrl;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +23,7 @@ public class EvChargerController {
 	}
 
 	@GetMapping
+	@PreAuthorize("hasAuthority('READ_CHARGERS')")
 	public ResponseEntity<List<EvChargerDTO>> getAllChargers() {
 		return ResponseEntity.ok(evChargerService.getAllChargers());
 	}

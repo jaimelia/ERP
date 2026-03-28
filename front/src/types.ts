@@ -2,15 +2,18 @@ import {type ReactElement} from "react";
 import {DEFAULT_LEVELS, WIDGETS} from "./data/stationConfig.tsx";
 
 export type ThemeKey = "light" | "dark";
-export type Role = "employe" | "gerant";
+export type Role = "manager" | "employee";
 export type ItemType = "product" | "fuel" | "electricity";
+
+export type TileLayouts = Record<Role, Levels>;
+export type TileLayoutPayload = Levels | TileLayouts;
 
 export interface User {
     username: string;
 	email: string;
     role: Role;
 	usesDarkMode: boolean;
-    tileLayout?: Levels;
+    tileLayout?: TileLayoutPayload;
 }
 
 export interface WidgetDef {
@@ -38,7 +41,7 @@ export interface ApiError {
 
 export interface UserPreferences {
 	darkMode: boolean;
-	tileLayout: Levels;
+	tileLayout: TileLayouts;
 }
 
 export const coordsToKey = (c: Coords): string => `${c.x},${c.y}`;

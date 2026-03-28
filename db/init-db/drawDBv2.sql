@@ -39,6 +39,12 @@ CREATE TYPE "document_status" AS ENUM (
 	'locked'
 );
 
+CREATE TYPE "role" AS ENUM (
+	'employee',
+	'manager'
+);
+
+
 
 CREATE TYPE schedule AS (
 	opening_time TIME,
@@ -120,7 +126,7 @@ CREATE TABLE IF NOT EXISTS "users" (
 	"username" VARCHAR(255) NOT NULL,
 	"password" VARCHAR(255) NOT NULL,
 	"email" VARCHAR(255) NOT NULL,
-	"role" VARCHAR(255) NOT NULL,
+	"role" role NOT NULL,
 	"uses_dark_mode" BOOLEAN NOT NULL DEFAULT false,
 	"tile_layout" TEXT,
 	PRIMARY KEY("id_user")
@@ -327,9 +333,9 @@ INSERT INTO "ev_chargers" ("is_fast", "status") VALUES
 (false, 'available');
 
 INSERT INTO "users" ("username", "password", "email", "role") VALUES
-('gerant1', '$2a$10$2IBaa5RyHYQyz6qNdWfmteVIWJUbFKSq8KOnuUyY89k43tKMTWd8C', 'admin@example.com', 'gerant'),
-('employe1', '$2a$10$Q4H7dnAln9/nOyQg4hx0e.p8iwMNJAbffD6MVd9VNdtWT2V7E/WgS', 'employe1@example.com', 'employe'),
-('employe2', '$2a$10$Q4H7dnAln9/nOyQg4hx0e.p8iwMNJAbffD6MVd9VNdtWT2V7E/WgS', 'employe2@example.com', 'employe');
+('gerant1', '$2a$10$2IBaa5RyHYQyz6qNdWfmteVIWJUbFKSq8KOnuUyY89k43tKMTWd8C', 'admin@example.com', 'manager'),
+('employe1', '$2a$10$Q4H7dnAln9/nOyQg4hx0e.p8iwMNJAbffD6MVd9VNdtWT2V7E/WgS', 'employe1@example.com', 'employee'),
+('employe2', '$2a$10$Q4H7dnAln9/nOyQg4hx0e.p8iwMNJAbffD6MVd9VNdtWT2V7E/WgS', 'employe2@example.com', 'employee');
 
 INSERT INTO "items" ("name") VALUES
 ('Sans plomb 95'),

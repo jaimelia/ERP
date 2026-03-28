@@ -1,12 +1,14 @@
 import * as React from "react";
 import {type DragEvent, type FC, type JSX, useCallback, useRef, useState} from "react";
 import {getSize} from "../data/stationConfig.tsx";
-import {type Coords, coordsEqual, coordsToKey, type Levels, type ThemeKey, type User} from "../types";
+import {type Coords, coordsEqual, coordsToKey, type Levels, type Role, type ThemeKey, type User} from "../types";
 import {Tile} from "./Tile";
-import {savePreferences} from "../api/userApi.ts";
+import {useModal} from "../contexts/ModalContext.tsx";
+import {UserManagementModal} from "./modal/UserManagementModal.tsx";
 
 interface DashboardProps {
     user: User;
+    viewRole: Role;
     level: number;
 	levels: Levels
 	onSaveLevels: (levels: Levels) => void;
@@ -14,18 +16,38 @@ interface DashboardProps {
     onLogout: () => void;
     editingLayout: boolean;
     onEditLayout: (editingLayout: boolean) => void;
+    onToggleViewRole: () => void;
+    canEditLayout: boolean;
     theme: ThemeKey;
     toggleTheme: () => void;
 }
 
-export const Dashboard: FC<DashboardProps> = ({user, level, levels, onSaveLevels, onLevel, onLogout, editingLayout, onEditLayout, theme, toggleTheme}) => {
+export const Dashboard: FC<DashboardProps> = ({
+    user,
+    viewRole,
+    level,
+    levels,
+    onSaveLevels,
+    onLevel,
+    onLogout,
+    editingLayout,
+    onEditLayout,
+    onToggleViewRole,
+    canEditLayout,
+    theme,
+    toggleTheme
+}) => {
+    const {openModal} = useModal();
     const [fromCoords, setFromCoords] = useState<Coords | null>(null);
     const [overCoords, setOverCoords] = useState<Coords | null>(null);
     const dragCounter = useRef<Record<string, number>>({});
-    const isManager = user.role === "gerant";
+    const isManager = user.role === "manager";
+    const isEmployeeView = viewRole === "employee";
+    const roleLabel = isManager && isEmployeeView ? "Employé (vue)" : isManager ? "Gérant" : "Employé";
 
 	const handleDrop = useCallback(
 		(targetCoords: Coords): void => {
+            if (!canEditLayout) return;
 			dragCounter.current = {};
 			setOverCoords(null);
 			setFromCoords(null);
@@ -115,12 +137,8 @@ export const Dashboard: FC<DashboardProps> = ({user, level, levels, onSaveLevels
 			
 			const nextLevels = levels.map((l, i) => i === level - 1 ? nextGrid : l)
 			onSaveLevels(nextLevels)
-			
-			savePreferences({
-				tileLayout: nextLevels
-			});
 		},
-		[fromCoords, onSaveLevels, level, levels]
+		[fromCoords, onSaveLevels, level, levels, canEditLayout]
 	);
 
     const widgets: JSX.Element[] = [];
@@ -202,7 +220,8 @@ export const Dashboard: FC<DashboardProps> = ({user, level, levels, onSaveLevels
                     <button 
                         type="button"
                         className={`header-button ${editingLayout ? "is-active" : ""}`} 
-                        onClick={() => onEditLayout(!editingLayout)}
+                        onClick={() => canEditLayout && onEditLayout(!editingLayout)}
+                        disabled={!canEditLayout}
                     >
                         Mode déplacement
                     </button>
@@ -220,9 +239,29 @@ export const Dashboard: FC<DashboardProps> = ({user, level, levels, onSaveLevels
                         </button>
                     ))}
 
+                    {isManager && (
+                        <button
+                            type="button"
+                            className={`header-button ${isEmployeeView ? "is-active" : ""}`}
+                            onClick={onToggleViewRole}
+                        >
+                            {isEmployeeView ? "Mode gérant" : "Mode employé"}
+                        </button>
+                    )}
+
+                    {isManager && (
+                        <button
+                            type="button"
+                            className="header-button"
+                            onClick={() => openModal(<UserManagementModal currentUsername={user.username} />)}
+                        >
+                            Utilisateurs
+                        </button>
+                    )}
+
                     <div className="header-divider"/>
-                    <span className={`header-role-badge ${isManager ? "is-manager" : "is-employee"}`}>
-                        {isManager ? "Gerant" : "Employe"}
+                    <span className={`header-role-badge ${viewRole === "manager" ? "is-manager" : "is-employee"}`}>
+                        {roleLabel}
                     </span>
                     <span className="header-user-name">{user.username}</span>
 
