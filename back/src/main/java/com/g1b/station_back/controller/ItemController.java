@@ -81,7 +81,7 @@ public class ItemController {
                         p.idItem(),
                         p.name(),
                         BigDecimal.valueOf(p.stock()),
-                        p.price(),
+                        p.unitPrice(),
 						"product")));
 
         fuelService.getAllFuels().forEach(f ->
