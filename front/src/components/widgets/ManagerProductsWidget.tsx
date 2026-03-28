@@ -24,7 +24,7 @@ import type {ApiError, ItemType} from "../../types.ts";
 
 interface ProductFormState {
     name: string;
-    price: string;
+    unitPrice: string;
     stock: string;
 }
 
@@ -34,7 +34,7 @@ interface ElectricityFormState {
     fastPrice: string;
 }
 
-const EMPTY_FORM: ProductFormState = { name: "", price: "", stock: ""};
+const EMPTY_FORM: ProductFormState = { name: "", unitPrice: "", stock: "" };
 
 type ElectricityItem = ElectricityDTO & { itemType: "electricity" };
 type ManagerItem = ItemDTO | ElectricityItem;
@@ -44,7 +44,7 @@ type ItemFilter = "all" | "product" | "fuel" | "electricity";
 
 function validateForm(form: ProductFormState): string | null {
     if (!form.name.trim()) return "Le nom est obligatoire.";
-    if (!form.price || isNaN(parseFloat(form.price))) return "Le prix doit être un nombre valide.";
+    if (!form.unitPrice || isNaN(parseFloat(form.unitPrice))) return "Le prix doit être un nombre valide.";
     if (!form.stock || isNaN(parseFloat(form.stock))) return "Le stock doit être un nombre valide.";
     return null;
 }
@@ -112,13 +112,13 @@ export const ManagerProductsWidget: FC = () => {
             if (item.itemType === "product") {
                 await updateProduct(item.id, {
                     name: form.name,
-                    price: parseFloat(form.price),
+                    unitPrice: parseFloat(form.unitPrice),
                     stock: parseInt(form.stock),
                 });
             } else {
                 await updateFuel(item.id, {
                     name: form.name,
-                    price: parseFloat(form.price),
+                    price: parseFloat(form.unitPrice),
                     stock: parseFloat(form.stock),
                 });
             }
@@ -188,7 +188,7 @@ export const ManagerProductsWidget: FC = () => {
         try {
             await createProduct({
                 name: form.name,
-                price: parseFloat(form.price),
+                unitPrice: parseFloat(form.unitPrice),
                 stock: parseInt(form.stock),
             });
             success(`"${form.name}" créé.`);
@@ -208,7 +208,7 @@ export const ManagerProductsWidget: FC = () => {
         try {
             await createFuel({
                 name: form.name,
-                price: parseFloat(form.price),
+                price: parseFloat(form.unitPrice),
                 stock: parseFloat(form.stock),
             });
             success(`"${form.name}" créé.`);
@@ -257,7 +257,7 @@ export const ManagerProductsWidget: FC = () => {
                 title={`Modifier "${item.name}"`}
                 initialForm={{
                     name: item.name,
-                    price: String(item.price),
+                    unitPrice: String(item.price),
                     stock: String(item.stock),
                 }}
                 onConfirm={(form) => handleUpdate(item, form)}
@@ -485,8 +485,8 @@ const AddItemModal: FC<AddItemModalProps> = ({ onCreateProduct, onCreateFuel, on
                                 <span>{isFuel ? "Prix/L (€)" : "Prix unitaire (€)"}</span>
                                 <input
                                     type="number" step="0.001" min="0"
-                                    value={productForm.price}
-                                    onChange={e => setProductForm({ ...productForm, price: e.target.value })}
+                                    value={productForm.unitPrice}
+                                    onChange={e => setProductForm({ ...productForm, unitPrice: e.target.value })}
                                 />
                             </label>
                             <label className="modal-field">
@@ -534,8 +534,8 @@ const ProductModal: FC<ProductModalProps> = ({ title, initialForm, onConfirm, pr
                     <span>{priceLabel}</span>
                     <input
                         type="number" step="0.001" min="0"
-                        value={form.price}
-                        onChange={e => setForm({ ...form, price: e.target.value })}
+                        value={form.unitPrice}
+                        onChange={e => setForm({ ...form, unitPrice: e.target.value })}
                     />
                 </label>
                 <label className="modal-field">

@@ -1,80 +1,10 @@
-import { type FC, useCallback, useState } from "react";
+import { type FC, useCallback } from "react";
 import { Switch } from "../Switch.tsx";
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface FuelLevel {
-    type: string;
-    currentLevel: number;
-    maxLevel: number | null;
-}
-
-interface ActiveTransaction {
-    volumeL: number;
-    amountEur: number;
-}
-
-type PumpStatus = "available" | "inUse" | "outOfOrder" | "deactivated";
-
-interface Pump {
-    id: number;
-    isAutomate: boolean;
-    status: PumpStatus;
-    fuelLevels: FuelLevel[];
-    activeTransaction: ActiveTransaction | null;
-    enabled: boolean;
-}
-
-// ─── Mock data ────────────────────────────────────────────────────────────────
-// TODO: remplacer par un appel API — GET /api/pumps
-// Réponse attendue : Pump[]
-
-const MOCK_PUMPS: Pump[] = [
-    {
-        id: 1,
-        isAutomate: true,
-        status: "available",
-        fuelLevels: [
-            { type: "Diesel", currentLevel: 1700, maxLevel: 2400 },
-            { type: "SP-95", currentLevel: 500, maxLevel: 2400 },
-        ],
-        activeTransaction: null,
-        enabled: true,
-    },
-    {
-        id: 2,
-        isAutomate: true,
-        status: "inUse",
-        fuelLevels: [
-            { type: "Diesel", currentLevel: 2300, maxLevel: 2400 },
-            { type: "SP-95", currentLevel: 2100, maxLevel: 2400 },
-        ],
-        activeTransaction: { volumeL: 12.24, amountEur: 20.07 },
-        enabled: true,
-    },
-    {
-        id: 3,
-        isAutomate: false,
-        status: "available",
-        fuelLevels: [
-            { type: "Diesel", currentLevel: 1100, maxLevel: 2400 },
-            { type: "SP-95", currentLevel: 2350, maxLevel: 2400 },
-        ],
-        activeTransaction: null,
-        enabled: true,
-    },
-    {
-        id: 4,
-        isAutomate: false,
-        status: "outOfOrder",
-        fuelLevels: [
-            { type: "Diesel", currentLevel: 1700, maxLevel: null },
-            { type: "SP-95", currentLevel: 1250, maxLevel: null },
-        ],
-        activeTransaction: null,
-        enabled: false,
-    },
-];
+import { useFetch } from "../../hooks/useFetch.ts";
+import { FetchWrapper } from "../FetchWrapper.tsx";
+import { useToast } from "../../contexts/ToastContext.tsx";
+import { getPumps, togglePumpEnabled, type PumpDTO } from "../../api/pumpsApi.ts";
+import { apiUrl } from "../../api/common.ts";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -88,17 +18,15 @@ const getFuelFillClass = (current: number, max: number): string => {
 // ─── Sub-component: PumpCard ──────────────────────────────────────────────────
 
 interface PumpCardProps {
-    pump: Pump;
+    pump: PumpDTO;
     onToggle: (id: number, enabled: boolean) => void;
-    onPay: (id: number) => void;
 }
 
-const PumpCard: FC<PumpCardProps> = ({ pump, onToggle, onPay }) => {
+const PumpCard: FC<PumpCardProps> = ({ pump, onToggle }) => {
     const showPayButton = !pump.isAutomate && pump.status !== "outOfOrder";
 
     return (
         <div className="pump-card">
-            {/* En-tête : indicateur de statut + numéro */}
             <div className="pump-card-header">
                 <div
                     className="status pump-status-dot"
@@ -113,7 +41,6 @@ const PumpCard: FC<PumpCardProps> = ({ pump, onToggle, onPay }) => {
                 </span>
             </div>
 
-            {/* Niveaux de carburant */}
             <div className="pump-fuel-levels">
                 {pump.fuelLevels.map((fuel) => (
                     <div key={fuel.type} className="pump-fuel-row">
@@ -122,13 +49,8 @@ const PumpCard: FC<PumpCardProps> = ({ pump, onToggle, onPay }) => {
                             <>
                                 <div className="pump-fuel-bar">
                                     <div
-                                        className={getFuelFillClass(
-                                            fuel.currentLevel,
-                                            fuel.maxLevel
-                                        )}
-                                        style={{
-                                            width: `${(fuel.currentLevel / fuel.maxLevel) * 100}%`,
-                                        }}
+                                        className={getFuelFillClass(fuel.currentLevel, fuel.maxLevel)}
+                                        style={{ width: `${(fuel.currentLevel / fuel.maxLevel) * 100}%` }}
                                     />
                                 </div>
                                 <span className="pump-fuel-label">
@@ -144,26 +66,18 @@ const PumpCard: FC<PumpCardProps> = ({ pump, onToggle, onPay }) => {
                 ))}
             </div>
 
-            {/* Transaction en cours */}
             <div className="pump-transaction">
                 <span className="pump-transaction-title">En cours:</span>
-                {pump.activeTransaction ? (
-                    <div className="pump-transaction-values">
-                        <span>{pump.activeTransaction.volumeL.toFixed(2)}L</span>
-                        <span>{pump.activeTransaction.amountEur.toFixed(2)}€</span>
-                    </div>
+                {pump.inUseAt ? (
+                    <span className="pump-transaction-values">{pump.inUseAt}</span>
                 ) : (
                     <span className="pump-transaction-empty">—</span>
                 )}
             </div>
 
-            {/* Pied de carte : bouton payer + interrupteur */}
             <div className="pump-card-footer">
                 {showPayButton && (
-                    <button
-                        className="pump-pay-btn"
-                        onClick={() => onPay(pump.id)}
-                    >
+                    <button className="pump-pay-btn" disabled>
                         Payer
                     </button>
                 )}
@@ -182,39 +96,33 @@ const PumpCard: FC<PumpCardProps> = ({ pump, onToggle, onPay }) => {
 // ─── Widget principal ─────────────────────────────────────────────────────────
 
 export const PumpsWidget: FC = () => {
-    // TODO: remplacer MOCK_PUMPS par un appel API
-    // const [pumps, setPumps] = useState<Pump[]>([]);
-    // useEffect(() => {
-    //     fetch("/api/pumps")
-    //         .then(res => res.json())
-    //         .then(data => setPumps(data));
-    // }, []);
-    const [pumps, setPumps] = useState<Pump[]>(MOCK_PUMPS);
+    const { data: pumps, loading, error, setData: setPumps } =
+        useFetch<PumpDTO[]>(apiUrl("/pumps"), 10000);
+    const { error: toastError } = useToast();
 
-    const handleToggle = useCallback((pumpId: number, enabled: boolean) => {
-        // TODO: PATCH /api/pumps/{pumpId}/enabled  →  body: { enabled }
-        setPumps((prev) =>
-            prev.map((p) => (p.id === pumpId ? { ...p, enabled } : p))
-        );
-    }, []);
-
-    const handlePay = useCallback((pumpId: number) => {
-        // TODO: POST /api/pumps/{pumpId}/payment
-        console.log("Payer pompe", pumpId);
-    }, []);
+    const handleToggle = useCallback(async (pumpId: number, enabled: boolean) => {
+        setPumps(prev => prev?.map(p => p.id === pumpId ? { ...p, enabled } : p) ?? prev);
+        try {
+            await togglePumpEnabled(pumpId, enabled);
+        } catch {
+            toastError("Impossible de modifier l'état de la pompe.");
+            setPumps(prev => prev?.map(p => p.id === pumpId ? { ...p, enabled: !enabled } : p) ?? prev);
+        }
+    }, [setPumps, toastError]);
 
     return (
-        <div className="widget-container pumps-container">
-            <div className="pumps-grid">
-                {pumps.map((pump) => (
-                    <PumpCard
-                        key={pump.id}
-                        pump={pump}
-                        onToggle={handleToggle}
-                        onPay={handlePay}
-                    />
-                ))}
+        <FetchWrapper loading={loading} error={error}>
+            <div className="widget-container pumps-container">
+                <div className="pumps-grid">
+                    {(pumps ?? []).map((pump) => (
+                        <PumpCard
+                            key={pump.id}
+                            pump={pump}
+                            onToggle={handleToggle}
+                        />
+                    ))}
+                </div>
             </div>
-        </div>
+        </FetchWrapper>
     );
 };

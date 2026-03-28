@@ -1,7 +1,7 @@
 import { type FC, type SubmitEvent, useEffect, useState } from "react";
 import { apiUrl, fetchJsonWithAuth } from "../../api/common.ts";
 import { TicketActions } from "../TicketActions";
-import type { TicketStatus } from "../../types.ts";
+import type { ApiError, PaymentResponseDTO, TicketStatus } from "../../types.ts";
 
 interface Product {
   idItem: number;
@@ -16,13 +16,6 @@ interface CartItem {
   name: string;
   quantity: number;
   unitPrice: number;
-}
-
-export interface PaymentResponseDTO {
-  paymentId: number;
-  status: "VALIDATED" | "PARTIAL" | "CANCELED" | "EXCESS";
-  amountRemaining: number;
-  message: string;
 }
 
 const emptyCart: CartItem[] = [];
@@ -149,24 +142,22 @@ export const TicketWidget: FC = () => {
 
       const payload = { type: "products", isFromAutomat: false, lines: items };
 
-      const data = await fetchJsonWithAuth(apiUrl("/transactions/shop"), {
+      const transactionId = await fetchJsonWithAuth(apiUrl("/transactions/shop"), {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
 
-      if (data === -1) {
-        setNotification({ message: "Stock insuffisant pour un des produits.", type: "error" });
-        return;
-      }
-
-      setCurrentTransactionId(data);
+      setCurrentTransactionId(transactionId);
       setRemainingAmount(total);
       setTicketStatus("paymentSelection");
     } catch (error) {
-      console.error("Erreur réseau lors de l'envoi du ticket:", error);
+      const apiError = error as ApiError;
+      if (apiError.status === 409) {
+        setNotification({ message: "Stock insuffisant pour un des produits.", type: "error" });
+      } else {
+        console.error("Erreur lors de la création de la transaction :", error);
+      }
     }
   };
 
@@ -226,18 +217,14 @@ export const TicketWidget: FC = () => {
   }
 
   const paymentProcessed = async (explicitResponse?: PaymentResponseDTO) => {
-    const isEvent = explicitResponse && 'nativeEvent' in (explicitResponse as object);
-    const responseToUse = (explicitResponse && !isEvent) ? (explicitResponse as PaymentResponseDTO) : paymentResponse;
+    const responseToUse = explicitResponse ?? paymentResponse;
 
     if (!responseToUse) {
-      console.error("Erreur : aucune donnée à traiter.");
+      console.error("Erreur : aucune donnée de paiement à traiter.");
       return;
     }
 
-    console.log("Données traitées :", responseToUse);
-
     const newAmount = Number(responseToUse.amountRemaining ?? 0);
-
     const status = responseToUse.status;
 
     if (status === "VALIDATED") {

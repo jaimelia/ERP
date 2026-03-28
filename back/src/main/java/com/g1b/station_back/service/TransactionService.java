@@ -2,7 +2,7 @@ package com.g1b.station_back.service;
 
 import com.g1b.station_back.dto.TransactionCreationRequestDTO;
 import com.g1b.station_back.dto.TransactionLineRequestDTO;
-import com.g1b.station_back.model.Item;
+import com.g1b.station_back.exception.InsufficientStockException;
 import com.g1b.station_back.model.Product;
 import com.g1b.station_back.model.Transaction;
 import com.g1b.station_back.model.TransactionLine;
@@ -42,18 +42,16 @@ public class TransactionService {
             if (product == null) {
                 throw new IllegalArgumentException("Product with ID " + lineDTO.idItem() + " not found");
             }
-            if (product.getStock() >= lineDTO.quantity()) {
-                TransactionLine transactionLine = new TransactionLine();
-                transactionLine.setItem(product);
-                transactionLine.setQuantity(lineDTO.quantity());
-                product.setStock(product.getStock() - lineDTO.quantity());
-                transactionLine.setTransaction(newTransaction);
-                transactionLine.setTotalAmount(product.getUnitPrice().multiply(new BigDecimal(lineDTO.quantity())));
-
-                transactionLines.add(transactionLine);
-            } else {
-                return -1;
+            if (product.getStock() < lineDTO.quantity()) {
+                throw new InsufficientStockException(product.getName());
             }
+            TransactionLine transactionLine = new TransactionLine();
+            transactionLine.setItem(product);
+            transactionLine.setQuantity(lineDTO.quantity());
+            product.setStock(product.getStock() - lineDTO.quantity());
+            transactionLine.setTransaction(newTransaction);
+            transactionLine.setTotalAmount(product.getUnitPrice().multiply(new BigDecimal(lineDTO.quantity())));
+            transactionLines.add(transactionLine);
         }
         newTransaction.setLines(transactionLines);
 
@@ -61,9 +59,13 @@ public class TransactionService {
         return newTransaction.getIdTransaction();
     }
 
+    @Transactional
     public Integer cancelShopTransaction(Integer transactionId) {
         Transaction transaction = transactionRepository.findById(transactionId)
                 .orElseThrow(() -> new IllegalArgumentException("Transaction not found"));
+        if (transaction.getStatus() == TransactionStatus.canceled) {
+            return transactionId;
+        }
         for (TransactionLine line : transaction.getLines()) {
             if (line.getItem() instanceof Product product) {
                 product.setStock(product.getStock() + line.getQuantity());

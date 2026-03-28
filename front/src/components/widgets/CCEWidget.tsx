@@ -57,7 +57,7 @@ export const CCEWidget: FC = () => {
                 tel: item.tel,
                 code: item.code.toString(),
                 numeroCCE: item.id.toString().padStart(4, '0'),
-                statut: (item.statut === "activated" || item.statut === "ACTIVATED") ? "Active" : "Désactivée",
+                statut: item.statut === "activated" ? "Active" : "Désactivée",
                 dateCreation: new Date(item.dateCreation).toLocaleDateString("fr-FR"),
                 montantCredite: `${item.montantCredite.toFixed(2)}€`
             }));
@@ -197,35 +197,60 @@ export const CCEWidget: FC = () => {
         }
 
         try {
-            let url = "";
-            let method = "POST";
-
             switch (activePopup) {
                 case "credit":
-                    url = `/cce/${selected}/credit`;
-                    method = "PUT";
+                    await fetchJsonWithAuth(apiUrl(`/cce/${selected}/credit`), {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ amount: parseFloat(formData.amount) }),
+                    });
                     break;
                 case "create":
-                    url = `/cce`;
+                    await fetchJsonWithAuth(apiUrl("/cce"), {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            nom: formData.nom,
+                            prenom: formData.prenom,
+                            email: formData.email,
+                            tel: formData.tel,
+                            code: formData.code,
+                            montant: parseFloat(formData.montant),
+                        }),
+                    });
                     break;
                 case "edit":
-                    url = `/cce/${selected}`;
-                    method = "PUT";
+                    await fetchJsonWithAuth(apiUrl(`/cce/${selected}`), {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            nom: formData.nom,
+                            prenom: formData.prenom,
+                            email: formData.email,
+                            tel: formData.tel,
+                            code: formData.code,
+                        }),
+                    });
                     break;
                 case "reedit":
-                    url = `/cce/${selected}/reedit`;
+                    await fetchJsonWithAuth(apiUrl(`/cce/${selected}/reedit`), {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            nom: formData.nom,
+                            prenom: formData.prenom,
+                            email: formData.email,
+                            tel: formData.tel,
+                            code: formData.code,
+                            montant: 0,
+                        }),
+                    });
+                    break;
+                default:
                     break;
             }
-
-            if (url) {
-                await fetchJsonWithAuth(apiUrl(url), {
-                    method,
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(formData)
-                });
-                await loadCces();
-                setSelected(null);
-            }
+            await loadCces();
+            setSelected(null);
         } catch (error) {
             console.error(error);
         } finally {

@@ -77,17 +77,17 @@ public class CceCardService {
 
         CceCard card = new CceCard();
         card.setClient(client);
-        card.setBalance(new BigDecimal(request.montant()));
+        card.setBalance(request.montant());
         card.setCreatedAt(LocalDate.now());
         card.setExpiresAt(LocalDate.now().plusYears(3));
-        card.setCode(request.code());
+        card.setCode(Integer.parseInt(request.code()));
         card.setStatus(CceStatus.activated);
         cceCardRepository.save(card);
     }
 
     public void editCce(Integer id, CceEditDTO request) {
         cceCardRepository.findById(id).ifPresent(card -> {
-            card.setCode(request.code());
+            card.setCode(Integer.parseInt(request.code()));
             cceCardRepository.save(card);
 
             Client client = card.getClient();
@@ -135,7 +135,7 @@ public class CceCardService {
         newCard.setBalance(transferredBalance);
         newCard.setCreatedAt(LocalDate.now());
         newCard.setExpiresAt(LocalDate.now().plusYears(3));
-        newCard.setCode(request.code());
+        newCard.setCode(Integer.parseInt(request.code()));
         newCard.setStatus(CceStatus.activated);
         cceCardRepository.save(newCard);
     }

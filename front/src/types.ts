@@ -6,6 +6,13 @@ export type Role = "employe" | "gerant";
 export type ItemType = "product" | "fuel" | "electricity";
 export type TicketStatus = "initial" | "paymentSelection" | "payingByCard" | "payingByCash" | "payingByCCE" | "processingCard" | "processingCash" | "validated";
 
+export interface PaymentResponseDTO {
+    paymentId: number | null;
+    status: "VALIDATED" | "PARTIAL" | "CANCELED" | "EXCESS";
+    amountRemaining: number;
+    message: string;
+}
+
 export interface User {
     username: string;
 	email: string;

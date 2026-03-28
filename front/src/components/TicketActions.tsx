@@ -1,6 +1,6 @@
 import { type FC, type SubmitEvent, useEffect } from "react";
 import DecimalInput from "./DecimalInput.tsx"
-import type { TicketStatus } from "../types.ts";
+import type { PaymentResponseDTO, TicketStatus } from "../types.ts";
 
 interface TicketActionsProps {
   ticketStatus: TicketStatus;
@@ -11,8 +11,7 @@ interface TicketActionsProps {
   onPayByCard: (e: SubmitEvent<HTMLFormElement>) => void;
   onPayByCash: (e: SubmitEvent<HTMLFormElement>) => void;
   setTicketStatus: (status: TicketStatus) => void;
-  onPaymentProcessed: () => void;
-  // onPayByCCE?: () => void;
+  onPaymentProcessed: (response?: PaymentResponseDTO) => void;
 }
 
 export const TicketActions: FC<TicketActionsProps> = ({

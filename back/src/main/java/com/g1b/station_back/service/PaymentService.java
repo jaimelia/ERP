@@ -39,6 +39,11 @@ public class PaymentService {
     BigDecimal totalToPay = transaction.getRemainingAmount();
     BigDecimal amountPaid = paymentRequestDTO.amount();
 
+    if (amountPaid.compareTo(totalToPay) > 0) {
+      return new PaymentResponseDTO(null, PaymentResponseDTO.PaymentStatus.EXCESS,
+          totalToPay, "Le total payé est supérieur au reste à payer. Paiement annulé.");
+    }
+
     TransactionPayment newPayment = new TransactionPayment();
     newPayment.setTransaction(transaction);
     newPayment.setPaymentMethod(PaymentMethod.valueOf(paymentRequestDTO.paymentMethod()));
@@ -53,18 +58,11 @@ public class PaymentService {
     }
 
     PaymentStatus paymentStatus = PaymentStatus.accepted;
-
-    if (newPayment.getPaymentMethod() == PaymentMethod.CreditCard) {
-      if (ThreadLocalRandom.current().nextDouble() >= 0.9) {
-        paymentStatus = PaymentStatus.canceled;
-      }
+    if (newPayment.getPaymentMethod() == PaymentMethod.CreditCard
+        && ThreadLocalRandom.current().nextDouble() >= 0.9) {
+      paymentStatus = PaymentStatus.canceled;
     }
     newPayment.setStatus(paymentStatus);
-
-    if (amountPaid.compareTo(totalToPay) > 0) {
-      return new PaymentResponseDTO(newPayment.getIdTransactionPayment(), PaymentResponseDTO.PaymentStatus.EXCESS,
-          totalToPay, "Le total payé est supérieur au reste à payer. Paiement annulé.");
-    }
     transaction.addPayment(newPayment);
     transactionPaymentRepository.save(newPayment);
 
@@ -78,9 +76,8 @@ public class PaymentService {
           BigDecimal.ZERO, "Paiement validé, transaction complétée.");
     }
 
-    BigDecimal newRemaining = totalToPay.subtract(amountPaid);
     return new PaymentResponseDTO(newPayment.getIdTransactionPayment(), PaymentResponseDTO.PaymentStatus.PARTIAL,
-        newRemaining, "Paiement partiel validé.");
+        totalToPay.subtract(amountPaid), "Paiement partiel validé.");
   }
 
   public PaymentResponseDTO cancelPayment(Integer paymentId) {

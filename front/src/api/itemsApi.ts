@@ -3,7 +3,7 @@ import type {ItemType} from "../types.ts";
 
 export interface UpdateProductDTO {
     name: string;
-    price: number;
+    unitPrice: number;
     stock: number;
 }
 
