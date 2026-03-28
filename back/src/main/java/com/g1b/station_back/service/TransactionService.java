@@ -27,7 +27,7 @@ public class TransactionService {
 
     @Transactional(readOnly = true)
     public List<TransactionDTO> getAllTransactions() {
-        List<Transaction> transactions = transactionRepository.findAllByOrderByDateDesc();
+        List<Transaction> transactions = transactionRepository.findAllByOrderByTransactionDateDesc();
 
         return transactions.stream()
                 .map(this::mapToTransactionDTO)

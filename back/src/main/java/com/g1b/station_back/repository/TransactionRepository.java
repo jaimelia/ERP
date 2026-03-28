@@ -10,6 +10,6 @@ import java.util.List;
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Integer> {
     @EntityGraph(attributePaths = {"lines", "lines.item", "payments"})
-    List<Transaction> findAllByOrderByDateDesc();
+    List<Transaction> findAllByOrderByTransactionDateDesc();
 }
 
