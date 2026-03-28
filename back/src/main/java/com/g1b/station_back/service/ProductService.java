@@ -20,30 +20,27 @@ public class ProductService {
     public List<ProductDTO> getAllProducts() {
         return productRepository.findAll()
                 .stream()
-                .map(p -> new ProductDTO(p.getIdItem(), p.getName(), p.getUnitPrice(), p.getStock(), p.getAlertThreshold()))
+                .map(p -> new ProductDTO(p.getIdItem(), p.getName(), p.getUnitPrice(), p.getStock()))
                 .toList();
     }
 
     public ProductDTO createProduct(ProductDTO dto) {
         Product product = new Product();
-        product.setName(dto.getName());
-        product.setItemType("produit");
-        product.setUnitPrice(dto.getUnitPrice());
-        product.setStock(dto.getStock());
-        product.setAlertThreshold(dto.getAlertThreshold());
+        product.setName(dto.name());
+        product.setUnitPrice(dto.price());
+        product.setStock(dto.stock());
         Product saved = productRepository.save(product);
-        return new ProductDTO(saved.getIdItem(), saved.getName(), saved.getUnitPrice(), saved.getStock(), saved.getAlertThreshold());
+        return new ProductDTO(saved.getIdItem(), saved.getName(), saved.getUnitPrice(), saved.getStock());
     }
 
     public ProductDTO updateProduct(Long id, ProductDTO dto) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Produit introuvable : " + id));
-        product.setName(dto.getName());
-        product.setUnitPrice(dto.getUnitPrice());
-        product.setStock(dto.getStock());
-        product.setAlertThreshold(dto.getAlertThreshold());
+        product.setName(dto.name());
+        product.setUnitPrice(dto.price());
+        product.setStock(dto.stock());
         Product saved = productRepository.save(product);
-        return new ProductDTO(saved.getIdItem(), saved.getName(), saved.getUnitPrice(), saved.getStock(), saved.getAlertThreshold());
+        return new ProductDTO(saved.getIdItem(), saved.getName(), saved.getUnitPrice(), saved.getStock());
     }
 
     public void deleteProduct(Long id) {

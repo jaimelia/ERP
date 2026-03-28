@@ -1,28 +1,37 @@
 import {apiUrl, fetchJsonWithAuth} from "./common.ts";
+import type {ItemType} from "../types.ts";
 
-export interface ProductDTO {
-    id: number;
+export interface UpdateProductDTO {
     name: string;
     price: number;
     stock: number;
-    alertThreshold: number;
 }
 
-export interface FuelDTO {
-    id: number;
+export interface UpdateFuelDTO {
     name: string;
     price: number;
     stock: number;
-    alertThreshold: number;
 }
 
-export interface StockItemDTO {
-    type: "Produit" | "Carburant";
+export interface UpdateElectricityDTO {
+    name: string;
+    normalPrice: number;
+    fastPrice: number;
+}
+
+export interface ItemDTO {
     id: number;
     name: string;
     stock: number;
+	itemType: ItemType;
     price: number;
-    alertThreshold: number | null;
+}
+
+export interface ElectricityDTO {
+    id: number;
+    name: string;
+    normalPrice: number;
+    fastPrice: number;
 }
 
 export interface RestockDTO {
@@ -35,24 +44,50 @@ export interface RestockDTO {
     status: "pending" | "delivered" | "canceled";
 }
 
-export interface RestockableItemDTO {
-    id: number;
-    name: string;
-    price: number;
-    stock: number;
+export interface CreateRestockDTO {
+	idItem: number;
+	quantity: number;
 }
 
-export async function getRestockableItems(): Promise<RestockableItemDTO[]> {
-    return fetchJsonWithAuth(apiUrl("/items/restockables"));
+export interface RestockableItemDTO {
+	id: number;
+	name: string;
+	price: number;
+	quantity: number;
+	itemType: ItemType;
+	alertThreshold?: number;
+	autoRestockQuantity?: number;
+}
+
+export interface UpdateThresholdsDTO {
+	idItem: number;
+	alertThreshold: number | null;
+	autoRestockQuantity: number | null;
+}
+
+/* restocks */
+export async function createRestock(restock: CreateRestockDTO) {
+	return await fetchJsonWithAuth(apiUrl("/restocks"), {
+		method: "POST",
+		headers: {"Content-Type": "application/json"},
+		body: JSON.stringify({
+			idItem: restock.idItem,
+			quantity: restock.quantity
+		}),
+	});
+}
+
+export async function updateThresholds(thresholds: UpdateThresholdsDTO[]) {
+	return await fetchJsonWithAuth(apiUrl("/restocks/thresholds"), {
+		method: "PUT",
+		headers: {"Content-Type": "application/json"},
+		body: JSON.stringify(thresholds),
+	})
 }
 
 // ── Produits ──────────────────────────────────────────────────────────────────
 
-export async function getProducts(): Promise<ProductDTO[]> {
-    return fetchJsonWithAuth(apiUrl("/items/products"));
-}
-
-export async function createProduct(dto: Omit<ProductDTO, "id">): Promise<ProductDTO> {
+export async function createProduct(dto: Omit<UpdateProductDTO, "id">): Promise<UpdateProductDTO> {
     return fetchJsonWithAuth(apiUrl("/items/products"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -60,7 +95,7 @@ export async function createProduct(dto: Omit<ProductDTO, "id">): Promise<Produc
     });
 }
 
-export async function updateProduct(id: number, dto: Omit<ProductDTO, "id">): Promise<ProductDTO> {
+export async function updateProduct(id: number, dto: UpdateProductDTO): Promise<UpdateProductDTO> {
     return fetchJsonWithAuth(apiUrl(`/items/products/${id}`), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -74,11 +109,15 @@ export async function deleteProduct(id: number): Promise<void> {
 
 // ── Carburants ────────────────────────────────────────────────────────────────
 
-export async function getFuels(): Promise<FuelDTO[]> {
-    return fetchJsonWithAuth(apiUrl("/items/fuels"));
+export async function createFuel(dto: UpdateFuelDTO): Promise<UpdateFuelDTO> {
+    return fetchJsonWithAuth(apiUrl("/items/fuels"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dto),
+    });
 }
 
-export async function updateFuel(id: number, dto: Omit<FuelDTO, "id">): Promise<FuelDTO> {
+export async function updateFuel(id: number, dto: UpdateFuelDTO): Promise<UpdateFuelDTO> {
     return fetchJsonWithAuth(apiUrl(`/items/fuels/${id}`), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -92,32 +131,28 @@ export async function deleteFuel(id: number): Promise<void> {
 
 // ── Stock combiné (Produits + Carburants) ─────────────────────────────────────
 
-export async function getStock(): Promise<StockItemDTO[]> {
+export async function getStock(): Promise<ItemDTO[]> {
     return fetchJsonWithAuth(apiUrl("/items/stock"));
 }
 
-// ── Réapprovisionnements ──────────────────────────────────────────────────────
+// electricity
 
-export async function getRestocks(): Promise<RestockDTO[]> {
-    return fetchJsonWithAuth(apiUrl("/items/restocks"));
-}
-
-export async function createRestock(dto: Omit<RestockDTO, "idRestock" | "itemName" | "itemType">): Promise<RestockDTO> {
-    return fetchJsonWithAuth(apiUrl("/items/restocks"), {
+export async function createElectricity(dto: UpdateElectricityDTO): Promise<ElectricityDTO> {
+    return fetchJsonWithAuth(apiUrl("/items/electricity"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(dto),
     });
 }
 
-export async function updateRestock(id: number, dto: Omit<RestockDTO, "idRestock" | "itemName" | "itemType">): Promise<RestockDTO> {
-    return fetchJsonWithAuth(apiUrl(`/items/restocks/${id}`), {
+export async function updateElectricity(id: number, dto: UpdateElectricityDTO): Promise<ElectricityDTO> {
+    return fetchJsonWithAuth(apiUrl(`/items/electricity/${id}`), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(dto),
     });
 }
 
-export async function deleteRestock(id: number): Promise<void> {
-    await fetchJsonWithAuth(apiUrl(`/items/restocks/${id}`), { method: "DELETE" });
+export async function deleteElectricity(id: number): Promise<void> {
+    await fetchJsonWithAuth(apiUrl(`/items/electricity/${id}`), { method: "DELETE" });
 }

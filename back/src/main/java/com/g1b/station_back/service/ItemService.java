@@ -30,12 +30,12 @@ public class ItemService {
 	public List<RestockableItemDTO> getRestockableItems() {
 		List<RestockableItemDTO> items = new ArrayList<>(fuelRepository.findAll()
 				.stream()
-				.map(fuel -> new RestockableItemDTO(fuel.getIdItem(), fuel.getName(), fuel.getPricePerLiter(), fuel.getStock()))
+				.map(fuel -> new RestockableItemDTO(fuel.getIdItem(), fuel.getName(), fuel.getPricePerLiter(), fuel.getStock(), "fuel", fuel.getAlertThreshold(), fuel.getAutoRestockQuantity()))
 				.toList());
 
 		items.addAll(productRepository.findAll()
 				.stream()
-				.map(product -> new RestockableItemDTO(product.getIdItem(), product.getName(), product.getUnitPrice(), new BigDecimal(product.getStock())))
+				.map(product -> new RestockableItemDTO(product.getIdItem(), product.getName(), product.getUnitPrice(), new BigDecimal(product.getStock()), "product", new BigDecimal(product.getAlertThreshold()), new BigDecimal(product.getAutoRestockQuantity())))
 				.toList());
 		
 		return items;

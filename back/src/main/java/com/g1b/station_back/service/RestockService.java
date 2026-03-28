@@ -2,17 +2,22 @@ package com.g1b.station_back.service;
 
 import com.g1b.station_back.dto.PostRestockDTO;
 import com.g1b.station_back.dto.RestockDTO;
+import com.g1b.station_back.dto.UpdateThresholdsDTO;
+import com.g1b.station_back.model.Fuel;
 import com.g1b.station_back.model.Item;
+import com.g1b.station_back.model.Product;
 import com.g1b.station_back.model.Restock;
 import com.g1b.station_back.model.enums.RestockStatus;
 import com.g1b.station_back.repository.FuelRepository;
 import com.g1b.station_back.repository.ItemRepository;
+import com.g1b.station_back.repository.ProductRepository;
 import com.g1b.station_back.repository.RestockRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -24,12 +29,14 @@ public class RestockService {
 	private final FuelRepository fuelRepository;
 	private final ItemRepository itemRepository;
 	private final ItemService itemService;
+	private final ProductRepository productRepository;
 
-	public RestockService(RestockRepository restockRepository, FuelRepository fuelRepository, ItemRepository itemRepository, ItemService itemService) {
+	public RestockService(RestockRepository restockRepository, FuelRepository fuelRepository, ItemRepository itemRepository, ItemService itemService, ProductRepository productRepository) {
 		this.restockRepository = restockRepository;
 		this.fuelRepository = fuelRepository;
 		this.itemRepository = itemRepository;
 		this.itemService = itemService;
+		this.productRepository = productRepository;
 	}
 
 	public List<RestockDTO> getAllRestocks() {
@@ -64,6 +71,31 @@ public class RestockService {
 				saved.getRestockDate(),
 				itemService.getItemType(item)
 		);
+	}
+	
+	public void updateThresholds(UpdateThresholdsDTO[] dtos) {
+		List<Fuel> fuels = new ArrayList<>();
+		List<Product> products = new ArrayList<>();
+		
+		for (UpdateThresholdsDTO dto : dtos) {
+			Fuel fuel = fuelRepository.findByIdItem(dto.idItem());
+			if (fuel != null) {
+				fuel.setAlertThreshold(dto.alertThreshold());
+				fuel.setAutoRestockQuantity(dto.autoRestockQuantity());
+				fuels.add(fuel);
+			} else {
+
+				Product product = productRepository.findByIdItem(dto.idItem());
+				if (product != null) {
+					product.setAlertThreshold(dto.alertThreshold().intValue());
+					product.setAutoRestockQuantity(dto.autoRestockQuantity().intValue());
+					products.add(product);
+				}
+			}
+		}
+		
+		fuelRepository.saveAll(fuels);
+		productRepository.saveAll(products);
 	}
 
 	public RestockDTO updateRestock(Integer id, RestockDTO dto) {

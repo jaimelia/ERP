@@ -24,19 +24,27 @@ public class FuelService {
     public List<FuelDTO> getAllFuels() {
         return fuelRepository.findAll()
                 .stream()
-                .map(f -> new FuelDTO(f.getIdItem(), f.getName(), f.getPricePerLiter(), f.getStock(), f.getAlertThreshold()))
+                .map(f -> new FuelDTO(f.getIdItem(), f.getName(), f.getPricePerLiter(), f.getStock()))
                 .toList();
+    }
+
+    public FuelDTO createFuel(FuelDTO dto) {
+        Fuel fuel = new Fuel();
+        fuel.setName(dto.name());
+        fuel.setPricePerLiter(dto.price());
+        fuel.setStock(dto.stock());
+        Fuel saved = fuelRepository.save(fuel);
+        return new FuelDTO(saved.getIdItem(), saved.getName(), saved.getPricePerLiter(), saved.getStock());
     }
 
     public FuelDTO updateFuel(Long id, FuelDTO dto) {
         Fuel fuel = fuelRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Carburant introuvable : " + id));
-        fuel.setName(dto.getName());
-        fuel.setPricePerLiter(dto.getPricePerLiter());
-        fuel.setStock(dto.getStock());
-        fuel.setAlertThreshold(dto.getAlertThreshold());
+        fuel.setName(dto.name());
+        fuel.setPricePerLiter(dto.price());
+        fuel.setStock(dto.stock());
         Fuel saved = fuelRepository.save(fuel);
-        return new FuelDTO(saved.getIdItem(), saved.getName(), saved.getPricePerLiter(), saved.getStock(), saved.getAlertThreshold());
+        return new FuelDTO(saved.getIdItem(), saved.getName(), saved.getPricePerLiter(), saved.getStock());
     }
 
     @Transactional

@@ -7,7 +7,7 @@ import {DEFAULT_LEVELS} from "./data/stationConfig.tsx";
 import {savePreferences} from "./api/userApi.ts";
 import {ToastProvider} from "./contexts/ToastContext.tsx";
 import {ToastContainer} from "./components/ToastContainer.tsx";
-import {ModalProvider} from "./context/ModalContext.tsx";
+import {ModalProvider} from "./contexts/ModalContext.tsx";
 
 const App: FC = () => {
     const [user, setUser] = useState<User | null>(null);

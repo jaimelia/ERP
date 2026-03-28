@@ -1,13 +1,10 @@
 package com.g1b.station_back.controller;
 
-import com.g1b.station_back.dto.FuelDTO;
-import com.g1b.station_back.dto.ProductDTO;
-import com.g1b.station_back.dto.RestockDTO;
-import com.g1b.station_back.dto.RestockableItemDTO;
+import com.g1b.station_back.dto.*;
+import com.g1b.station_back.service.ElectricityService;
 import com.g1b.station_back.service.FuelService;
 import com.g1b.station_back.service.ItemService;
 import com.g1b.station_back.service.ProductService;
-import com.g1b.station_back.service.RestockService;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,11 +20,13 @@ public class ItemController {
 	private final ItemService itemService;
     private final ProductService productService;
     private final FuelService fuelService;
+	private final ElectricityService electricityService;
 
-    public ItemController(ItemService itemService, ProductService productService, FuelService fuelService, ) {
+	public ItemController(ItemService itemService, ProductService productService, FuelService fuelService, ElectricityService electricityService) {
 		this.itemService = itemService;
         this.productService = productService;
         this.fuelService = fuelService;
+		this.electricityService = electricityService;
 	}
 	
 	@GetMapping("/restockables")
@@ -36,11 +35,6 @@ public class ItemController {
 	}
 
     // ── Produits ──────────────────────────────────────────────────────────────
-
-    @GetMapping("/products")
-    public ResponseEntity<List<ProductDTO>> getAllProducts() {
-        return ResponseEntity.ok(productService.getAllProducts());
-    }
 
     @PostMapping("/products")
     public ResponseEntity<ProductDTO> createProduct(@RequestBody ProductDTO dto) {
@@ -60,10 +54,10 @@ public class ItemController {
 
     // ── Carburants ────────────────────────────────────────────────────────────
 
-    @GetMapping("/fuels")
-    public ResponseEntity<List<FuelDTO>> getAllFuels() {
-        return ResponseEntity.ok(fuelService.getAllFuels());
-    }
+	@PostMapping("/fuels")
+	public ResponseEntity<FuelDTO> createFuel(@RequestBody FuelDTO dto) {
+		return ResponseEntity.ok(fuelService.createFuel(dto));
+	}
 
     @PutMapping("/fuels/{id}")
     public ResponseEntity<FuelDTO> updateFuel(@PathVariable Long id, @RequestBody FuelDTO dto) {
@@ -79,27 +73,46 @@ public class ItemController {
     // ── Stock combiné (Produits + Carburants) ─────────────────────────────────
 
     @GetMapping("/stock")
-    public ResponseEntity<List<StockItemDTO>> getStock() {
-        List<StockItemDTO> stock = new ArrayList<>();
+    public ResponseEntity<List<ItemDTO>> getStock() {
+        List<ItemDTO> stock = new ArrayList<>();
 
         productService.getAllProducts().forEach(p ->
-                stock.add(new StockItemDTO(
-                        "Produit",
-                        p.getIdItem() != null ? p.getIdItem().longValue() : null,
-                        p.getName(),
-                        p.getStock() != null ? BigDecimal.valueOf(p.getStock()) : null,
-                        p.getUnitPrice(),
-                        p.getAlertThreshold() != null ? BigDecimal.valueOf(p.getAlertThreshold()) : null)));
+                stock.add(new ItemDTO(
+                        p.idItem(),
+                        p.name(),
+                        BigDecimal.valueOf(p.stock()),
+                        p.price(),
+						"product")));
 
         fuelService.getAllFuels().forEach(f ->
-                stock.add(new StockItemDTO(
-                        "Carburant",
-                        f.getIdItem() != null ? f.getIdItem().longValue() : null,
-                        f.getName(),
-                        f.getStock(),
-                        f.getPricePerLiter(),
-                        f.getAlertThreshold())));
+                stock.add(new ItemDTO(
+                        f.idItem(),
+                        f.name(),
+                        f.stock(),
+                        f.price(),
+                        "fuel")));
 
         return ResponseEntity.ok(stock);
     }
+	
+	@GetMapping("/electricity")
+	public ResponseEntity<List<ElectricityDTO>> getElectricity() {
+		return ResponseEntity.ok(electricityService.getElectricity());
+	}
+
+	@PostMapping("/electricity")
+	public ResponseEntity<ElectricityDTO> createElectricity(@RequestBody ElectricityDTO dto) {
+		return ResponseEntity.ok(electricityService.createElectricity(dto));
+	}
+
+	@PutMapping("/electricity/{id}")
+	public ResponseEntity<ElectricityDTO> updateElectricity(@PathVariable Integer id, @RequestBody ElectricityDTO dto) {
+		return ResponseEntity.ok(electricityService.updateElectricity(id, dto));
+	}
+
+	@DeleteMapping("/electricity/{id}")
+	public ResponseEntity<Void> deleteElectricity(@PathVariable Integer id) {
+		electricityService.deleteElectricity(id);
+		return ResponseEntity.noContent().build();
+	}
 }

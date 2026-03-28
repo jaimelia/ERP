@@ -12,21 +12,16 @@ public abstract class Item {
     @Column(name = "id_item")
     private Integer idItem;
 
-    @Column(name = "item_type", nullable = false)
-    private String itemType;
-
     @Column(nullable = false)
     private String name;
 
     public Item() {}
-    public Item(Integer idItem, String itemType, String name) {
-        this.idItem = idItem; this.itemType = itemType; this.name = name;
+    public Item(Integer idItem, String name) {
+        this.idItem = idItem; this.name = name;
     }
 
     public Integer getIdItem() { return idItem; }
     public void setIdItem(Integer idItem) { this.idItem = idItem; }
-    public String getItemType() { return itemType; }
-    public void setItemType(String itemType) { this.itemType = itemType; }
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 }

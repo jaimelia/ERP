@@ -1,4 +1,4 @@
-import {useModal} from "../../context/ModalContext";
+import {useModal} from "../../contexts/ModalContext";
 import type {FC} from "react";
 
 interface ConfirmModalProps {

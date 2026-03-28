@@ -1,87 +1,125 @@
-.modal-content {
+.modal-new-restock,
+.modal-thresholds {
 	width: 700px;
 }
 
-.modal-content .widget-search {
+/* modal-new-restock */
+
+.modal-new-restock .widget-search {
 	margin-bottom: 10px;
 }
 
-.modal-content .products-list {
+.modal-new-restock .products-list {
 	display: flex;
 	flex-direction: column;
 	height: 20vh;
 	overflow-y: scroll;
 }
 
-.modal-content .products-list .product-item {
+.modal-new-restock .products-list .product-item {
 	display: flex;
 	justify-content: space-between;
 	padding: 0.7rem;
 	cursor: pointer;
+	transition: 0.15s ease background-color;
 }
 
-.modal-content .products-list .product-item:not(:last-child) {
+.modal-new-restock .products-list .product-item:not(:last-child) {
 	border-bottom: 1px solid var(--color-border);
 }
 
-.modal-content .products-list .product-item:hover {
+.modal-new-restock .products-list .product-item:hover {
 	background-color: var(--color-surface-alt);
 }
 
-.modal-content .products-list .product-item.selected {
+.modal-new-restock .products-list .product-item.selected {
 	background-color: var(--color-accent-soft);
 }
 
-.modal-content .products-list .product-item.selected:hover {
+.modal-new-restock .products-list .product-item.selected:hover {
 	background-color: var(--color-accent-soft-hover);
 }
 
-.modal-content .modal-options {
+.modal-new-restock .modal-options {
 	margin-top: 20px;
 	display: flex;
 	justify-content: space-between;
 }
 
-.modal-content .modal-options input {
+.modal-new-restock .modal-options input {
 	margin-left: 0.5rem;
 	width: 70px;
 }
 
-.modal-content .dropdown-menu > span {
-	display: flex;
-	align-items: center;
+/* modal thresholds */
+.modal-thresholds .dropdown-menu {
+	margin-bottom: 15px;
 }
 
-.modal-content .dropdown-menu .threshold-item {
+.modal-thresholds .dropdown-menu > span {
+	display: flex;
+	align-items: center;
+	cursor: pointer;
+}
+
+.modal-thresholds .dropdown-menu > span > svg {
+	transition: 0.2s ease transform;
+}
+
+.modal-thresholds .dropdown-menu:not(.active) > span > svg {
+	transform: rotate(-90deg);
+}
+
+.modal-thresholds .dropdown-menu .dropdown-content {
+	transition: 0.3s ease max-height;
+}
+
+.modal-thresholds .dropdown-menu:not(.active) .dropdown-content {
+	max-height: 0;
+	overflow-y: hidden;
+}
+
+.modal-thresholds .dropdown-menu.active .dropdown-content {
+	max-height: 200px;
+	overflow-y: scroll;
+}
+
+.modal-thresholds .dropdown-menu .threshold-item {
 	display: flex;
 	justify-content: space-between;
+	align-items: center;
 	background-color: var(--color-surface-alt);
 	gap: 0.5rem;
 	padding: 0.2rem;
+	height: 35px;
 }
 
-.modal-content .dropdown-menu .threshold-item > div {
+.modal-thresholds .dropdown-menu .threshold-item > div {
 	display: flex;
 	gap: 1rem;
 }
 
-.modal-content .dropdown-menu .threshold-item > div > div {
+.modal-thresholds .dropdown-menu .threshold-item > div > div {
 	display: flex;
 	gap: 0.4rem;
 }
 
-.modal-content .dropdown-menu .threshold-item > div > div > input {
+.modal-thresholds .dropdown-menu .threshold-item > div > div > input {
 	width: 70px;
 }
 
-.modal-content .dropdown-menu .threshold-item > :first-child {
+.modal-thresholds .dropdown-menu .threshold-item > :first-child {
 	margin-right: auto;
 }
 
-.modal-content .dropdown-menu .threshold-item:not(:last-child) {
+.modal-thresholds .dropdown-menu .threshold-item:not(:last-child) {
 	margin-bottom: 0.2rem;
 }
 
-.modal-content .dropdown-menu .threshold-item button.action-btn {
+.modal-thresholds .dropdown-menu .threshold-item button {
+	height: 100%	;
+}
+
+.modal-thresholds .dropdown-menu .threshold-item button.action-btn {
 	width: 80px;
 }
