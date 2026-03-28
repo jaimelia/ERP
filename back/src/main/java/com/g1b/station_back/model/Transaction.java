@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "transactions")
@@ -30,10 +30,10 @@ public class Transaction {
     private TransactionStatus status;
 
     @OneToMany(mappedBy = "transaction", cascade = CascadeType.ALL)
-    private List<TransactionLine> lines;
+    private Set<TransactionLine> lines;
 
     @OneToMany(mappedBy = "transaction", cascade = CascadeType.ALL)
-    private List<TransactionPayment> payments;
+    private Set<TransactionPayment> payments;
 
     public Transaction() {}
     public Transaction(Integer idTransaction, String type, LocalDate transactionDate, Boolean isFromAutomat, TransactionStatus status) {
@@ -51,10 +51,10 @@ public class Transaction {
     public void setIsFromAutomat(Boolean isFromAutomat) { this.isFromAutomat = isFromAutomat; }
     public TransactionStatus getStatus() { return status; }
     public void setStatus(TransactionStatus status) { this.status = status; }
-    public List<TransactionLine> getLines() { return lines; }
-    public void setLines(List<TransactionLine> lines) { this.lines = lines; }
-    public List<TransactionPayment> getPayments() { return payments; }
-    public void setPayments(List<TransactionPayment> payments) { this.payments = payments; }
+    public Set<TransactionLine> getLines() { return lines; }
+    public void setLines(Set<TransactionLine> lines) { this.lines = lines; }
+    public Set<TransactionPayment> getPayments() { return payments; }
+    public void setPayments(Set<TransactionPayment> payments) { this.payments = payments; }
 
     public BigDecimal getTotalAmount() {
         BigDecimal totalAmount = BigDecimal.ZERO;
