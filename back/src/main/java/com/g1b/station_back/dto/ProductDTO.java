@@ -8,5 +8,5 @@ public record ProductDTO(
         BigDecimal unitPrice,
         Integer stock,
         Integer alertThreshold
-) {
+) implements ItemIDTO {
 }
