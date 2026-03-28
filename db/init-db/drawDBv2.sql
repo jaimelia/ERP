@@ -215,7 +215,7 @@ CREATE TABLE IF NOT EXISTS "daily_transactions_reports" (
 CREATE TABLE IF NOT EXISTS "incident_reports" (
 	"id_incident_report" INTEGER NOT NULL UNIQUE GENERATED ALWAYS AS IDENTITY,
 	"type" VARCHAR(255),
-	"date" DATE,
+	"date" TIMESTAMP,
 	"technical_detail" VARCHAR(255),
 	"resolution" VARCHAR(255),
 	"status" document_status NOT NULL,

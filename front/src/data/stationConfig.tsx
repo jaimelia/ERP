@@ -8,6 +8,7 @@ import {ManagerProductsWidget} from "../components/widgets/ManagerProductsWidget
 import {ChargersWidget} from "../components/widgets/ChargersWidget.tsx";
 import {PumpsWidget} from "../components/widgets/PumpsWidget.tsx";
 import {TicketWidget} from "../components/widgets/TicketWidget.tsx";
+import {IncidentWidget} from "../components/widgets/IncidentWidget.tsx";
 
 
 export const WIDGETS: Record<string, WidgetDef> = {
@@ -26,7 +27,7 @@ export const WIDGETS: Record<string, WidgetDef> = {
 	transaction_table: {id: "transaction_table", label: "Table transactions", size: {width: 1, height: 1}},
 	guidelines: {id: "guidelines", label: "Directives", size: {width: 1, height: 1}},
 	management_documents: {id: "management_documents", label: "Documents De Gestion", size: {width: 1, height: 1}},
-	incident: {id: "incident", label: "Incident", size: {width: 1, height: 1}},
+	incident: {id: "incident", label: "Incident", size: {width: 1, height: 1}, element: <IncidentWidget/>},
 };
 
 export const DEFAULT_LEVELS: Record<Role, Levels> = {
