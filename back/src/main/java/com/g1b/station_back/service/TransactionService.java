@@ -2,6 +2,7 @@ package com.g1b.station_back.service;
 
 import com.g1b.station_back.dto.TransactionCreationRequestDTO;
 import com.g1b.station_back.dto.TransactionLineRequestDTO;
+import com.g1b.station_back.model.Item;
 import com.g1b.station_back.model.Product;
 import com.g1b.station_back.model.Transaction;
 import com.g1b.station_back.model.TransactionLine;
@@ -51,7 +52,7 @@ public class TransactionService {
 
                 transactionLines.add(transactionLine);
             } else {
-                throw new IllegalArgumentException("Not enough stock for product " + product.getName());
+                return -1;
             }
         }
         newTransaction.setLines(transactionLines);
@@ -63,7 +64,11 @@ public class TransactionService {
     public Integer cancelShopTransaction(Integer transactionId) {
         Transaction transaction = transactionRepository.findById(transactionId)
                 .orElseThrow(() -> new IllegalArgumentException("Transaction not found"));
-
+        for (TransactionLine line : transaction.getLines()) {
+            if (line.getItem() instanceof Product product) {
+                product.setStock(product.getStock() + line.getQuantity());
+            }
+        }
         transaction.setStatus(TransactionStatus.canceled);
         transactionRepository.save(transaction);
         return transactionId;
