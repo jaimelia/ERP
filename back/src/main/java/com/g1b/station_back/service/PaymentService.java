@@ -2,7 +2,6 @@ package com.g1b.station_back.service;
 
 import com.g1b.station_back.dto.PaymentRequestDTO;
 import com.g1b.station_back.dto.PaymentResponseDTO;
-import com.g1b.station_back.exception.PaymentExcessException;
 import com.g1b.station_back.model.CceCard;
 import com.g1b.station_back.model.Transaction;
 import com.g1b.station_back.model.TransactionPayment;
@@ -40,9 +39,6 @@ public class PaymentService {
     BigDecimal totalToPay = transaction.getRemainingAmount();
     BigDecimal amountPaid = paymentRequestDTO.amount();
 
-    if (amountPaid.compareTo(totalToPay) > 0) {
-      throw new PaymentExcessException();
-    }
     TransactionPayment newPayment = new TransactionPayment();
     newPayment.setTransaction(transaction);
     newPayment.setPaymentMethod(PaymentMethod.valueOf(paymentRequestDTO.paymentMethod()));
@@ -65,22 +61,26 @@ public class PaymentService {
     }
     newPayment.setStatus(paymentStatus);
 
+    if (amountPaid.compareTo(totalToPay) > 0) {
+      return new PaymentResponseDTO(newPayment.getIdTransactionPayment(), PaymentResponseDTO.PaymentStatus.EXCESS,
+          totalToPay, "Le total payé est supérieur au reste à payer. Paiement annulé.");
+    }
     transaction.addPayment(newPayment);
     transactionPaymentRepository.save(newPayment);
 
     if (paymentStatus == PaymentStatus.canceled) {
       return new PaymentResponseDTO(newPayment.getIdTransactionPayment(), PaymentResponseDTO.PaymentStatus.CANCELED,
-          totalToPay, "Payment refused.");
+          totalToPay, "Paiement par carte refusé.");
     }
 
     if (amountPaid.compareTo(totalToPay) == 0) {
       return new PaymentResponseDTO(newPayment.getIdTransactionPayment(), PaymentResponseDTO.PaymentStatus.VALIDATED,
-          BigDecimal.ZERO, "Payment successful, transaction completed.");
+          BigDecimal.ZERO, "Paiement validé, transaction complétée.");
     }
 
     BigDecimal newRemaining = totalToPay.subtract(amountPaid);
     return new PaymentResponseDTO(newPayment.getIdTransactionPayment(), PaymentResponseDTO.PaymentStatus.PARTIAL,
-        newRemaining, "Partial payment successful.");
+        newRemaining, "Paiement partiel validé.");
   }
 
   public PaymentResponseDTO cancelPayment(Integer paymentId) {
@@ -91,7 +91,7 @@ public class PaymentService {
     BigDecimal remainingAmount = transaction.getRemainingAmount();
     transactionPaymentRepository.save(payment);
     return new PaymentResponseDTO(paymentId, PaymentResponseDTO.PaymentStatus.CANCELED, remainingAmount,
-        "Payment canceled.");
+        "Paiement annulé.");
   }
 
 }

@@ -232,17 +232,18 @@ export const TicketWidget: FC = () => {
     console.log("Données traitées :", responseToUse);
 
     const newAmount = Number(responseToUse.amountRemaining ?? 0);
-    setRemainingAmount(newAmount);
 
     const status = responseToUse.status;
 
     if (status === "VALIDATED") {
       setTicketStatus("validated");
       setNotification({ message: responseToUse.message, type: "success" });
+      setRemainingAmount(newAmount);
       setCart([]);
     } else if (status === "PARTIAL") {
       setTicketStatus("paymentSelection");
       setNotification({ message: responseToUse.message, type: "warning" });
+      setRemainingAmount(newAmount);
       setPaymentResponse(null);
     } else if (status === "CANCELED") {
       setTicketStatus("paymentSelection");

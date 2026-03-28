@@ -59,7 +59,7 @@ export const TicketActions: FC<TicketActionsProps> = ({
       return (
         <form onSubmit={onPayByCard}>
           <div className="ticket-payment-actions">
-            <button className="ticket-action-btn" type="button" onClick={onCancelTicket}>Annuler</button>
+            <button className="ticket-action-btn" type="button" onClick={() => setTicketStatus("paymentSelection")}>Annuler</button>
             <DecimalInput />
             <button className="ticket-action-btn" type="submit" >Valider</button>
           </div>
@@ -69,7 +69,7 @@ export const TicketActions: FC<TicketActionsProps> = ({
       return (
         <form onSubmit={onPayByCash}>
           <div className="ticket-payment-actions">
-            <button className="ticket-action-btn" type="button" onClick={onCancelTicket}>Annuler</button>
+            <button className="ticket-action-btn" type="button" onClick={() => setTicketStatus("paymentSelection")}>Annuler</button>
             <DecimalInput />
             <button className="ticket-action-btn" type="submit" >Valider</button>
           </div>
