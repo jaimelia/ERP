@@ -2,6 +2,8 @@ package com.g1b.station_back.model;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 @Table(name = "clients")
 public class Client {
@@ -22,13 +24,12 @@ public class Client {
     @Column(name = "phone_number", nullable = false, length = 20)
     private String phoneNumber;
 
-    @ManyToOne
-    @JoinColumn(name = "id_cce_card", nullable = false)
-    private CceCard cceCard;
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
+    private List<CceCard> cceCards;
 
     public Client() {}
-    public Client(Integer idClient, String firstname, String lastname, String mail, String phoneNumber, CceCard cceCard) {
-        this.idClient = idClient; this.firstname = firstname; this.lastname = lastname; this.mail = mail; this.phoneNumber = phoneNumber; this.cceCard = cceCard;
+    public Client(Integer idClient, String firstname, String lastname, String mail, String phoneNumber, List<CceCard> cceCards) {
+        this.idClient = idClient; this.firstname = firstname; this.lastname = lastname; this.mail = mail; this.phoneNumber = phoneNumber; this.cceCards = cceCards;
     }
 
     public Integer getIdClient() { return idClient; }
@@ -41,6 +42,6 @@ public class Client {
     public void setMail(String mail) { this.mail = mail; }
     public String getPhoneNumber() { return phoneNumber; }
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
-    public CceCard getCceCard() { return cceCard; }
-    public void setCceCard(CceCard cceCard) { this.cceCard = cceCard; }
+    public List<CceCard> getCceCards() {return cceCards;}
+    public void setCceCards(List<CceCard> cceCards) {this.cceCards = cceCards;}
 }
