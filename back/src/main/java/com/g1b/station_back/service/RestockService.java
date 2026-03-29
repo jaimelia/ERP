@@ -14,8 +14,13 @@ import com.g1b.station_back.repository.ProductRepository;
 import com.g1b.station_back.repository.RestockRepository;
 
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.stereotype.Service;
 
+import org.apache.coyote.BadRequestException;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +58,10 @@ public class RestockService {
 	}
 
 	public RestockDTO createRestock(PostRestockDTO dto) {
+		if (dto.quantity().compareTo(new BigDecimal(0)) <= 0) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantity must be greater than 0");
+		}
+		
 		Item item = itemRepository.findById(dto.idItem())
 				.orElseThrow(() -> new EntityNotFoundException("Article introuvable : " + dto.idItem()));
 

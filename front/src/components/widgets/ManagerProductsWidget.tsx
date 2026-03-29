@@ -5,20 +5,21 @@ import {useToast} from "../../contexts/ToastContext.tsx";
 import {useModal} from "../../contexts/ModalContext.tsx";
 import {apiUrl} from "../../api/common.ts";
 import {
-    createElectricity,
-    createFuel,
-    createProduct,
-    deleteFuel,
-    deleteElectricity,
-    deleteProduct,
-    type ElectricityDTO,
-    type ItemDTO,
-    updateElectricity,
-    updateFuel,
-    updateProduct,
+	createElectricity,
+	createFuel,
+	createProduct,
+	deleteElectricity,
+	deleteFuel,
+	deleteProduct,
+	type ElectricityDTO,
+	type ItemDTO,
+	updateElectricity,
+	updateFuel,
+	updateProduct,
 } from "../../api/itemsApi.ts";
 import {ConfirmModal} from "../modal/ConfirmModal.tsx";
 import type {ApiError, ItemType} from "../../types.ts";
+import DecimalInput from "../DecimalInput.tsx";
 
 // ─── Types internes ───────────────────────────────────────────────────────────
 
@@ -454,19 +455,19 @@ const AddItemModal: FC<AddItemModalProps> = ({ onCreateProduct, onCreateFuel, on
                         <div className="modal-grid">
                             <label className="modal-field">
                                 <span>Prix normal (EUR/kWh)</span>
-                                <input
-                                    type="number" step="0.001" min="0"
-                                    value={electricityForm.normalPrice}
-                                    onChange={e => setElectricityForm({ ...electricityForm, normalPrice: e.target.value })}
-                                />
+								<DecimalInput 
+									nbDecimalPlaces={3}
+									initialValue={electricityForm.normalPrice}
+									onChange={e => setElectricityForm({ ...electricityForm, normalPrice: e.target.value })}
+								/>
                             </label>
                             <label className="modal-field">
                                 <span>Prix rapide (EUR/kWh)</span>
-                                <input
-                                    type="number" step="0.001" min="0"
-                                    value={electricityForm.fastPrice}
-                                    onChange={e => setElectricityForm({ ...electricityForm, fastPrice: e.target.value })}
-                                />
+								<DecimalInput 
+									nbDecimalPlaces={3}
+									initialValue={electricityForm.fastPrice}
+									onChange={e => setElectricityForm({ ...electricityForm, fastPrice: e.target.value })}
+								/>
                             </label>
                         </div>
                     </>
@@ -483,19 +484,19 @@ const AddItemModal: FC<AddItemModalProps> = ({ onCreateProduct, onCreateFuel, on
                         <div className="modal-grid">
                             <label className="modal-field">
                                 <span>{isFuel ? "Prix/L (€)" : "Prix unitaire (€)"}</span>
-                                <input
-                                    type="number" step="0.001" min="0"
-                                    value={productForm.unitPrice}
-                                    onChange={e => setProductForm({ ...productForm, unitPrice: e.target.value })}
-                                />
+								<DecimalInput
+									nbDecimalPlaces={3}
+									initialValue={productForm.unitPrice}
+									onChange={e => setProductForm({ ...productForm, unitPrice: e.target.value })}
+								/>
                             </label>
                             <label className="modal-field">
                                 <span>{isFuel ? "Stock (L)" : "Stock"}</span>
-                                <input
-                                    type="number" step="0.001" min="0"
-                                    value={productForm.stock}
-                                    onChange={e => setProductForm({ ...productForm, stock: e.target.value })}
-                                />
+								<DecimalInput 
+									nbDecimalPlaces={3}
+									initialValue={productForm.stock}
+									onChange={e => setProductForm({ ...productForm, stock: e.target.value })}
+								/>
                             </label>
                         </div>
                     </>
@@ -503,7 +504,14 @@ const AddItemModal: FC<AddItemModalProps> = ({ onCreateProduct, onCreateFuel, on
             </div>
             <div className="modal-actions">
                 <button className="modal-button modal-button--cancel" type="button" onClick={closeModal}>Annuler</button>
-                <button className="modal-button modal-button--confirm" type="button" onClick={handleConfirm}>
+                <button 
+					className="modal-button modal-button--confirm" 
+					type="button"
+					onClick={handleConfirm}
+					disabled={itemType === "electricity" 
+						? !(electricityForm.name && electricityForm.normalPrice != null && electricityForm.fastPrice != null)
+						: !(productForm.name && productForm.stock != null && productForm.unitPrice != null)}
+				>
                     Créer
                 </button>
             </div>
@@ -532,17 +540,17 @@ const ProductModal: FC<ProductModalProps> = ({ title, initialForm, onConfirm, pr
                 </label>
                 <label className="modal-field">
                     <span>{priceLabel}</span>
-                    <input
-                        type="number" step="0.001" min="0"
-                        value={form.unitPrice}
-                        onChange={e => setForm({ ...form, unitPrice: e.target.value })}
-                    />
+					<DecimalInput
+						nbDecimalPlaces={3}
+						initialValue={form.unitPrice}
+						onChange={e => setForm({ ...form, unitPrice: e.target.value })}
+					/>
                 </label>
                 <label className="modal-field">
                     <span>{stockLabel}</span>
-                    <input
-                        type="number" step="0.001" min="0"
-                        value={form.stock}
+                    <DecimalInput
+                        nbDecimalPlaces={3}
+                        initialValue={form.stock}
                         onChange={e => setForm({ ...form, stock: e.target.value })}
                     />
                 </label>
@@ -590,17 +598,17 @@ const ElectricityModal: FC<ElectricityModalProps> = ({ title, initialForm, onCon
                 </label>
                 <label className="modal-field">
                     <span>Prix normal (EUR/kWh)</span>
-                    <input
-                        type="number" step="0.001" min="0"
-                        value={form.normalPrice}
+                    <DecimalInput
+                        nbDecimalPlaces={3}
+                        initialValue={form.normalPrice}
                         onChange={e => setForm({ ...form, normalPrice: e.target.value })}
                     />
                 </label>
                 <label className="modal-field">
                     <span>Prix rapide (EUR/kWh)</span>
-                    <input
-                        type="number" step="0.001" min="0"
-                        value={form.fastPrice}
+                    <DecimalInput
+                        nbDecimalPlaces={3}
+                        initialValue={form.fastPrice}
                         onChange={e => setForm({ ...form, fastPrice: e.target.value })}
                     />
                 </label>

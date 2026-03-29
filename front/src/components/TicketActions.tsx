@@ -59,7 +59,7 @@ export const TicketActions: FC<TicketActionsProps> = ({
         <form onSubmit={onPayByCard}>
           <div className="ticket-payment-actions">
             <button className="ticket-action-btn" type="button" onClick={() => setTicketStatus("paymentSelection")}>Annuler</button>
-            <DecimalInput />
+            <DecimalInput placeHolder="Montant" />
             <button className="ticket-action-btn" type="submit" >Valider</button>
           </div>
         </form>
@@ -69,7 +69,7 @@ export const TicketActions: FC<TicketActionsProps> = ({
         <form onSubmit={onPayByCash}>
           <div className="ticket-payment-actions">
             <button className="ticket-action-btn" type="button" onClick={() => setTicketStatus("paymentSelection")}>Annuler</button>
-            <DecimalInput />
+            <DecimalInput placeHolder="Montant" />
             <button className="ticket-action-btn" type="submit" >Valider</button>
           </div>
         </form>

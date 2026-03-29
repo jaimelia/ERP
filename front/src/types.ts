@@ -158,14 +158,14 @@ export const formatQuantity = (quantity: number, itemType: ItemType): string => 
   }
 }
 
-export const formatPrice = (price: number, itemType?: ItemType): string => {
+export const formatPrice = (price: number, decimalPlaces = 2, itemType?: ItemType): string => {
   switch (itemType) {
     case undefined:
     case "product":
-      return `${price} €`;
+      return `${price.toFixed(decimalPlaces)} €`;
     case "fuel":
-      return `${price} €/L`;
+      return `${price.toFixed(decimalPlaces)} €/L`;
     case "electricity":
-      return `${price} €/kWh`
+      return `${price.toFixed(decimalPlaces)} €/kWh`
   }
 }

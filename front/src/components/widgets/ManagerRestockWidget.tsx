@@ -10,6 +10,7 @@ import {
 	updateThresholds,
 	type UpdateThresholdsDTO
 } from "../../api/itemsApi.ts";
+import DecimalInput from "../DecimalInput.tsx";
 
 interface Restock {
     id: number;
@@ -181,14 +182,14 @@ const NewRestockModal: FC<NewRestockModalProps> = ({onConfirm}) => {
 				<div className="modal-options">
 					<div>
 						<label htmlFor="quantity">Quantité</label>
-						<input
-							type="number"
+						<DecimalInput
 							id="quantity"
-							min={0}
+							nbDecimalPlaces={0}
 							onChange={e => setQuantity(parseInt(e.target.value))}
 						/>
+						{selectedProduct?.itemType === "fuel" && <span> L</span>}
 					</div>
-					<span>{`Prix : ${formatPrice(selectedProduct && !isNaN(quantity) ? selectedProduct.price * quantity : 0)}`}</span>
+					<span>{`Prix : ${formatPrice(selectedProduct && !isNaN(quantity) ? selectedProduct.price * quantity : 0, 3)}`}</span>
 				</div>
 				<div className="modal-actions">
 					<button className="modal-button modal-button--cancel" onClick={closeModal}>
@@ -200,7 +201,7 @@ const NewRestockModal: FC<NewRestockModalProps> = ({onConfirm}) => {
 							onConfirm(selectedProduct!, quantity);
 							closeModal();
 						}}
-						disabled={selectedProduct === undefined || quantity === 0}
+						disabled={selectedProduct === undefined || quantity <= 0}
 					>
 						Valider
 					</button>
@@ -266,12 +267,12 @@ const ThresholdsModal: FC<ThresholdModalProps> = ({onConfirm}) => {
 							{thresholds && thresholds.map(threshold => threshold.itemType === itemType && (
 								<div key={threshold.id} className="threshold-item">
 									<span>{threshold.name}</span>
-									{threshold.autoRestockQuantity !== undefined && threshold.alertThreshold !== undefined
+									{threshold.autoRestockQuantity != null && threshold.alertThreshold != null
 										? (<>
 											<div>
 												<div>
 													<label>Seuil</label>
-													<input type="number" value={threshold.alertThreshold} onChange={
+													<DecimalInput nbDecimalPlaces={itemType === "product" ? 0 : 3} initialValue={threshold.alertThreshold} onChange={
 														(e) =>
 															handleValueChange(threshold.id, {threshold: parseInt(e.target.value)})
 													}/>
@@ -280,7 +281,7 @@ const ThresholdsModal: FC<ThresholdModalProps> = ({onConfirm}) => {
 
 												<div>
 													<label>Quantité</label>
-													<input type="number" value={threshold.autoRestockQuantity} onChange={
+													<DecimalInput nbDecimalPlaces={itemType === "product" ? 0 : 3} initialValue={threshold.autoRestockQuantity} onChange={
 														(e) =>
 															handleValueChange(threshold.id, {quantity: parseInt(e.target.value)})
 													}/>
@@ -289,7 +290,7 @@ const ThresholdsModal: FC<ThresholdModalProps> = ({onConfirm}) => {
 											</div>
 											<button className="action-btn" onClick={() => handleDeleteThreshold(threshold.id)}>Supprimer</button>
 										</>) : (<>
-											<span>Aucun seuil</span>
+											<span style={{padding: "8px"}}>Aucun seuil</span>
 											<button className="action-btn" onClick={() => handleAddThreshold(threshold.id)}>Ajouter</button>
 										</>)
 									}

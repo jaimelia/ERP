@@ -9,6 +9,8 @@ import {ChargersWidget} from "../components/widgets/ChargersWidget.tsx";
 import {PumpsWidget} from "../components/widgets/PumpsWidget.tsx";
 import {TicketWidget} from "../components/widgets/TicketWidget.tsx";
 import {IncidentWidget} from "../components/widgets/IncidentWidget.tsx";
+import {EmployeeRestockWidget} from "../components/widgets/EmployeeRestockWidget.tsx";
+import {EmployeeProductsWidget} from "../components/widgets/EmployeeProductsWidget.tsx";
 
 
 export const WIDGETS: Record<string, WidgetDef> = {
@@ -18,8 +20,8 @@ export const WIDGETS: Record<string, WidgetDef> = {
 	ticket: {id: "ticket", label: "Ticket", size: {width: 1, height: 1}, element: <TicketWidget/>},
 	transaction_history: {id: "transaction_history", label: "Historique transactions", size: {width: 1, height: 1}},
 	calculator: {id: "calculator", label: "Calculatrice", size: {width: 1, height: 1}, element: <CalculatorWidget/>},
-	employee_restocking: {id: "employee_restocking", label: "Réapprovisionnements", size: {width: 1, height: 1}},
-	employee_products: {id: "employee_products", label: "Produits", size: {width: 1, height: 1}},
+	employee_restocking: {id: "employee_restocking", label: "Réapprovisionnements", size: {width: 1, height: 1}, element: <EmployeeRestockWidget/>},
+	employee_products: {id: "employee_products", label: "Produits", size: {width: 1, height: 1}, element: <EmployeeProductsWidget />},
 	transactions: {id: "transactions", label: "Transactions", size: {width: 1, height: 1}, element: <TransactionsWidget/>},
 	customers: {id: "customers", label: "Clients", size: {width: 1, height: 1}, element: <CustomersWidget/>},
 	manager_restocking: {id: "manager_restocking", label: "Réapprovisionnements", size: {width: 1, height: 2}, element: <ManagerRestockWidget/>},

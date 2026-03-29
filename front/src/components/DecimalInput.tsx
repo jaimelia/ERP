@@ -1,12 +1,23 @@
-import React, {type ChangeEvent, useState} from 'react';
+import React, {type ChangeEvent, type ChangeEventHandler, useState} from 'react';
 
-const DecimalInput: React.FC = () => {
-    const [value, setValue] = useState<string>("");
+interface DecimalInputProps {
+	id?: string;
+	onChange?: ChangeEventHandler<HTMLInputElement, HTMLInputElement>;
+	nbDecimalPlaces?: number;
+	placeHolder?: string;
+	initialValue?: string | number;
+}
+
+const DecimalInput: React.FC<DecimalInputProps> = ({id, onChange, nbDecimalPlaces, placeHolder, initialValue}: DecimalInputProps) => {
+    const [value, setValue] = useState<string>(initialValue ? String(initialValue) : "");
+
+	const places = Math.max(0, nbDecimalPlaces ?? 2);
+	const regex = new RegExp(`^\\d*(\\.?\\d{0,${places}})$`);
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const newValue = e.target.value;
+		if (onChange) onChange(e);
 
-        const regex = /^\d*(\.?\d{0,2})$/;
+        const newValue = e.target.value;
 
         if (regex.test(newValue)) {
             setValue(newValue);
@@ -17,9 +28,10 @@ const DecimalInput: React.FC = () => {
         <>
             <input
                 type="text"
+				id={id ?? ""}
                 value={value}
                 onChange={handleChange}
-                placeholder="Montant"
+                placeholder={placeHolder ?? ""}
                 required
                 name="amount"
                 className="ticket-amount-input"
