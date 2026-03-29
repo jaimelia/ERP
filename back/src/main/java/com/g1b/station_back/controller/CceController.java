@@ -4,6 +4,7 @@ import com.g1b.station_back.dto.*;
 import com.g1b.station_back.service.CceCardService;
 import com.g1b.station_back.service.CceSettingsService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,50 +22,59 @@ public class CceController {
     }
 
     @GetMapping
+	@PreAuthorize("hasAuthority('MANAGE_CCE')")
     public ResponseEntity<List<CceDTO>> getAllCce() {
         return ResponseEntity.ok(cceCardService.getAllCceCards());
     }
 
     @PostMapping
+	@PreAuthorize("hasAuthority('MANAGE_CCE')")
     public ResponseEntity<Void> createCce(@RequestBody CceCreateDTO request) {
         cceCardService.createCce(request);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{id}")
+	@PreAuthorize("hasAuthority('MANAGE_CCE')")
     public ResponseEntity<Void> editCce(@PathVariable Integer id, @RequestBody CceEditDTO request) {
         cceCardService.editCce(id, request);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{id}/credit")
+	@PreAuthorize("hasAuthority('MANAGE_CCE')")
     public ResponseEntity<Void> creditCce(@PathVariable Integer id, @RequestBody CceCreditDTO request) {
         cceCardService.creditCce(id, request);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{id}/reedit")
+	@PreAuthorize("hasAuthority('MANAGE_CCE')")
     public ResponseEntity<Void> reeditCce(@PathVariable Integer id, @RequestBody CceCreateDTO request) {
         cceCardService.reeditCce(id, request);
         return ResponseEntity.ok().build();
     }
     @PutMapping("/{id}/toggle-status")
+	@PreAuthorize("hasAuthority('MANAGE_CCE')")
     public ResponseEntity<Void> toggleStatus(@PathVariable Integer id) {
         cceCardService.toggleStatus(id);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{id}/transactions")
+	@PreAuthorize("hasAuthority('MANAGE_CCE')")
     public ResponseEntity<List<CceTransactionDTO>> getCceTransactions(@PathVariable Integer id) {
         return ResponseEntity.ok(cceCardService.getCceTransactions(id));
     }
 
     @GetMapping("/settings")
+	@PreAuthorize("hasAuthority('MANAGE_CCE_SETTINGS')")
     public ResponseEntity<CceSettingsDTO> getSettings() {
         return ResponseEntity.ok(cceSettingsService.getGlobalSettings());
     }
 
     @PutMapping("/settings")
+	@PreAuthorize("hasAuthority('MANAGE_CCE_SETTINGS')")
     public ResponseEntity<Void> updateSettings(@RequestBody CceSettingsDTO request) {
         cceSettingsService.updateGlobalSettings(request);
         return ResponseEntity.ok().build();

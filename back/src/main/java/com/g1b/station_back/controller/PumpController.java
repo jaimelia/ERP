@@ -5,6 +5,7 @@ import com.g1b.station_back.dto.PumpEnabledDTO;
 import com.g1b.station_back.dto.PumpStatusUpdateDTO;
 import com.g1b.station_back.service.PumpService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,6 +26,7 @@ public class PumpController {
     }
 
     @PatchMapping("/{id}/enabled")
+	@PreAuthorize("hasAuthority('UPDATE_PUMPS')")
     public ResponseEntity<PumpDTO> toggleEnabled(
             @PathVariable Integer id,
             @RequestBody PumpEnabledDTO dto
@@ -32,7 +34,9 @@ public class PumpController {
         return ResponseEntity.ok(service.toggleEnabled(id, dto.enabled()));
     }
 
+	// TODO supprimer si on l'utilise pas dans le front
     @PatchMapping("/{id}/status")
+	@PreAuthorize("hasAuthority('UPDATE_PUMPS')")
     public ResponseEntity<PumpDTO> updateStatus(
             @PathVariable Integer id,
             @RequestBody PumpStatusUpdateDTO dto

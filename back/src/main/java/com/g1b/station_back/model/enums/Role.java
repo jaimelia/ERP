@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 public enum Role {
-	employee(Set.of(READ_CHARGERS, READ_ITEMS, READ_RESTOCKS)),
+	employee(Set.of(READ_CHARGERS, READ_ITEMS, READ_RESTOCKS, MANAGE_CCE, MANAGE_CUSTOMERS, CREATE_PAYMENT, UPDATE_PUMPS, READ_TRANSACTIONS, CREATE_TRANSACTIONS, CANCEL_TRANSACTIONS)),
 	manager(Set.of(Permission.values()));
 
 	private final Set<Permission> permissions;

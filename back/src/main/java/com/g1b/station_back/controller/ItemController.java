@@ -38,6 +38,18 @@ public class ItemController {
 
     // ── Produits ──────────────────────────────────────────────────────────────
 
+	@GetMapping("products")
+	@PreAuthorize("hasAuthority('READ_ITEMS')")
+	public ResponseEntity<List<ProductDTO>> getAllProducts() {
+		return ResponseEntity.ok(productService.getAllProducts());
+	}
+
+	@GetMapping("/products/available-names")
+	@PreAuthorize("hasAuthority('READ_ITEMS')")
+	public ResponseEntity<List<String>> getAvailableProductNames(@RequestParam(required = false) String search) {
+		return ResponseEntity.ok(productService.getAvailableProductNames(search));
+	}
+
     @PostMapping("/products")
 	@PreAuthorize("hasAuthority('CREATE_ITEMS')")
     public ResponseEntity<ProductDTO> createProduct(@RequestBody ProductDTO dto) {

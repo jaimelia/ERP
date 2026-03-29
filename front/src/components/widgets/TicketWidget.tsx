@@ -35,7 +35,7 @@ export const TicketWidget: FC = () => {
   const [notification, setNotification] = useState<{ message: string; type: "success" | "error" | "warning" | "info" } | null>(null);
 
   useEffect(() => {
-    fetchJsonWithAuth(apiUrl("/products"))
+    fetchJsonWithAuth(apiUrl("/items/products"))
       .then(data => setAllProducts(data))
       .catch(console.error);
   }, []);
@@ -49,7 +49,7 @@ export const TicketWidget: FC = () => {
 
     const timer = setTimeout(() => {
       if (active) setIsSearching(true);
-      fetchJsonWithAuth(apiUrl(`/products/available-names?search=${encodeURIComponent(search)}`))
+      fetchJsonWithAuth(apiUrl(`/items/products/available-names?search=${encodeURIComponent(search)}`))
         .then(data => {
           if (active) {
             setSearchResults(data);
