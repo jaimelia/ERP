@@ -33,11 +33,11 @@ export const WIDGETS: Record<string, WidgetDef> = {
 };
 
 export const DEFAULT_LEVELS: Record<Role, Levels> = {
-	employe: [
+	employee: [
 		[["chargers", "CCE", "ticket"], ["pumps", "transaction_history", "calculator"]],
 		[["employee_restocking", "employee_products"], ["transactions", "customers"]]
 	],
-	gerant: [
+	manager: [
 		[["manager_restocking", "manager_products", "CCE"], [null, "transactions", "customers"]],
 		[["transaction_table", "guidelines"], ["management_documents", "incident"]]
 	]

@@ -129,7 +129,7 @@
 
 .login-submit-button:disabled {
     opacity: 0.75;
-    cursor: wait;
+    cursor: default;
 }
 
 .login-demo {

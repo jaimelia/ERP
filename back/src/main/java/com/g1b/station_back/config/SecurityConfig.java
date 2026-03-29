@@ -4,13 +4,12 @@ import com.g1b.station_back.jwt.CustomUserDetailsService;
 import com.g1b.station_back.jwt.JwtAuthTokenFilter;
 import com.g1b.station_back.jwt.JwtUtils;
 
-import java.util.List;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -25,48 +24,47 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.List;
 
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
 
-  private final JwtUtils jwtUtils;
-  private final CustomUserDetailsService userDetailsService;
+	private final JwtUtils jwtUtils;
+	private final CustomUserDetailsService userDetailsService;
 
-  public SecurityConfig(JwtUtils jwtUtils, CustomUserDetailsService userDetailsService) {
-    this.jwtUtils = jwtUtils;
-    this.userDetailsService = userDetailsService;
-  }
-
-  @Bean
-  public JwtAuthTokenFilter authenticationJwtTokenFilter() {
-    return new JwtAuthTokenFilter(jwtUtils, userDetailsService);
-  }
-
-  @Bean
-  public PasswordEncoder passwordEncoder() {
-    return new BCryptPasswordEncoder();
-  }
+	public SecurityConfig(JwtUtils jwtUtils, CustomUserDetailsService userDetailsService) {
+		this.jwtUtils = jwtUtils;
+		this.userDetailsService = userDetailsService;
+	}
 
 	@Bean
-	public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+	public JwtAuthTokenFilter authenticationJwtTokenFilter() {
+		return new JwtAuthTokenFilter(jwtUtils, userDetailsService);
+	}
+
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
+
+	@Bean
+	public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) {
 		return authConfig.getAuthenticationManager();
 	}
 
-  @Bean
-  public CorsConfigurationSource corsConfigurationSource() {
-    CorsConfiguration configuration = new CorsConfiguration();
-    // Utilise setAllowedOriginPatterns pour supporter les wildcards (*) sur les
-    // ports
-    configuration.setAllowedOriginPatterns(List.of("http://127.0.0.1:*", "http://localhost:*"));
-    configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-    configuration.setAllowedHeaders(List.of("*"));
-    configuration.setAllowCredentials(true);
+	@Bean
+	public CorsConfigurationSource corsConfigurationSource() {
+		CorsConfiguration config = new CorsConfiguration();
+		config.setAllowedOriginPatterns(List.of("http://127.0.0.1:*", "http://localhost:*"));
+		config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+		config.setAllowedHeaders(List.of("*"));
+		config.setAllowCredentials(true);
 
-    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/**", configuration);
-    return source;
-  }
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", config);
+		return source;
+	}
 
 	@Bean
-	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+	public SecurityFilterChain filterChain(HttpSecurity http) {
 		http
 				.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 				.csrf(AbstractHttpConfigurer::disable)
@@ -77,9 +75,9 @@ public class SecurityConfig {
 						.requestMatchers("/api/auth/**").permitAll()
 						.anyRequest().authenticated());
 
-    http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+		http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 
-    return http.build();
-  }
+		return http.build();
+	}
 }
 

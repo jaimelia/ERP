@@ -7,6 +7,7 @@ import com.g1b.station_back.service.ItemService;
 import com.g1b.station_back.service.ProductService;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -28,8 +29,9 @@ public class ItemController {
         this.fuelService = fuelService;
 		this.electricityService = electricityService;
 	}
-	
+
 	@GetMapping("/restockables")
+	@PreAuthorize("hasAuthority('READ_ITEMS')")
 	public ResponseEntity<List<RestockableItemDTO>> getRestockableItems() {
 		return ResponseEntity.ok(itemService.getRestockableItems());
 	}
@@ -37,16 +39,19 @@ public class ItemController {
     // ── Produits ──────────────────────────────────────────────────────────────
 
     @PostMapping("/products")
+	@PreAuthorize("hasAuthority('CREATE_ITEMS')")
     public ResponseEntity<ProductDTO> createProduct(@RequestBody ProductDTO dto) {
         return ResponseEntity.ok(productService.createProduct(dto));
     }
 
     @PutMapping("/products/{id}")
+	@PreAuthorize("hasAuthority('UPDATE_ITEMS')")
     public ResponseEntity<ProductDTO> updateProduct(@PathVariable Long id, @RequestBody ProductDTO dto) {
         return ResponseEntity.ok(productService.updateProduct(id, dto));
     }
 
     @DeleteMapping("/products/{id}")
+	@PreAuthorize("hasAuthority('DELETE_ITEMS')")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
@@ -55,16 +60,19 @@ public class ItemController {
     // ── Carburants ────────────────────────────────────────────────────────────
 
 	@PostMapping("/fuels")
+	@PreAuthorize("hasAuthority('CREATE_ITEMS')")
 	public ResponseEntity<FuelDTO> createFuel(@RequestBody FuelDTO dto) {
 		return ResponseEntity.ok(fuelService.createFuel(dto));
 	}
 
     @PutMapping("/fuels/{id}")
+	@PreAuthorize("hasAuthority('UPDATE_ITEMS')")
     public ResponseEntity<FuelDTO> updateFuel(@PathVariable Long id, @RequestBody FuelDTO dto) {
         return ResponseEntity.ok(fuelService.updateFuel(id, dto));
     }
 
     @DeleteMapping("/fuels/{id}")
+	@PreAuthorize("hasAuthority('DELETE_ITEMS')")
     public ResponseEntity<Void> deleteFuel(@PathVariable Long id) {
         fuelService.deleteFuel(id);
         return ResponseEntity.noContent().build();
@@ -73,6 +81,7 @@ public class ItemController {
     // ── Stock combiné (Produits + Carburants) ─────────────────────────────────
 
     @GetMapping("/stock")
+	@PreAuthorize("hasAuthority('READ_ITEMS')")
     public ResponseEntity<List<ItemDTO>> getStock() {
         List<ItemDTO> stock = new ArrayList<>();
 
@@ -94,23 +103,27 @@ public class ItemController {
 
         return ResponseEntity.ok(stock);
     }
-	
+
 	@GetMapping("/electricity")
+	@PreAuthorize("hasAuthority('READ_ITEMS')")
 	public ResponseEntity<List<ElectricityDTO>> getElectricity() {
 		return ResponseEntity.ok(electricityService.getElectricity());
 	}
 
 	@PostMapping("/electricity")
+	@PreAuthorize("hasAuthority('CREATE_ITEMS')")
 	public ResponseEntity<ElectricityDTO> createElectricity(@RequestBody ElectricityDTO dto) {
 		return ResponseEntity.ok(electricityService.createElectricity(dto));
 	}
 
 	@PutMapping("/electricity/{id}")
+	@PreAuthorize("hasAuthority('UPDATE_ITEMS')")
 	public ResponseEntity<ElectricityDTO> updateElectricity(@PathVariable Integer id, @RequestBody ElectricityDTO dto) {
 		return ResponseEntity.ok(electricityService.updateElectricity(id, dto));
 	}
 
 	@DeleteMapping("/electricity/{id}")
+	@PreAuthorize("hasAuthority('DELETE_ITEMS')")
 	public ResponseEntity<Void> deleteElectricity(@PathVariable Integer id) {
 		electricityService.deleteElectricity(id);
 		return ResponseEntity.noContent().build();

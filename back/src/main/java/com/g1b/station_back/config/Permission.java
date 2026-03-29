@@ -1,0 +1,8 @@
+package com.g1b.station_back.config;
+
+public enum Permission {
+	READ_CHARGERS,
+	MANAGE_USERS,
+	READ_ITEMS, CREATE_ITEMS, UPDATE_ITEMS, DELETE_ITEMS, 
+	READ_RESTOCKS, CREATE_RESTOCKS, UPDATE_RESTOCKS
+}

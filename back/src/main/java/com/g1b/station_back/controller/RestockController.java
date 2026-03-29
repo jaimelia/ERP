@@ -7,6 +7,7 @@ import com.g1b.station_back.dto.UpdateThresholdsDTO;
 import com.g1b.station_back.service.RestockService;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,16 +22,19 @@ public class RestockController {
 	}
 
 	@GetMapping
+	@PreAuthorize("hasAuthority('READ_RESTOCKS')")
 	public ResponseEntity<List<RestockDTO>> getAllRestocks() {
 		return ResponseEntity.ok(restockService.getAllRestocks());
 	}
 
 	@PostMapping
+	@PreAuthorize("hasAuthority('CREATE_RESTOCKS')")
 	public ResponseEntity<RestockDTO> createRestock(@RequestBody PostRestockDTO dto) {
 		return ResponseEntity.ok(restockService.createRestock(dto));
 	}
-	
+
 	@PutMapping("/thresholds")
+	@PreAuthorize("hasAuthority('READ_ITEMS')")
 	public ResponseEntity<Void> updateThresholds(@RequestBody UpdateThresholdsDTO[] dtos) {
 		restockService.updateThresholds(dtos);
 		return ResponseEntity.noContent().build();

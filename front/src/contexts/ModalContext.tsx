@@ -9,20 +9,28 @@ interface ModalContextValue {
 const ModalContext = createContext<ModalContextValue | null>(null);
 
 export const ModalProvider: FC<{ children: ReactNode }> = ({children}) => {
-    const [content, setContent] = useState<ReactNode | null>(null);
+    const [stack, setStack] = useState<ReactNode[]>([]);
 
     const openModal = useCallback((content: ReactNode): void => {
-        setContent(content);
+        setStack(prev => [...prev, content]);
     }, []);
 
     const closeModal = useCallback((): void => {
-        setContent(null);
+        setStack(prev => prev.slice(0, -1));
     }, []);
 
     return (
         <ModalContext.Provider value={{openModal, closeModal}}>
             {children}
-            {content && <ModalOverlay onClose={closeModal}>{content}</ModalOverlay>}
+            {stack.map((content, index) => (
+                <ModalOverlay
+                    key={index}
+                    onClose={closeModal}
+                    isActive={index === stack.length - 1}
+                >
+                    {content}
+                </ModalOverlay>
+            ))}
         </ModalContext.Provider>
     );
 };

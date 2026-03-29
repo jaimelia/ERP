@@ -1,0 +1,64 @@
+.modal-user-list {
+	display: grid;
+	gap: 10px;
+}
+
+.modal-user-row {
+	background: var(--color-surface);
+	border: 1px solid var(--color-border);
+	border-radius: 12px;
+	padding: 12px 14px;
+	display: grid;
+	gap: 12px;
+}
+
+.modal-user-main {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	flex-wrap: wrap;
+}
+
+.modal-user-meta {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	min-width: 160px;
+}
+
+.modal-user-name {
+	font-weight: 600;
+	color: var(--color-text);
+}
+
+.modal-user-email {
+	font-size: 0.85rem;
+	color: var(--color-text-muted);
+}
+
+.modal-role-pill {
+	padding: 4px 10px;
+	border-radius: 999px;
+	font-size: 0.75rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.3px;
+}
+
+.modal-role-pill.is-manager {
+	color: var(--color-accent);
+	background: var(--color-manager-soft);
+	border: 1px solid var(--color-manager-border);
+}
+
+.modal-role-pill.is-employee {
+	color: var(--color-employee);
+	background: var(--color-employee-soft);
+	border: 1px solid var(--color-employee-border);
+}
+
+.modal-user-actions {
+	display: flex;
+	gap: 8px;
+}
