@@ -1,6 +1,6 @@
 import type {Levels, Role, Size, WidgetDef, WidgetKey} from "../types";
 import {CalculatorWidget} from "../components/widgets/CalculatorWidget.tsx";
-import {CCEWidget} from "../components/widgets/CCEWidget.tsx";
+import {ManagerCCEWidget} from "../components/widgets/ManagerCCEWidget.tsx";
 import {CustomersWidget} from "../components/widgets/CustomersWidget.tsx";
 import {ManagerRestockWidget} from "../components/widgets/ManagerRestockWidget.tsx";
 import {TransactionsWidget} from "../components/widgets/TransactionsWidget.tsx";
@@ -11,11 +11,13 @@ import {TicketWidget} from "../components/widgets/TicketWidget.tsx";
 import {IncidentWidget} from "../components/widgets/IncidentWidget.tsx";
 import {EmployeeRestockWidget} from "../components/widgets/EmployeeRestockWidget.tsx";
 import {EmployeeProductsWidget} from "../components/widgets/EmployeeProductsWidget.tsx";
+import {EmployeeCCEWidget} from "../components/widgets/EmployeeCCEWidget.tsx";
 
 
 export const WIDGETS: Record<string, WidgetDef> = {
 	chargers: {id: "chargers", label: "Chargeurs", size: {width: 1, height: 1}, element: <ChargersWidget/>},
-	CCE: {id: "CCE", label: "CCE", size: {width: 1, height: 1}, element: <CCEWidget/>},
+	manager_cce: {id: "manager_cce", label: "CCE", size: {width: 1, height: 1}, element: <ManagerCCEWidget/>},
+    employee_cce: {id: "employee_cce", label: "CCE", size: {width: 1, height: 1}, element: <EmployeeCCEWidget/>},
 	pumps: {id: "pumps", label: "Etat des Pompes", size: {width: 1, height: 1}, element: <PumpsWidget/>},
 	ticket: {id: "ticket", label: "Ticket", size: {width: 1, height: 1}, element: <TicketWidget/>},
 	transaction_history: {id: "transaction_history", label: "Historique transactions", size: {width: 1, height: 1}},
@@ -34,11 +36,11 @@ export const WIDGETS: Record<string, WidgetDef> = {
 
 export const DEFAULT_LEVELS: Record<Role, Levels> = {
 	employee: [
-		[["chargers", "CCE", "ticket"], ["pumps", "transaction_history", "calculator"]],
+		[["chargers", "employee_cce", "ticket"], ["pumps", "transaction_history", "calculator"]],
 		[["employee_restocking", "employee_products"], ["transactions", "customers"]]
 	],
 	manager: [
-		[["manager_restocking", "manager_products", "CCE"], [null, "transactions", "customers"]],
+		[["manager_restocking", "manager_products", "manager_cce"], [null, "transactions", "customers"]],
 		[["transaction_table", "guidelines"], ["management_documents", "incident"]]
 	]
 }

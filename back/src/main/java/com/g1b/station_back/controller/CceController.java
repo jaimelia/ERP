@@ -68,13 +68,13 @@ public class CceController {
     }
 
     @GetMapping("/settings")
-	@PreAuthorize("hasAuthority('MANAGE_CCE_SETTINGS')")
+	@PreAuthorize("hasAuthority('READ_CCE_SETTINGS')")
     public ResponseEntity<CceSettingsDTO> getSettings() {
         return ResponseEntity.ok(cceSettingsService.getGlobalSettings());
     }
 
     @PutMapping("/settings")
-	@PreAuthorize("hasAuthority('MANAGE_CCE_SETTINGS')")
+	@PreAuthorize("hasAuthority('UPDATE_CCE_SETTINGS')")
     public ResponseEntity<Void> updateSettings(@RequestBody CceSettingsDTO request) {
         cceSettingsService.updateGlobalSettings(request);
         return ResponseEntity.ok().build();

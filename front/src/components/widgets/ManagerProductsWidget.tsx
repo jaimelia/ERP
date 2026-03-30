@@ -5,17 +5,17 @@ import {useToast} from "../../contexts/ToastContext.tsx";
 import {useModal} from "../../contexts/ModalContext.tsx";
 import {apiUrl} from "../../api/common.ts";
 import {
-	createElectricity,
-	createFuel,
-	createProduct,
-	deleteElectricity,
-	deleteFuel,
-	deleteProduct,
-	type ElectricityDTO,
-	type ItemDTO,
-	updateElectricity,
-	updateFuel,
-	updateProduct,
+    createElectricity,
+    createFuel,
+    createProduct,
+    deleteElectricity,
+    deleteFuel,
+    deleteProduct,
+    type ElectricityDTO,
+    type ItemDTO,
+    updateElectricity,
+    updateFuel,
+    updateProduct,
 } from "../../api/itemsApi.ts";
 import {ConfirmModal} from "../modal/ConfirmModal.tsx";
 import type {ApiError, ItemType} from "../../types.ts";
@@ -620,7 +620,7 @@ const ElectricityModal: FC<ElectricityModalProps> = ({ title, initialForm, onCon
                     type="button"
                     onClick={async () => {
                         const shouldClose = await onConfirm(form);
-                        if (shouldClose !== false) closeModal();
+                        if (shouldClose) closeModal();
                     }}
                 >
                     Confirmer

@@ -1,4 +1,4 @@
-import {useState, useEffect, type FC} from "react";
+import {type FC, useEffect, useState} from "react";
 import {apiUrl, fetchJsonWithAuth} from "../../api/common.ts";
 import {Popup} from "../Popup.tsx";
 
@@ -33,9 +33,9 @@ interface CCESettingsData {
     bonusTiers: BonusTier[];
 }
 
-type PopupType = "create" | "edit" | "credit" | "transactions" | "reedit_alert" | "reedit" | "settings" | null;
+type PopupType = "create" | "edit" | "credit" | "transactions" | "reedit_alert" | "reedit" | null;
 
-export const CCEWidget: FC = () => {
+export const EmployeeCCEWidget: FC = () => {
     const [search, setSearch] = useState("");
     const [selected, setSelected] = useState<number | null>(null);
     const [cces, setCces] = useState<CCE[]>([]);
@@ -132,7 +132,7 @@ export const CCEWidget: FC = () => {
             setCardTransactions([]);
         }
 
-        if (type === "settings" || type === "credit") {
+        if (type === "credit") {
             await loadSettings();
         }
 
@@ -149,27 +149,6 @@ export const CCEWidget: FC = () => {
     const handleValidatePopup = async () => {
         if (activePopup === "reedit_alert") {
             handleOpenPopup("reedit");
-            return;
-        }
-
-        if (activePopup === "settings") {
-            try {
-                await fetchJsonWithAuth(apiUrl("/cce/settings"), {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        minimumCreditAmount: parseFloat(settingsData.minimumCreditAmount) || 0,
-                        bonusTiers: settingsData.bonusTiers.map(t => ({
-                            minAmount: parseFloat(t.minAmount) || 0,
-                            bonusAmount: parseFloat(t.bonusAmount) || 0
-                        }))
-                    })
-                });
-                handleClosePopup();
-                await loadSettings();
-            } catch (error) {
-                console.error(error);
-            }
             return;
         }
 
@@ -257,27 +236,6 @@ export const CCEWidget: FC = () => {
             handleClosePopup();
         }
     };
-
-    const handleAddTier = () => {
-        setSettingsData(prev => ({ ...prev, bonusTiers: [...prev.bonusTiers, { minAmount: "", bonusAmount: "" }] }));
-    };
-
-    const handleUpdateTier = (index: number, field: keyof BonusTier, value: string) => {
-        setSettingsData(prev => {
-            const newTiers = [...prev.bonusTiers];
-            newTiers[index] = { ...newTiers[index], [field]: value };
-            return { ...prev, bonusTiers: newTiers };
-        });
-    };
-
-    const handleRemoveTier = (index: number) => {
-        setSettingsData(prev => {
-            const newTiers = [...prev.bonusTiers];
-            newTiers.splice(index, 1);
-            return { ...prev, bonusTiers: newTiers };
-        });
-    };
-
     const calculateBonus = (amountStr: string) => {
         const amount = parseFloat(amountStr);
         if (isNaN(amount) || amount <= 0) return 0;
@@ -339,75 +297,8 @@ export const CCEWidget: FC = () => {
         );
 
         switch (activePopup) {
-            case "settings":
-                return {
-                    icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>,
-                    title: "Paramètres globaux CCE",
-                    subtitle: "Configuration commune à toutes les cartes",
-                    content: (
-                        <div className="popup-form" style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-                            <div className="field-group full-span">
-                                <label className="field-label">Montant de crédit minimum (€)</label>
-                                <input
-                                    type="number"
-                                    min="0"
-                                    placeholder="Ex: 15.00"
-                                    onKeyDown={blockInvalidChar}
-                                    value={settingsData.minimumCreditAmount}
-                                    onChange={e => setSettingsData({ ...settingsData, minimumCreditAmount: e.target.value.replace(",", ".") })}
-                                />
-                            </div>
-                            <div style={{ borderTop: "1px solid var(--color-border)", paddingTop: "15px" }}>
-                                <h4 style={{ margin: "0 0 15px 0", fontSize: "14px", color: "var(--color-text)" }}>Tranches de bonus</h4>
-                                <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                                    {settingsData.bonusTiers.map((tier, index) => (
-                                        <div key={index} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                                            <span style={{ fontSize: "13px" }}>À partir de</span>
-                                            <input
-                                                type="number"
-                                                min="0"
-                                                style={{ width: "80px", padding: "6px" }}
-                                                value={tier.minAmount}
-                                                onKeyDown={blockInvalidChar}
-                                                onChange={e => handleUpdateTier(index, "minAmount", e.target.value.replace(",", "."))}
-                                            />
-                                            <span style={{ fontSize: "13px" }}>€</span>
-                                            <span style={{ margin: "0 5px" }}>&rarr;</span>
-                                            <span style={{ fontSize: "13px" }}>Bonus de</span>
-                                            <input
-                                                type="number"
-                                                min="0"
-                                                style={{ width: "70px", padding: "6px" }}
-                                                value={tier.bonusAmount}
-                                                onKeyDown={blockInvalidChar}
-                                                onChange={e => handleUpdateTier(index, "bonusAmount", e.target.value.replace(",", "."))}
-                                            />
-                                            <span style={{ fontSize: "13px" }}>€</span>
-                                            <button
-                                                type="button"
-                                                onClick={() => handleRemoveTier(index)}
-                                                style={{ background: "none", border: "none", color: "#ef4444", cursor: "pointer", padding: "5px" }}
-                                                title="Supprimer la tranche"
-                                            >
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                                            </button>
-                                        </div>
-                                    ))}
-                                    <button
-                                        type="button"
-                                        onClick={handleAddTier}
-                                        style={{ marginTop: "10px", padding: "8px", background: "var(--color-surface-alt)", border: "1px dashed var(--color-border)", borderRadius: "6px", color: "var(--color-text)", cursor: "pointer", fontSize: "13px" }}
-                                    >
-                                        + Ajouter une tranche
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    ),
-                    footer: baseFooter("Sauvegarder")
-                };
             case "credit":
-                { const bonusAmount = calculateBonus(formData.amount || "0");
+            { const bonusAmount = calculateBonus(formData.amount || "0");
                 return {
                     icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>,
                     title: "Créditer la CCE",
@@ -562,12 +453,6 @@ export const CCEWidget: FC = () => {
                         onChange={e => setSearch(e.target.value)}
                     />
                 </div>
-                <button className="widget-settings-btn" type="button" title="Paramètres" onClick={() => handleOpenPopup("settings")}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <circle cx="12" cy="12" r="3"></circle>
-                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                    </svg>
-                </button>
             </div>
 
             <div className="widget-table-wrap">
