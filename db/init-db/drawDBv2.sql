@@ -135,9 +135,10 @@ CREATE TABLE IF NOT EXISTS "cce_bonus_tiers" (
 CREATE TABLE IF NOT EXISTS "management_documents" (
 	"id_management_document" INTEGER NOT NULL UNIQUE GENERATED ALWAYS AS IDENTITY,
 	"name" VARCHAR(255) NOT NULL,
-	"last_modified" DATE,
+	"last_modified" TIMESTAMP,
 	"content" TEXT,
 	"status" document_status NOT NULL,
+	"sent_at" TIMESTAMP,
 	PRIMARY KEY("id_management_document")
 );
 
