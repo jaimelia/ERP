@@ -11,6 +11,7 @@ import {TicketWidget} from "../components/widgets/TicketWidget.tsx";
 import {GuidelinesWidget} from "../components/widgets/GuidelinesWidget.tsx";
 import {IncidentWidget} from "../components/widgets/IncidentWidget.tsx";
 import {ManagementDocumentsWidget} from "../components/widgets/ManagementDocumentsWidget.tsx";
+import {DailyTransactionsReportWidget} from "../components/widgets/DailyTransactionsReportWidget.tsx";
 import {EmployeeRestockWidget} from "../components/widgets/EmployeeRestockWidget.tsx";
 import {EmployeeProductsWidget} from "../components/widgets/EmployeeProductsWidget.tsx";
 import {EmployeeCCEWidget} from "../components/widgets/EmployeeCCEWidget.tsx";
@@ -30,7 +31,7 @@ export const WIDGETS: Record<string, WidgetDef> = {
 	customers: {id: "customers", label: "Clients", size: {width: 1, height: 1}, element: <CustomersWidget/>},
 	manager_restocking: {id: "manager_restocking", label: "Réapprovisionnements", size: {width: 1, height: 2}, element: <ManagerRestockWidget/>},
 	manager_products: {id: "manager_products", label: "Marchandises", size: {width: 1, height: 1}, element: <ManagerProductsWidget/>},
-	transaction_table: {id: "transaction_table", label: "Table transactions", size: {width: 1, height: 1}},
+	transaction_table: {id: "transaction_table", label: "Table transactions", size: {width: 1, height: 1}, element: <DailyTransactionsReportWidget/>},
 	guidelines: {id: "guidelines", label: "Directives Régionales", size: {width: 1, height: 1}, element: <GuidelinesWidget/>},
 	management_documents: {id: "management_documents", label: "Documents De Gestion", size: {width: 1, height: 1}, element: <ManagementDocumentsWidget/>},
 	incident: {id: "incident", label: "Incident", size: {width: 1, height: 1}, element: <IncidentWidget/>},

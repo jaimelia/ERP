@@ -1,0 +1,130 @@
+/* ── Barre d'actions ────────────────────────────────────────────────────────── */
+.daily-report-actions-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 8px 10px;
+    background: var(--color-surface-alt);
+    border-top: 1px solid var(--color-border);
+    flex-shrink: 0;
+}
+
+.daily-report-action-btn {
+    padding: 5px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    text-align: center;
+    transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+}
+
+.daily-report-action-btn:hover:not(:disabled) {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+.daily-report-action-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.daily-report-action-btn--primary {
+    background: var(--color-accent);
+    color: #fff;
+    border-color: var(--color-accent);
+}
+
+.daily-report-action-btn--primary:hover:not(:disabled) {
+    background: var(--color-accent-hover);
+    border-color: var(--color-accent-hover);
+    color: #fff;
+}
+
+/* ── Sélection de ligne ─────────────────────────────────────────────────────── */
+.widget-table.daily-report-list-table tbody tr {
+    cursor: pointer;
+}
+
+.widget-table tbody tr.daily-report-row-selected td {
+    background: var(--color-accent-soft);
+}
+
+.widget-table tbody tr.daily-report-row-selected:hover td {
+    background: var(--color-accent-soft-hover);
+}
+
+/* ── Modale ─────────────────────────────────────────────────────────────────── */
+.modal-daily-report {
+    min-width: 560px;
+}
+
+/* ── Table carburants ────────────────────────────────────────────────────────── */
+.daily-report-fuel-wrap {
+    margin-bottom: 14px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.daily-report-fuel-table th,
+.daily-report-fuel-table td {
+    text-align: center;
+}
+
+.daily-report-fuel-table th:first-child,
+.daily-report-fuel-table td:first-child {
+    text-align: left;
+}
+
+/* ── Grille des totaux ─────────────────────────────────────────────────────── */
+.daily-report-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 20px;
+    font-size: 13px;
+}
+
+.daily-report-grid-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.daily-report-grid-cell label {
+    color: var(--color-text);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.daily-report-value-box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-alt);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text);
+    min-width: 64px;
+}
+
+.daily-report-amount {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.daily-report-loading {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    text-align: center;
+    padding: 20px 0;
+}
