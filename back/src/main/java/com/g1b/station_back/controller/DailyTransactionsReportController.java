@@ -1,5 +1,6 @@
 package com.g1b.station_back.controller;
 
+import com.g1b.station_back.dto.DailyReportRequestDTO;
 import com.g1b.station_back.dto.DailyReportSummaryDTO;
 import com.g1b.station_back.dto.DailyTransactionsReportDTO;
 import com.g1b.station_back.service.DailyTransactionsReportService;
@@ -10,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/daily-reports")
@@ -43,15 +43,16 @@ public class DailyTransactionsReportController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('MANAGE_DAILY_REPORTS')")
-    public ResponseEntity<DailyTransactionsReportDTO> create(@RequestBody Map<String, String> body) {
-        LocalDate date = LocalDate.parse(body.get("reportDate"));
-        return ResponseEntity.ok(service.create(date));
+    public ResponseEntity<DailyTransactionsReportDTO> create(@RequestBody DailyReportRequestDTO request) {
+        return ResponseEntity.ok(service.create(request));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('MANAGE_DAILY_REPORTS')")
-    public ResponseEntity<DailyTransactionsReportDTO> update(@PathVariable Integer id) {
-        return ResponseEntity.ok(service.update(id));
+    public ResponseEntity<DailyTransactionsReportDTO> update(
+            @PathVariable Integer id,
+            @RequestBody DailyReportRequestDTO request) {
+        return ResponseEntity.ok(service.update(id, request));
     }
 
     @PatchMapping("/{id}/validate")

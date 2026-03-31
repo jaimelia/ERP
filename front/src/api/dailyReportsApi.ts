@@ -35,6 +35,18 @@ export interface DailyTransactionsReportDTO {
     status: DocumentStatus | null;
 }
 
+export interface DailyReportRequestDTO {
+    reportDate: string;
+    totalFuelVolume: number;
+    totalFuelsAmount: number;
+    totalElectricityVolume: number;
+    totalElectricityAmount: number;
+    totalProductVolume: number;
+    totalProductsAmount: number;
+    automatTransactionCount: number;
+    cashierTransactionCount: number;
+}
+
 export async function getDailyReports(): Promise<DailyReportSummaryDTO[]> {
     return fetchJsonWithAuth(apiUrl("/daily-reports"), {});
 }
@@ -47,16 +59,20 @@ export async function getDailyReportById(id: number): Promise<DailyTransactionsR
     return fetchJsonWithAuth(apiUrl(`/daily-reports/${id}`), {});
 }
 
-export async function createDailyReport(reportDate: string): Promise<DailyTransactionsReportDTO> {
+export async function createDailyReport(request: DailyReportRequestDTO): Promise<DailyTransactionsReportDTO> {
     return fetchJsonWithAuth(apiUrl("/daily-reports"), {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({reportDate}),
+        body: JSON.stringify(request),
     });
 }
 
-export async function updateDailyReport(id: number): Promise<DailyTransactionsReportDTO> {
-    return fetchJsonWithAuth(apiUrl(`/daily-reports/${id}`), {method: "PUT"});
+export async function updateDailyReport(id: number, request: DailyReportRequestDTO): Promise<DailyTransactionsReportDTO> {
+    return fetchJsonWithAuth(apiUrl(`/daily-reports/${id}`), {
+        method: "PUT",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(request),
+    });
 }
 
 export async function validateDailyReport(id: number): Promise<DailyTransactionsReportDTO> {

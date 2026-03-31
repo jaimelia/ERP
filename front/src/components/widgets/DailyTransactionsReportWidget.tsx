@@ -6,6 +6,7 @@ import {useModal} from "../../contexts/ModalContext.tsx";
 import {apiUrl} from "../../api/common.ts";
 import {
     createDailyReport,
+    type DailyReportRequestDTO,
     type DailyReportSummaryDTO,
     type DailyTransactionsReportDTO,
     getDailyReportById,
@@ -60,9 +61,9 @@ export const DailyTransactionsReportWidget: FC = () => {
 
     // ── Handlers ──────────────────────────────────────────────────────────────
 
-    const handleCreate = async (): Promise<boolean> => {
+    const handleCreate = async (request: DailyReportRequestDTO): Promise<boolean> => {
         try {
-            const created = await createDailyReport(todayIso());
+            const created = await createDailyReport(request);
             success("Rapport créé.");
             setReports(prev => prev ? [toSummary(created), ...prev] : [toSummary(created)]);
             return true;
@@ -72,10 +73,10 @@ export const DailyTransactionsReportWidget: FC = () => {
         }
     };
 
-    const handleUpdate = async (): Promise<boolean> => {
+    const handleUpdate = async (request: DailyReportRequestDTO): Promise<boolean> => {
         if (!selectedId) return false;
         try {
-            const updated = await updateDailyReport(selectedId);
+            const updated = await updateDailyReport(selectedId, request);
             success("Rapport mis à jour.");
             setReports(prev => prev?.map(r => r.id === updated.id ? toSummary(updated) : r) ?? []);
             return true;
@@ -224,25 +225,76 @@ const MODAL_TITLES: Record<ModalMode, string> = {
     validate: "Valider table des transactions journalières",
 };
 
+interface FormState {
+    totalFuelVolume: string;
+    totalFuelsAmount: string;
+    totalElectricityVolume: string;
+    totalElectricityAmount: string;
+    totalProductVolume: string;
+    totalProductsAmount: string;
+    automatTransactionCount: string;
+    cashierTransactionCount: string;
+}
+
+function dtoToForm(dto: DailyTransactionsReportDTO): FormState {
+    return {
+        totalFuelVolume:          String(dto.totalFuelVolume),
+        totalFuelsAmount:         String(dto.totalFuelsAmount),
+        totalElectricityVolume:   String(dto.totalElectricityVolume),
+        totalElectricityAmount:   String(dto.totalElectricityAmount),
+        totalProductVolume:       String(dto.totalProductVolume),
+        totalProductsAmount:      String(dto.totalProductsAmount),
+        automatTransactionCount:  String(dto.automatTransactionCount),
+        cashierTransactionCount:  String(dto.cashierTransactionCount),
+    };
+}
+
+function formToRequest(form: FormState, reportDate: string): DailyReportRequestDTO {
+    return {
+        reportDate,
+        totalFuelVolume:          parseFloat(form.totalFuelVolume)          || 0,
+        totalFuelsAmount:         parseFloat(form.totalFuelsAmount)         || 0,
+        totalElectricityVolume:   parseFloat(form.totalElectricityVolume)   || 0,
+        totalElectricityAmount:   parseFloat(form.totalElectricityAmount)   || 0,
+        totalProductVolume:       parseFloat(form.totalProductVolume)       || 0,
+        totalProductsAmount:      parseFloat(form.totalProductsAmount)      || 0,
+        automatTransactionCount:  parseInt(form.automatTransactionCount)    || 0,
+        cashierTransactionCount:  parseInt(form.cashierTransactionCount)    || 0,
+    };
+}
+
 interface DailyReportModalProps {
     mode: ModalMode;
     reportId: number | null;
+    onConfirm?: (request: DailyReportRequestDTO) => Promise<boolean>;
+}
+
+// onConfirm pour validate n'a pas besoin du request
+interface DailyReportValidateModalProps {
+    mode: "validate";
+    reportId: number;
     onConfirm?: () => Promise<boolean>;
 }
 
-const DailyReportModal: FC<DailyReportModalProps> = ({mode, reportId, onConfirm}) => {
+type AnyDailyReportModalProps = DailyReportModalProps | DailyReportValidateModalProps;
+
+const DailyReportModal: FC<AnyDailyReportModalProps> = (props) => {
+    const {mode, reportId} = props;
     const {closeModal} = useModal();
-    const [dto, setDto]           = useState<DailyTransactionsReportDTO | null>(null);
+    const [dto, setDto]             = useState<DailyTransactionsReportDTO | null>(null);
+    const [form, setForm]           = useState<FormState | null>(null);
     const [loadError, setLoadError] = useState<string | null>(null);
+
+    const isReadOnly = mode === "view" || mode === "validate";
 
     useEffect(() => {
         const load = async () => {
             try {
-                if (mode === "create") {
-                    setDto(await previewDailyReport(todayIso()));
-                } else {
-                    setDto(await getDailyReportById(reportId!));
-                }
+                const loaded = mode === "create"
+                    ? await previewDailyReport(todayIso())
+                    : await getDailyReportById(reportId!);
+                setDto(loaded);
+                setForm(dtoToForm(loaded));
             } catch (err) {
                 setLoadError(toApiError(err));
             }
@@ -250,14 +302,38 @@ const DailyReportModal: FC<DailyReportModalProps> = ({mode, reportId, onConfirm}
         void load();
     }, [mode, reportId]);
 
+    const setField = (key: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement>) => {
+        setForm(prev => prev ? {...prev, [key]: e.target.value} : prev);
+    };
+
     const handleConfirm = async () => {
         if (mode === "view") { closeModal(); return; }
+
+        if (mode === "validate") {
+            const {onConfirm} = props as DailyReportValidateModalProps;
+            if (!onConfirm) { closeModal(); return; }
+            const shouldClose = await onConfirm();
+            if (shouldClose) closeModal();
+            return;
+        }
+
+        if (!form || !dto) return;
+        const {onConfirm} = props as DailyReportModalProps;
         if (!onConfirm) { closeModal(); return; }
-        const shouldClose = await onConfirm();
+        const request = formToRequest(form, dto.reportDate);
+        const shouldClose = await onConfirm(request);
         if (shouldClose) closeModal();
     };
 
-    const isReadOnly = mode === "view";
+    const totalTransactions = form
+        ? (parseInt(form.automatTransactionCount) || 0) + (parseInt(form.cashierTransactionCount) || 0)
+        : 0;
+
+    const totalAmount = form
+        ? (parseFloat(form.totalFuelsAmount) || 0)
+          + (parseFloat(form.totalElectricityAmount) || 0)
+          + (parseFloat(form.totalProductsAmount) || 0)
+        : 0;
 
     return (
         <div className="modal-content modal-daily-report">
@@ -271,7 +347,7 @@ const DailyReportModal: FC<DailyReportModalProps> = ({mode, reportId, onConfirm}
                 <p className="daily-report-loading">Chargement...</p>
             )}
 
-            {dto && (
+            {dto && form && (
                 <>
                     {/* ── Table des carburants ── */}
                     {dto.fuelLines.length > 0 && (
@@ -303,51 +379,92 @@ const DailyReportModal: FC<DailyReportModalProps> = ({mode, reportId, onConfirm}
                     <div className="daily-report-grid">
                         <div className="daily-report-grid-cell">
                             <label>Volume total carburant délivré :</label>
-                            <span className="daily-report-value-box">{dto.totalFuelVolume} L</span>
+                            <input
+                                className="daily-report-value-input"
+                                type="number"
+                                min="0"
+                                value={form.totalFuelVolume}
+                                onChange={setField("totalFuelVolume")}
+                                disabled={isReadOnly}
+                                readOnly={isReadOnly}
+                            />
+                            <span className="daily-report-unit">L</span>
                         </div>
                         <div className="daily-report-grid-cell">
                             <label>Montant total carburant :</label>
-                            <span className="daily-report-amount">{formatAmount(dto.totalFuelsAmount)}</span>
+                            {isReadOnly
+                                ? <span className="daily-report-amount">{formatAmount(parseFloat(form.totalFuelsAmount) || 0)}</span>
+                                : <input
+                                    className="daily-report-value-input"
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    value={form.totalFuelsAmount}
+                                    onChange={setField("totalFuelsAmount")}
+                                  />
+                            }
                         </div>
 
                         <div className="daily-report-grid-cell">
                             <label>Volume total électricité délivrée :</label>
-                            <span className="daily-report-value-box">{dto.totalElectricityVolume} kWh</span>
+                            <input
+                                className="daily-report-value-input"
+                                type="number"
+                                min="0"
+                                value={form.totalElectricityVolume}
+                                onChange={setField("totalElectricityVolume")}
+                                disabled={isReadOnly}
+                                readOnly={isReadOnly}
+                            />
+                            <span className="daily-report-unit">kWh</span>
                         </div>
                         <div className="daily-report-grid-cell">
                             <label>Montant total électricité :</label>
-                            <span className="daily-report-amount">{formatAmount(dto.totalElectricityAmount)}</span>
+                            {isReadOnly
+                                ? <span className="daily-report-amount">{formatAmount(parseFloat(form.totalElectricityAmount) || 0)}</span>
+                                : <input
+                                    className="daily-report-value-input"
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    value={form.totalElectricityAmount}
+                                    onChange={setField("totalElectricityAmount")}
+                                  />
+                            }
                         </div>
-
-                        {dto.totalProductVolume > 0 && (
-                            <>
-                                <div className="daily-report-grid-cell">
-                                    <label>Volume total produits délivrés :</label>
-                                    <span className="daily-report-value-box">{dto.totalProductVolume} unités</span>
-                                </div>
-                                <div className="daily-report-grid-cell">
-                                    <label>Montant total produits :</label>
-                                    <span className="daily-report-amount">{formatAmount(dto.totalProductsAmount)}</span>
-                                </div>
-                            </>
-                        )}
 
                         <div className="daily-report-grid-cell">
                             <label>Nombre transactions automates :</label>
-                            <span className="daily-report-value-box">{dto.automatTransactionCount}</span>
+                            <input
+                                className="daily-report-value-input daily-report-value-input--sm"
+                                type="number"
+                                min="0"
+                                value={form.automatTransactionCount}
+                                onChange={setField("automatTransactionCount")}
+                                disabled={isReadOnly}
+                                readOnly={isReadOnly}
+                            />
                         </div>
                         <div className="daily-report-grid-cell">
-                            <label>Nombre transactions caisse</label>
-                            <span className="daily-report-value-box">{dto.cashierTransactionCount}</span>
+                            <label>Nombre transactions caisse :</label>
+                            <input
+                                className="daily-report-value-input daily-report-value-input--sm"
+                                type="number"
+                                min="0"
+                                value={form.cashierTransactionCount}
+                                onChange={setField("cashierTransactionCount")}
+                                disabled={isReadOnly}
+                                readOnly={isReadOnly}
+                            />
                         </div>
 
                         <div className="daily-report-grid-cell">
                             <label>Nombre transaction total :</label>
-                            <span className="daily-report-value-box">{dto.transactionCount}</span>
+                            <span className="daily-report-value-box">{totalTransactions}</span>
                         </div>
                         <div className="daily-report-grid-cell">
                             <label>Montant total journalier :</label>
-                            <span className="daily-report-amount">{formatAmount(dto.totalAmount)}</span>
+                            <span className="daily-report-amount">{formatAmount(totalAmount)}</span>
                         </div>
                     </div>
                 </>
@@ -355,9 +472,9 @@ const DailyReportModal: FC<DailyReportModalProps> = ({mode, reportId, onConfirm}
 
             <div className="modal-actions">
                 <button className="modal-button modal-button--cancel" type="button" onClick={closeModal}>
-                    {isReadOnly ? "Fermer" : "Annuler"}
+                    {mode === "view" ? "Fermer" : "Annuler"}
                 </button>
-                {!isReadOnly && (
+                {mode !== "view" && (
                     <button
                         className="modal-button modal-button--confirm"
                         type="button"
