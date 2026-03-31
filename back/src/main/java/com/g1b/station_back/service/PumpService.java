@@ -24,7 +24,7 @@ public class PumpService {
     }
 
     public List<PumpDTO> getAll() {
-        return pumpRepository.findAll().stream().map(this::toDto).toList();
+        return pumpRepository.findAllByOrderByIdPumpAsc().stream().map(this::toDto).toList();
     }
 
     public PumpDTO toggleEnabled(Integer id, Boolean enabled) {

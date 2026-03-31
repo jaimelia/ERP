@@ -328,10 +328,10 @@ INSERT INTO "restocks" ("quantity", "restock_date", "id_item", "status") VALUES
 (500, '2025-11-21', 4, 'delivered');
 
 INSERT INTO "pumps" ("is_automat", "status", "enabled") VALUES
-(false, 'available', true),
+(true, 'available', true),
 (true, 'inUse', true),
 (false, 'available', true),
-(true, 'available', true);
+(false, 'available', true);
 
 INSERT INTO "pumps_fuels" ("id_fuel", "id_pump", "max_volume", "available_volume") VALUES
 (1, 1, 5000.000, 1200.000),
