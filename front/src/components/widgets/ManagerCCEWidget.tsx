@@ -1,4 +1,4 @@
-import {type FC, useEffect, useState} from "react";
+import {type FC, useCallback, useEffect, useState} from "react";
 import {apiUrl, fetchJsonWithAuth} from "../../api/common.ts";
 import {Popup} from "../Popup.tsx";
 
@@ -139,12 +139,13 @@ export const ManagerCCEWidget: FC = () => {
         setActivePopup(type);
     };
 
-    const handleClosePopup = () => {
+    const handleClosePopup = useCallback(() => {
+        console.log("handleClosePopup");
         setActivePopup(null);
         setFormData({});
         setErrors({});
         setCardTransactions([]);
-    };
+    }, []);
 
     const handleValidatePopup = async () => {
         if (activePopup === "reedit_alert") {
@@ -500,7 +501,7 @@ export const ManagerCCEWidget: FC = () => {
                         <div className="alert-content">
                             <p className="alert-text">
                                 Vous êtes sur le point de rééditer la carte CCE <strong style={{color:'var(--color-accent)'}}>N° {selectedCard?.numeroCCE}</strong>.<br/>
-                                L'ancienne carte sera <strong>définitivement désactivée</strong> et une nouvelle carte sera créée avec les informations que vous allez saisir.<br/><br/>
+                                L'ancienne carte sera <strong>désactivée</strong> et une nouvelle carte sera créée avec les informations que vous allez saisir.<br/><br/>
                                 Voulez-vous continuer ?
                             </p>
                         </div>

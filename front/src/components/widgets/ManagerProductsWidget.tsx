@@ -20,8 +20,7 @@ import {
 import {ConfirmModal} from "../modal/ConfirmModal.tsx";
 import type {ApiError, ItemType} from "../../types.ts";
 import DecimalInput from "../DecimalInput.tsx";
-
-// ─── Types internes ───────────────────────────────────────────────────────────
+import {Popup} from "../Popup.tsx";
 
 interface ProductFormState {
     name: string;
@@ -35,25 +34,23 @@ interface ElectricityFormState {
     fastPrice: string;
 }
 
-const EMPTY_FORM: ProductFormState = { name: "", unitPrice: "", stock: "" };
+const EMPTY_FORM: ProductFormState = {name: "", unitPrice: "", stock: ""};
 
 type ElectricityItem = ElectricityDTO & { itemType: "electricity" };
 type ManagerItem = ItemDTO | ElectricityItem;
 type ItemFilter = "all" | "product" | "fuel" | "electricity";
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
 function validateForm(form: ProductFormState): string | null {
     if (!form.name.trim()) return "Le nom est obligatoire.";
-    if (!form.unitPrice || isNaN(parseFloat(form.unitPrice))) return "Le prix doit être un nombre valide.";
-    if (!form.stock || isNaN(parseFloat(form.stock))) return "Le stock doit être un nombre valide.";
+    if (!form.unitPrice || isNaN(parseFloat(form.unitPrice))) return "Le prix doit etre un nombre valide.";
+    if (!form.stock || isNaN(parseFloat(form.stock))) return "Le stock doit etre un nombre valide.";
     return null;
 }
 
 function validateElectricityForm(form: ElectricityFormState): string | null {
     if (!form.name.trim()) return "Le nom est obligatoire.";
-    if (!form.normalPrice || isNaN(parseFloat(form.normalPrice))) return "Le prix normal doit être un nombre valide.";
-    if (!form.fastPrice || isNaN(parseFloat(form.fastPrice))) return "Le prix rapide doit être un nombre valide.";
+    if (!form.normalPrice || isNaN(parseFloat(form.normalPrice))) return "Le prix normal doit etre un nombre valide.";
+    if (!form.fastPrice || isNaN(parseFloat(form.fastPrice))) return "Le prix rapide doit etre un nombre valide.";
     return null;
 }
 
@@ -72,30 +69,26 @@ function typeLabel(type: ManagerItem["itemType"]): string {
         case "fuel":
             return "Carburant";
         case "electricity":
-            return "Électricité";
+            return "Electricite";
         default:
             return type;
     }
 }
 
-// ─── Composant ────────────────────────────────────────────────────────────────
-
 export const ManagerProductsWidget: FC = () => {
-    const { data: items, loading: itemsLoading, error: itemsError, refetch: refetchItems } =
+    const {data: items, loading: itemsLoading, error: itemsError, refetch: refetchItems} =
         useFetch<ItemDTO[]>(apiUrl("/items/stock"));
-    const { data: electricity, loading: electricityLoading, error: electricityError, refetch: refetchElectricity } =
+    const {data: electricity, loading: electricityLoading, error: electricityError, refetch: refetchElectricity} =
         useFetch<ElectricityDTO[]>(apiUrl("/items/electricity"));
-    const { success, error: toastError } = useToast();
-    const { openModal } = useModal();
+    const {success, error: toastError} = useToast();
+    const {openModal} = useModal();
 
-    const [search, setSearch]  = useState("");
-    const [filter, setFilter]  = useState<ItemFilter>("all");
-
-    // ── Filtrage ──────────────────────────────────────────────────────────────
+    const [search, setSearch] = useState("");
+    const [filter, setFilter] = useState<ItemFilter>("all");
 
     const managerItems: ManagerItem[] = [
         ...(items ?? []),
-        ...(electricity ?? []).map(e => ({ ...e, itemType: "electricity" as const })),
+        ...(electricity ?? []).map(e => ({...e, itemType: "electricity" as const})),
     ];
 
     const filtered = managerItems.filter(m =>
@@ -103,11 +96,12 @@ export const ManagerProductsWidget: FC = () => {
         (filter === "all" || m.itemType === filter)
     );
 
-    // ── Handlers CRUD ─────────────────────────────────────────────────────────
-
     const handleUpdate = async (item: ItemDTO, form: ProductFormState): Promise<boolean> => {
         const validationError = validateForm(form);
-        if (validationError) { toastError(validationError); return false; }
+        if (validationError) {
+            toastError(validationError);
+            return false;
+        }
 
         try {
             if (item.itemType === "product") {
@@ -123,7 +117,7 @@ export const ManagerProductsWidget: FC = () => {
                     stock: parseFloat(form.stock),
                 });
             }
-            success(`"${form.name}" mis à jour.`);
+            success(`"${form.name}" mis a jour.`);
             refetchItems();
             refetchElectricity();
             return true;
@@ -135,7 +129,10 @@ export const ManagerProductsWidget: FC = () => {
 
     const handleUpdateElectricity = async (item: ElectricityItem, form: ElectricityFormState): Promise<boolean> => {
         const validationError = validateElectricityForm(form);
-        if (validationError) { toastError(validationError); return false; }
+        if (validationError) {
+            toastError(validationError);
+            return false;
+        }
 
         try {
             await updateElectricity(item.id, {
@@ -143,7 +140,7 @@ export const ManagerProductsWidget: FC = () => {
                 normalPrice: parseFloat(form.normalPrice),
                 fastPrice: parseFloat(form.fastPrice),
             });
-            success(`"${form.name}" mis à jour.`);
+            success(`"${form.name}" mis a jour.`);
             refetchItems();
             refetchElectricity();
             return true;
@@ -162,7 +159,7 @@ export const ManagerProductsWidget: FC = () => {
             } else {
                 await deleteProduct(item.id);
             }
-            success(`"${item.name}" supprimé.`);
+            success(`"${item.name}" supprime.`);
             refetchItems();
             refetchElectricity();
         } catch (err) {
@@ -174,17 +171,23 @@ export const ManagerProductsWidget: FC = () => {
         openModal(
             <ConfirmModal
                 title="Supprimer la marchandise"
-                message={`Supprimer "${item.name}" ? Cette action est irréversible.`}
+                message={`Supprimer "${item.name}" ? Cette action est irreversible.`}
                 confirmLabel="Supprimer"
-                onConfirm={() => { void executeDelete(item); }}
+                onConfirm={() => {
+                    void executeDelete(item);
+                }}
                 danger
-            />
+            />,
+            {boxed: false}
         );
     };
 
     const handleCreateProduct = async (form: ProductFormState): Promise<boolean> => {
         const validationError = validateForm(form);
-        if (validationError) { toastError(validationError); return false; }
+        if (validationError) {
+            toastError(validationError);
+            return false;
+        }
 
         try {
             await createProduct({
@@ -192,7 +195,7 @@ export const ManagerProductsWidget: FC = () => {
                 unitPrice: parseFloat(form.unitPrice),
                 stock: parseInt(form.stock),
             });
-            success(`"${form.name}" créé.`);
+            success(`"${form.name}" cree.`);
             refetchItems();
             refetchElectricity();
             return true;
@@ -204,7 +207,10 @@ export const ManagerProductsWidget: FC = () => {
 
     const handleCreateFuel = async (form: ProductFormState): Promise<boolean> => {
         const validationError = validateForm(form);
-        if (validationError) { toastError(validationError); return false; }
+        if (validationError) {
+            toastError(validationError);
+            return false;
+        }
 
         try {
             await createFuel({
@@ -212,7 +218,7 @@ export const ManagerProductsWidget: FC = () => {
                 price: parseFloat(form.unitPrice),
                 stock: parseFloat(form.stock),
             });
-            success(`"${form.name}" créé.`);
+            success(`"${form.name}" cree.`);
             refetchItems();
             refetchElectricity();
             return true;
@@ -224,7 +230,10 @@ export const ManagerProductsWidget: FC = () => {
 
     const handleCreateElectricity = async (form: ElectricityFormState): Promise<boolean> => {
         const validationError = validateElectricityForm(form);
-        if (validationError) { toastError(validationError); return false; }
+        if (validationError) {
+            toastError(validationError);
+            return false;
+        }
 
         try {
             await createElectricity({
@@ -232,7 +241,7 @@ export const ManagerProductsWidget: FC = () => {
                 normalPrice: parseFloat(form.normalPrice),
                 fastPrice: parseFloat(form.fastPrice),
             });
-            success(`"${form.name}" créé.`);
+            success(`"${form.name}" cree.`);
             refetchItems();
             refetchElectricity();
             return true;
@@ -248,7 +257,8 @@ export const ManagerProductsWidget: FC = () => {
                 onCreateProduct={handleCreateProduct}
                 onCreateFuel={handleCreateFuel}
                 onCreateElectricity={handleCreateElectricity}
-            />
+            />,
+            {boxed: false}
         );
     };
 
@@ -261,10 +271,11 @@ export const ManagerProductsWidget: FC = () => {
                     unitPrice: String(item.price),
                     stock: String(item.stock),
                 }}
-                onConfirm={(form) => handleUpdate(item, form)}
-                priceLabel={item.itemType === "fuel" ? "Prix/L (€)" : "Prix unitaire (€)"}
+                onConfirm={form => handleUpdate(item, form)}
+                priceLabel={item.itemType === "fuel" ? "Prix/L (EUR)" : "Prix unitaire (EUR)"}
                 stockLabel={item.itemType === "fuel" ? "Stock (L)" : "Stock"}
-            />
+            />,
+            {boxed: false}
         );
     };
 
@@ -277,18 +288,15 @@ export const ManagerProductsWidget: FC = () => {
                     normalPrice: String(item.normalPrice),
                     fastPrice: String(item.fastPrice),
                 }}
-                onConfirm={(form) => handleUpdateElectricity(item, form)}
-            />
+                onConfirm={form => handleUpdateElectricity(item, form)}
+            />,
+            {boxed: false}
         );
     };
-
-    // ── Rendu ─────────────────────────────────────────────────────────────────
 
     return (
         <FetchWrapper loading={itemsLoading || electricityLoading} error={itemsError ?? electricityError}>
             <div className="widget-container">
-
-                {/* Toolbar */}
                 <div className="widget-toolbar">
                     <div className="widget-search">
                         <svg className="widget-search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -304,13 +312,13 @@ export const ManagerProductsWidget: FC = () => {
                     </div>
                     <select
                         className="widget-select"
-                        value={filter} 
+                        value={filter}
                         onChange={e => setFilter(e.target.value as ItemFilter)}
                     >
                         <option value="all">Tous</option>
                         <option value="fuel">Carburant</option>
                         <option value="product">Produit</option>
-                        <option value="electricity">Électricité</option>
+                        <option value="electricity">Electricite</option>
                     </select>
                     <button className="widget-btn-add" type="button" title="Ajouter" onClick={openAddModal}>
                         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
@@ -319,56 +327,58 @@ export const ManagerProductsWidget: FC = () => {
                     </button>
                 </div>
 
-                {/* Tableau */}
                 <div className="widget-table-wrap">
                     <table className="widget-table">
                         <thead>
-                            <tr>
-                                <th>Produit</th>
-                                <th>Quantité</th>
-                                <th>Type</th>
-                                <th>Prix</th>
-                                <th>Actions</th>
-                            </tr>
+                        <tr>
+                            <th>Produit</th>
+                            <th>Quantite</th>
+                            <th>Type</th>
+                            <th>Prix</th>
+                            <th>Actions</th>
+                        </tr>
                         </thead>
                         <tbody>
-                            {filtered.map(m => (
-                                <tr key={m.id}>
-                                    <td>{m.name}</td>
-                                    <td>
-                                        {isElectricityItem(m) ? "—" : `${m.stock}${m.itemType === "fuel" ? " L" : ""}`}
-                                    </td>
-                                    <td>{typeLabel(m.itemType)}</td>
-                                    <td>
-                                        {isElectricityItem(m)
-                                            ? <>
-												<div>{m.normalPrice} €/kWh (normal)</div>
-												<div>{m.fastPrice} €/kWh (rapide)</div>
-											</>
-                                            : <div>{m.price} {m.itemType === "fuel" ? "€/L" : "€"}</div>}
-                                    </td>
-                                    <td>
-                                        <div className="row-actions">
-                                            {isElectricityItem(m) ? (
-                                                <button className="icon-btn" type="button" title="Modifier" onClick={() => openEditElectricityModal(m)}>✏️</button>
-                                            ) : (
-                                                <button className="icon-btn" type="button" title="Modifier" onClick={() => openEditModal(m)}>✏️</button>
-                                            )}
-                                            <button className="icon-btn delete" type="button" title="Supprimer" onClick={() => handleDelete(m)}>🗑️</button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
+                        {filtered.map(m => (
+                            <tr key={m.id}>
+                                <td>{m.name}</td>
+                                <td>{isElectricityItem(m) ? "-" : `${m.stock}${m.itemType === "fuel" ? " L" : ""}`}</td>
+                                <td>{typeLabel(m.itemType)}</td>
+                                <td>
+                                    {isElectricityItem(m) ? (
+                                        <>
+                                            <div>{m.normalPrice} EUR/kWh (normal)</div>
+                                            <div>{m.fastPrice} EUR/kWh (rapide)</div>
+                                        </>
+                                    ) : (
+                                        <div>{m.price} {m.itemType === "fuel" ? "EUR/L" : "EUR"}</div>
+                                    )}
+                                </td>
+                                <td>
+                                    <div className="row-actions">
+                                        {isElectricityItem(m) ? (
+                                            <button className="icon-btn" type="button" title="Modifier" onClick={() => openEditElectricityModal(m)}>
+                                                ✏️
+                                            </button>
+                                        ) : (
+                                            <button className="icon-btn" type="button" title="Modifier" onClick={() => openEditModal(m)}>
+                                                ✏️
+                                            </button>
+                                        )}
+                                        <button className="icon-btn delete" type="button" title="Supprimer" onClick={() => handleDelete(m)}>
+                                            🗑️
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
                         </tbody>
                     </table>
                 </div>
-
             </div>
         </FetchWrapper>
     );
 };
-
-// ─── Sous-composant modale ─────────────────────────────────────────────────────
 
 interface ProductModalProps {
     title: string;
@@ -384,8 +394,8 @@ interface AddItemModalProps {
     onCreateElectricity: (form: ElectricityFormState) => Promise<boolean> | boolean;
 }
 
-const AddItemModal: FC<AddItemModalProps> = ({ onCreateProduct, onCreateFuel, onCreateElectricity }) => {
-    const { closeModal } = useModal();
+const AddItemModal: FC<AddItemModalProps> = ({onCreateProduct, onCreateFuel, onCreateElectricity}) => {
+    const {closeModal} = useModal();
     const [itemType, setItemType] = useState<ItemType>("product");
     const [productForm, setProductForm] = useState<ProductFormState>(EMPTY_FORM);
     const [electricityForm, setElectricityForm] = useState<ElectricityFormState>({
@@ -400,12 +410,12 @@ const AddItemModal: FC<AddItemModalProps> = ({ onCreateProduct, onCreateFuel, on
                 ...prev,
                 name: prev.name || productForm.name,
             }));
-        } else {
-            setProductForm(prev => ({
-                ...prev,
-                name: prev.name || electricityForm.name,
-            }));
+            return;
         }
+        setProductForm(prev => ({
+            ...prev,
+            name: prev.name || electricityForm.name,
+        }));
     };
 
     const handleTypeChange = (nextType: ItemType) => {
@@ -428,18 +438,33 @@ const AddItemModal: FC<AddItemModalProps> = ({ onCreateProduct, onCreateFuel, on
     const isFuel = itemType === "fuel";
 
     return (
-        <div className="modal-content modal-item-create">
-            <div className="modal-header">
-                <h2>Ajouter une marchandise</h2>
-                <p className="modal-subtitle">Choisis le type puis renseigne les informations.</p>
-            </div>
+        <Popup
+            className="modal-item-create"
+            title="Ajouter une marchandise"
+            subtitle="Choisis le type puis renseigne les informations."
+            footer={
+                <>
+                    <button className="popup-btn cancel" type="button" onClick={closeModal}>Annuler</button>
+                    <button
+                        className="popup-btn validate"
+                        type="button"
+                        onClick={handleConfirm}
+                        disabled={itemType === "electricity"
+                            ? !(electricityForm.name && electricityForm.normalPrice != null && electricityForm.fastPrice != null)
+                            : !(productForm.name && productForm.stock != null && productForm.unitPrice != null)}
+                    >
+                        Creer
+                    </button>
+                </>
+            }
+        >
             <div className="modal-form">
                 <label className="modal-field">
                     <span>Type de marchandise</span>
                     <select value={itemType} onChange={e => handleTypeChange(e.target.value as ItemType)}>
                         <option value="product">Produit</option>
                         <option value="fuel">Carburant</option>
-                        <option value="electricity">Électricité</option>
+                        <option value="electricity">Electricite</option>
                     </select>
                 </label>
 
@@ -449,25 +474,25 @@ const AddItemModal: FC<AddItemModalProps> = ({ onCreateProduct, onCreateFuel, on
                             <span>Nom</span>
                             <input
                                 value={electricityForm.name}
-                                onChange={e => setElectricityForm({ ...electricityForm, name: e.target.value })}
+                                onChange={e => setElectricityForm({...electricityForm, name: e.target.value})}
                             />
                         </label>
                         <div className="modal-grid">
                             <label className="modal-field">
                                 <span>Prix normal (EUR/kWh)</span>
-								<DecimalInput 
-									nbDecimalPlaces={3}
-									initialValue={electricityForm.normalPrice}
-									onChange={e => setElectricityForm({ ...electricityForm, normalPrice: e.target.value })}
-								/>
+                                <DecimalInput
+                                    nbDecimalPlaces={3}
+                                    initialValue={electricityForm.normalPrice}
+                                    onChange={e => setElectricityForm({...electricityForm, normalPrice: e.target.value})}
+                                />
                             </label>
                             <label className="modal-field">
                                 <span>Prix rapide (EUR/kWh)</span>
-								<DecimalInput 
-									nbDecimalPlaces={3}
-									initialValue={electricityForm.fastPrice}
-									onChange={e => setElectricityForm({ ...electricityForm, fastPrice: e.target.value })}
-								/>
+                                <DecimalInput
+                                    nbDecimalPlaces={3}
+                                    initialValue={electricityForm.fastPrice}
+                                    onChange={e => setElectricityForm({...electricityForm, fastPrice: e.target.value})}
+                                />
                             </label>
                         </div>
                     </>
@@ -478,97 +503,86 @@ const AddItemModal: FC<AddItemModalProps> = ({ onCreateProduct, onCreateFuel, on
                             <input
                                 placeholder="Ex: Snack, huile moteur"
                                 value={productForm.name}
-                                onChange={e => setProductForm({ ...productForm, name: e.target.value })}
+                                onChange={e => setProductForm({...productForm, name: e.target.value})}
                             />
                         </label>
                         <div className="modal-grid">
                             <label className="modal-field">
-                                <span>{isFuel ? "Prix/L (€)" : "Prix unitaire (€)"}</span>
-								<DecimalInput
-									nbDecimalPlaces={3}
-									initialValue={productForm.unitPrice}
-									onChange={e => setProductForm({ ...productForm, unitPrice: e.target.value })}
-								/>
+                                <span>{isFuel ? "Prix/L (EUR)" : "Prix unitaire (EUR)"}</span>
+                                <DecimalInput
+                                    nbDecimalPlaces={3}
+                                    initialValue={productForm.unitPrice}
+                                    onChange={e => setProductForm({...productForm, unitPrice: e.target.value})}
+                                />
                             </label>
                             <label className="modal-field">
                                 <span>{isFuel ? "Stock (L)" : "Stock"}</span>
-								<DecimalInput 
-									nbDecimalPlaces={3}
-									initialValue={productForm.stock}
-									onChange={e => setProductForm({ ...productForm, stock: e.target.value })}
-								/>
+                                <DecimalInput
+                                    nbDecimalPlaces={3}
+                                    initialValue={productForm.stock}
+                                    onChange={e => setProductForm({...productForm, stock: e.target.value})}
+                                />
                             </label>
                         </div>
                     </>
                 )}
             </div>
-            <div className="modal-actions">
-                <button className="modal-button modal-button--cancel" type="button" onClick={closeModal}>Annuler</button>
-                <button 
-					className="modal-button modal-button--confirm" 
-					type="button"
-					onClick={handleConfirm}
-					disabled={itemType === "electricity" 
-						? !(electricityForm.name && electricityForm.normalPrice != null && electricityForm.fastPrice != null)
-						: !(productForm.name && productForm.stock != null && productForm.unitPrice != null)}
-				>
-                    Créer
-                </button>
-            </div>
-        </div>
+        </Popup>
     );
 };
 
-const ProductModal: FC<ProductModalProps> = ({ title, initialForm, onConfirm, priceLabel, stockLabel }) => {
-    const { closeModal } = useModal();
+const ProductModal: FC<ProductModalProps> = ({title, initialForm, onConfirm, priceLabel, stockLabel}) => {
+    const {closeModal} = useModal();
     const [form, setForm] = useState<ProductFormState>(initialForm);
 
     return (
-        <div className="modal-content modal-product-editor">
-            <div className="modal-header">
-                <h2>{title}</h2>
-                <p className="modal-subtitle">Renseigne les informations du produit.</p>
-            </div>
+        <Popup
+            className="modal-product-editor"
+            title={title}
+            subtitle="Renseigne les informations du produit."
+            footer={
+                <>
+                    <button className="popup-btn cancel" type="button" onClick={closeModal}>Annuler</button>
+                    <button
+                        className="popup-btn validate"
+                        type="button"
+                        onClick={async () => {
+                            const shouldClose = await onConfirm(form);
+                            if (shouldClose) closeModal();
+                        }}
+                    >
+                        Confirmer
+                    </button>
+                </>
+            }
+        >
             <div className="modal-form">
                 <label className="modal-field">
                     <span>Nom</span>
                     <input
                         placeholder="Ex: Snack, huile moteur"
                         value={form.name}
-                        onChange={e => setForm({ ...form, name: e.target.value })}
+                        onChange={e => setForm({...form, name: e.target.value})}
                     />
                 </label>
                 <label className="modal-field">
                     <span>{priceLabel}</span>
-					<DecimalInput
-						nbDecimalPlaces={3}
-						initialValue={form.unitPrice}
-						onChange={e => setForm({ ...form, unitPrice: e.target.value })}
-					/>
+                    <DecimalInput
+                        nbDecimalPlaces={3}
+                        initialValue={form.unitPrice}
+                        onChange={e => setForm({...form, unitPrice: e.target.value})}
+                    />
                 </label>
                 <label className="modal-field">
                     <span>{stockLabel}</span>
                     <DecimalInput
                         nbDecimalPlaces={3}
                         initialValue={form.stock}
-                        onChange={e => setForm({ ...form, stock: e.target.value })}
+                        onChange={e => setForm({...form, stock: e.target.value})}
                     />
                 </label>
             </div>
-            <div className="modal-actions">
-                <button className="modal-button modal-button--cancel" type="button" onClick={closeModal}>Annuler</button>
-                <button
-                    className="modal-button modal-button--confirm"
-                    type="button"
-                    onClick={async () => {
-                        const shouldClose = await onConfirm(form);
-                        if (shouldClose) closeModal();
-                    }}
-                >
-                    Confirmer
-                </button>
-            </div>
-        </div>
+        </Popup>
     );
 };
 
@@ -578,22 +592,37 @@ interface ElectricityModalProps {
     onConfirm: (form: ElectricityFormState) => Promise<boolean> | boolean;
 }
 
-const ElectricityModal: FC<ElectricityModalProps> = ({ title, initialForm, onConfirm }) => {
-    const { closeModal } = useModal();
+const ElectricityModal: FC<ElectricityModalProps> = ({title, initialForm, onConfirm}) => {
+    const {closeModal} = useModal();
     const [form, setForm] = useState<ElectricityFormState>(initialForm);
 
     return (
-        <div className="modal-content modal-electricity-editor">
-            <div className="modal-header">
-                <h2>{title}</h2>
-                <p className="modal-subtitle">Définis les tarifs pour chargeurs normal et rapide.</p>
-            </div>
+        <Popup
+            className="modal-electricity-editor"
+            title={title}
+            subtitle="Definis les tarifs pour chargeurs normal et rapide."
+            footer={
+                <>
+                    <button className="popup-btn cancel" type="button" onClick={closeModal}>Annuler</button>
+                    <button
+                        className="popup-btn validate"
+                        type="button"
+                        onClick={async () => {
+                            const shouldClose = await onConfirm(form);
+                            if (shouldClose) closeModal();
+                        }}
+                    >
+                        Confirmer
+                    </button>
+                </>
+            }
+        >
             <div className="modal-form">
                 <label className="modal-field">
                     <span>Nom</span>
                     <input
                         value={form.name}
-                        onChange={e => setForm({ ...form, name: e.target.value })}
+                        onChange={e => setForm({...form, name: e.target.value})}
                     />
                 </label>
                 <label className="modal-field">
@@ -601,7 +630,7 @@ const ElectricityModal: FC<ElectricityModalProps> = ({ title, initialForm, onCon
                     <DecimalInput
                         nbDecimalPlaces={3}
                         initialValue={form.normalPrice}
-                        onChange={e => setForm({ ...form, normalPrice: e.target.value })}
+                        onChange={e => setForm({...form, normalPrice: e.target.value})}
                     />
                 </label>
                 <label className="modal-field">
@@ -609,23 +638,10 @@ const ElectricityModal: FC<ElectricityModalProps> = ({ title, initialForm, onCon
                     <DecimalInput
                         nbDecimalPlaces={3}
                         initialValue={form.fastPrice}
-                        onChange={e => setForm({ ...form, fastPrice: e.target.value })}
+                        onChange={e => setForm({...form, fastPrice: e.target.value})}
                     />
                 </label>
             </div>
-            <div className="modal-actions">
-                <button className="modal-button modal-button--cancel" type="button" onClick={closeModal}>Annuler</button>
-                <button
-                    className="modal-button modal-button--confirm"
-                    type="button"
-                    onClick={async () => {
-                        const shouldClose = await onConfirm(form);
-                        if (shouldClose) closeModal();
-                    }}
-                >
-                    Confirmer
-                </button>
-            </div>
-        </div>
+        </Popup>
     );
 };

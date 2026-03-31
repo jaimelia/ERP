@@ -3,6 +3,7 @@ import {useFetch} from "../../hooks/useFetch.ts";
 import {FetchWrapper} from "../FetchWrapper.tsx";
 import {useToast} from "../../contexts/ToastContext.tsx";
 import {useModal} from "../../contexts/ModalContext.tsx";
+import {Popup} from "../Popup.tsx";
 import {apiUrl} from "../../api/common.ts";
 import {
     createDailyReport,
@@ -108,7 +109,8 @@ export const DailyTransactionsReportWidget: FC = () => {
                 mode="create"
                 reportId={null}
                 onConfirm={handleCreate}
-            />
+            />,
+            {boxed: false}
         );
     };
 
@@ -119,7 +121,8 @@ export const DailyTransactionsReportWidget: FC = () => {
                 mode="edit"
                 reportId={selectedId}
                 onConfirm={handleUpdate}
-            />
+            />,
+            {boxed: false}
         );
     };
 
@@ -129,7 +132,8 @@ export const DailyTransactionsReportWidget: FC = () => {
             <DailyReportModal
                 mode="view"
                 reportId={selectedId}
-            />
+            />,
+            {boxed: false}
         );
     };
 
@@ -140,7 +144,8 @@ export const DailyTransactionsReportWidget: FC = () => {
                 mode="validate"
                 reportId={selectedId}
                 onConfirm={handleValidate}
-            />
+            />,
+            {boxed: false}
         );
     };
 
@@ -336,10 +341,27 @@ const DailyReportModal: FC<AnyDailyReportModalProps> = (props) => {
         : 0;
 
     return (
-        <div className="modal-content modal-daily-report">
-            <div className="modal-header">
-                <h2>{MODAL_TITLES[mode]}</h2>
-            </div>
+        <Popup
+            className="modal-daily-report"
+            title={MODAL_TITLES[mode]}
+            footer={
+                <>
+                    <button className="popup-btn cancel" type="button" onClick={closeModal}>
+                        {mode === "view" ? "Fermer" : "Annuler"}
+                    </button>
+                    {mode !== "view" && (
+                        <button
+                            className="popup-btn validate"
+                            type="button"
+                            onClick={handleConfirm}
+                            disabled={!dto}
+                        >
+                            Valider
+                        </button>
+                    )}
+                </>
+            }
+        >
 
             {loadError && <p className="modal-error">{loadError}</p>}
 
@@ -470,21 +492,6 @@ const DailyReportModal: FC<AnyDailyReportModalProps> = (props) => {
                 </>
             )}
 
-            <div className="modal-actions">
-                <button className="modal-button modal-button--cancel" type="button" onClick={closeModal}>
-                    {mode === "view" ? "Fermer" : "Annuler"}
-                </button>
-                {mode !== "view" && (
-                    <button
-                        className="modal-button modal-button--confirm"
-                        type="button"
-                        onClick={handleConfirm}
-                        disabled={!dto}
-                    >
-                        Valider
-                    </button>
-                )}
-            </div>
-        </div>
+        </Popup>
     );
 };

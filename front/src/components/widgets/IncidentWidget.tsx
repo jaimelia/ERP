@@ -4,6 +4,7 @@ import {FetchWrapper} from "../FetchWrapper.tsx";
 import {useToast} from "../../contexts/ToastContext.tsx";
 import {useModal} from "../../contexts/ModalContext.tsx";
 import {ConfirmModal} from "../modal/ConfirmModal.tsx";
+import {Popup} from "../Popup.tsx";
 import {apiUrl} from "../../api/common.ts";
 import {
     createIncident,
@@ -177,7 +178,8 @@ export const IncidentWidget: FC = () => {
                 title="Nouvelle fiche incident"
                 initialForm={{...EMPTY_FORM, date: nowDateString(), time: nowTimeString()}}
                 onConfirm={handleCreate}
-            />
+            />,
+            {boxed: false}
         );
     };
 
@@ -189,7 +191,8 @@ export const IncidentWidget: FC = () => {
                 title="Modification fiche incident"
                 initialForm={incidentToForm(selectedIncident)}
                 onConfirm={handleUpdate}
-            />
+            />,
+            {boxed: false}
         );
     };
 
@@ -200,7 +203,8 @@ export const IncidentWidget: FC = () => {
                 mode="view"
                 title="Consultation fiche incident"
                 initialForm={incidentToForm(selectedIncident)}
-            />
+            />,
+            {boxed: false}
         );
     };
 
@@ -212,7 +216,8 @@ export const IncidentWidget: FC = () => {
                 message="Voulez-vous vraiment envoyer cette fiche incident ?"
                 confirmLabel="Envoyer"
                 onConfirm={() => { void executeSend(selectedIncident.id!); }}
-            />
+            />,
+            {boxed: false}
         );
     };
 
@@ -318,10 +323,20 @@ const IncidentFormModal: FC<IncidentFormModalProps> = ({mode, title, initialForm
     };
 
     return (
-        <div className="modal-content modal-incident">
-            <div className="modal-header">
-                <h2>{title}</h2>
-            </div>
+        <Popup
+            className="modal-incident"
+            title={title}
+            footer={
+                <>
+                    <button className="popup-btn cancel" type="button" onClick={closeModal}>
+                        Annuler
+                    </button>
+                    <button className="popup-btn validate" type="button" onClick={handleConfirm}>
+                        Valider
+                    </button>
+                </>
+            }
+        >
             <div className="modal-form">
                 <div className="modal-grid">
                     <label className="modal-field">
@@ -371,14 +386,6 @@ const IncidentFormModal: FC<IncidentFormModalProps> = ({mode, title, initialForm
                     />
                 </label>
             </div>
-            <div className="modal-actions">
-                <button className="modal-button modal-button--cancel" type="button" onClick={closeModal}>
-                    Annuler
-                </button>
-                <button className="modal-button modal-button--confirm" type="button" onClick={handleConfirm}>
-                    Valider
-                </button>
-            </div>
-        </div>
+        </Popup>
     );
 };

@@ -1,14 +1,14 @@
-import {useEffect, type FC, type ReactNode} from "react";
+import {type FC, type ReactNode, useEffect} from "react";
 import {createPortal} from "react-dom";
 
 interface ModalOverlayProps {
     onClose: () => void;
     children: ReactNode;
     isActive?: boolean;
+    boxed?: boolean;
 }
 
-export const ModalOverlay: FC<ModalOverlayProps> = ({onClose, children, isActive = true}) => {
-    // Fermer avec Échap
+export const ModalOverlay: FC<ModalOverlayProps> = ({onClose, children, isActive = true, boxed = true}) => {
     useEffect(() => {
         if (!isActive) return;
         const handleKey = (e: KeyboardEvent): void => {
@@ -20,15 +20,18 @@ export const ModalOverlay: FC<ModalOverlayProps> = ({onClose, children, isActive
 
     return createPortal(
         <div
-            className="modal-overlay"
+            className="modal-overlay popup-overlay"
             onClick={onClose}
             style={isActive ? undefined : {display: "none"}}
             aria-hidden={!isActive}
         >
-            <div className="modal-box" onClick={e => e.stopPropagation()}>
+            <div
+                className={boxed ? "modal-box" : "modal-unboxed"}
+                onClick={e => e.stopPropagation()}
+            >
                 {children}
             </div>
         </div>,
-        document.body  // rendu en dehors du DOM du widget
+        document.body
     );
 };

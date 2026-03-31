@@ -29,7 +29,7 @@ public class Transaction {
     @Column(nullable = false)
     private TransactionStatus status;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "id_user")
     private User user;
 

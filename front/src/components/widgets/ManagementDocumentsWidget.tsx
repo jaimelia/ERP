@@ -6,6 +6,7 @@ import {FetchWrapper} from "../FetchWrapper.tsx";
 import {useToast} from "../../contexts/ToastContext.tsx";
 import {useModal} from "../../contexts/ModalContext.tsx";
 import {ConfirmModal} from "../modal/ConfirmModal.tsx";
+import {Popup} from "../Popup.tsx";
 import {apiUrl} from "../../api/common.ts";
 import {
     createManagementDocument,
@@ -121,7 +122,8 @@ export const ManagementDocumentsWidget: FC = () => {
                 initialName=""
                 initialContent=""
                 onConfirm={handleCreate}
-            />
+            />,
+            {boxed: false}
         );
     };
 
@@ -134,7 +136,8 @@ export const ManagementDocumentsWidget: FC = () => {
                 initialName={selectedDoc.name}
                 initialContent={selectedDoc.content ?? ""}
                 onConfirm={canEdit ? handleUpdate : undefined}
-            />
+            />,
+            {boxed: false}
         );
     };
 
@@ -146,7 +149,8 @@ export const ManagementDocumentsWidget: FC = () => {
                 message="Voulez-vous envoyer ce document à la direction régionale ? Il ne pourra plus être modifié."
                 confirmLabel="Envoyer"
                 onConfirm={() => { void executeSend(selectedDoc.id!); }}
-            />
+            />,
+            {boxed: false}
         );
     };
 
@@ -159,7 +163,8 @@ export const ManagementDocumentsWidget: FC = () => {
                 confirmLabel="Supprimer"
                 danger
                 onConfirm={() => { void executeDelete(selectedDoc.id!); }}
-            />
+            />,
+            {boxed: false}
         );
     };
 
@@ -279,10 +284,20 @@ const ManagementDocumentFormModal: FC<ManagementDocumentFormModalProps> = ({
     };
 
     return (
-        <div className="modal-content modal-mgmt-doc">
-            <div className="modal-header">
-                <h2>{title}</h2>
-            </div>
+        <Popup
+            className="modal-mgmt-doc"
+            title={title}
+            footer={
+                <>
+                    <button className="popup-btn cancel" type="button" onClick={closeModal}>
+                        Annuler
+                    </button>
+                    <button className="popup-btn validate" type="button" onClick={handleConfirm}>
+                        Valider
+                    </button>
+                </>
+            }
+        >
             <div className="modal-form">
                 <label className="modal-field">
                     <span>Nom</span>
@@ -320,14 +335,6 @@ const ManagementDocumentFormModal: FC<ManagementDocumentFormModalProps> = ({
                     </div>
                 </div>
             </div>
-            <div className="modal-actions">
-                <button className="modal-button modal-button--cancel" type="button" onClick={closeModal}>
-                    Annuler
-                </button>
-                <button className="modal-button modal-button--confirm" type="button" onClick={handleConfirm}>
-                    Valider
-                </button>
-            </div>
-        </div>
+        </Popup>
     );
 };

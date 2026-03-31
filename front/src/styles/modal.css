@@ -23,6 +23,10 @@
 	box-shadow: var(--shadow-lg);
 }
 
+.modal-unboxed {
+	display: contents;
+}
+
 .modal-content {
 	padding: 24px 26px;
 	min-width: 320px;

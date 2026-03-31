@@ -391,7 +391,7 @@ export const EmployeeCCEWidget: FC = () => {
                         <div className="alert-content">
                             <p className="alert-text">
                                 Vous êtes sur le point de rééditer la carte CCE <strong style={{color:'var(--color-accent)'}}>N° {selectedCard?.numeroCCE}</strong>.<br/>
-                                L'ancienne carte sera <strong>définitivement désactivée</strong> et une nouvelle carte sera créée avec les informations que vous allez saisir.<br/><br/>
+                                L'ancienne carte sera <strong>désactivée</strong> et une nouvelle carte sera créée avec les informations que vous allez saisir.<br/><br/>
                                 Voulez-vous continuer ?
                             </p>
                         </div>
@@ -497,9 +497,8 @@ export const EmployeeCCEWidget: FC = () => {
                 <button className="cce-action-btn" type="button" disabled={!selected} onClick={() => handleOpenPopup("reedit_alert")}>Rééditer</button>
             </div>
 
-            {popupConfig && (
+            {popupConfig && activePopup !== null && (
                 <Popup
-                    isOpen={activePopup !== null}
                     onClose={handleClosePopup}
                     icon={popupConfig.icon}
                     title={popupConfig.title}

@@ -3,16 +3,17 @@ import {useModal} from "../../contexts/ModalContext.tsx";
 import {useFetch} from "../../hooks/useFetch.ts";
 import {apiUrl} from "../../api/common.ts";
 import {
-	createUser,
-	deleteUser,
-	type AdminUserDTO,
-	type CreateUserDTO,
-	type UpdateUserDTO,
-	updateUser
+    type AdminUserDTO,
+    createUser,
+    type CreateUserDTO,
+    deleteUser,
+    updateUser,
+    type UpdateUserDTO
 } from "../../api/userApi.ts";
 import type {Role} from "../../types.ts";
 import {ConfirmModal} from "./ConfirmModal.tsx";
 import {FetchWrapper} from "../FetchWrapper.tsx";
+import {Popup} from "../Popup.tsx";
 
 interface UserManagementModalProps {
 	currentUsername: string;
@@ -134,24 +135,30 @@ export const UserManagementModal: FC<UserManagementModalProps> = ({currentUserna
 		}
 	};
 
-	const confirmDelete = (user: AdminUserDTO) => {
-		openModal(
-			<ConfirmModal
-				title="Supprimer l'utilisateur"
-				message={`Supprimer ${user.username} ? Cette action est irreversible.`}
-				confirmLabel="Supprimer"
-				cancelLabel="Annuler"
-				onConfirm={() => handleDelete(user)}
-				danger
-			/>
-		);
-	};
+		const confirmDelete = (user: AdminUserDTO) => {
+			openModal(
+				<ConfirmModal
+					title="Supprimer l'utilisateur"
+					message={`Supprimer ${user.username} ? Cette action est irreversible.`}
+					confirmLabel="Supprimer"
+					cancelLabel="Annuler"
+					onConfirm={() => handleDelete(user)}
+					danger
+				/>,
+				{boxed: false}
+			);
+		};
 
 	return (
-		<div className="modal-content modal-users">
-			<div className="modal-header">
-				<h2 className="modal-title">Gestion des utilisateurs</h2>
-			</div>
+		<Popup
+			className="modal-users"
+			title="Gestion des utilisateurs"
+			footer={
+				<button type="button" className="popup-btn cancel" onClick={closeModal}>
+					Fermer
+				</button>
+			}
+		>
 
 			{actionError && <div className="modal-error">{actionError}</div>}
 
@@ -328,11 +335,6 @@ export const UserManagementModal: FC<UserManagementModalProps> = ({currentUserna
 				</FetchWrapper>
 			</section>
 
-			<div className="modal-actions">
-				<button type="button" className="modal-button modal-button--cancel" onClick={closeModal}>
-					Fermer
-				</button>
-			</div>
-		</div>
+		</Popup>
 	);
 };

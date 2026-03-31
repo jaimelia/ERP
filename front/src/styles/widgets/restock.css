@@ -1,6 +1,7 @@
 .modal-new-restock,
 .modal-thresholds {
 	width: 700px;
+	max-width: 92vw;
 }
 
 /* modal-new-restock */

@@ -5,6 +5,7 @@ import {FetchWrapper} from "../FetchWrapper.tsx";
 import {apiUrl} from "../../api/common.ts";
 import type {PumpChargerStatus} from "../../api/pumpsApi.ts";
 import {updateChargerStatus} from "../../api/chargersApi.ts";
+import {useToast} from "../../contexts/ToastContext.tsx";
 
 interface Charger {
 	idEvCharger: number;
@@ -13,6 +14,7 @@ interface Charger {
 }
 
 export const ChargersWidget: FC = () => {
+    const {error: toastError} = useToast();
 
 	const {data: chargers, setData: setChargers, loading, error} = useFetch<Charger[]>(
 		apiUrl("/chargers"),
@@ -54,6 +56,7 @@ export const ChargersWidget: FC = () => {
         
         updateChargerStatus(charger.idEvCharger, newStatus).catch((error) => {
             console.error(error);
+            toastError("Erreur serveur")
             setChargers(prev => prev
                 ? prev.map(c => c.idEvCharger === charger.idEvCharger ? {...c, status: oldStatus!} : c)
                 : prev

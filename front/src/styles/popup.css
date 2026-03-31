@@ -1,4 +1,5 @@
-.popup-overlay {
+.popup-overlay,
+.modal-overlay.popup-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -188,7 +189,7 @@
 }
 
 .popup-btn.validate:hover {
-    background: #1d4ed8;
+    background: var(--color-accent-hover);
     transform: translateY(-1px);
 }
 
@@ -197,10 +198,11 @@
 }
 
 .popup-btn.warning {
-    background: #f59e0b;
-    color: white;
+	color: var(--color-danger-text);
+	border-color: var(--color-danger-border);
+	background: var(--color-danger-bg);
 }
 
 .popup-btn.warning:hover {
-    background: #d97706;
+    background-color: hsl(from var(--color-danger-bg) h s calc(l * 0.8));
 }

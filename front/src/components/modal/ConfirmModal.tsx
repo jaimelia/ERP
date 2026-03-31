@@ -1,5 +1,6 @@
 import {useModal} from "../../contexts/ModalContext";
 import type {FC} from "react";
+import {Popup} from "../Popup.tsx";
 
 interface ConfirmModalProps {
     title: string;
@@ -17,23 +18,26 @@ export const ConfirmModal: FC<ConfirmModalProps> = ({
     const {closeModal} = useModal();
 
     return (
-        <div className="modal-content">
-            <h2 className="modal-title">{title}</h2>
+        <Popup
+            title={title}
+            footer={
+                <>
+                    <button className="popup-btn cancel" onClick={closeModal}>
+                        {cancelLabel}
+                    </button>
+                    <button
+                        className={`popup-btn ${danger ? "warning" : "validate"}`}
+                        onClick={() => {
+                            onConfirm();
+                            closeModal();
+                        }}
+                    >
+                        {confirmLabel}
+                    </button>
+                </>
+            }
+        >
             <p className="modal-message">{message}</p>
-            <div className="modal-actions">
-                <button className="modal-button modal-button--cancel" onClick={closeModal}>
-                    {cancelLabel}
-                </button>
-                <button
-                    className={`modal-button ${danger ? "modal-button--danger" : "modal-button--confirm"}`}
-                    onClick={() => {
-                        onConfirm();
-                        closeModal();
-                    }}
-                >
-                    {confirmLabel}
-                </button>
-            </div>
-        </div>
+        </Popup>
     );
 };

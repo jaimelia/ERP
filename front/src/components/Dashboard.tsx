@@ -253,7 +253,7 @@ export const Dashboard: FC<DashboardProps> = ({
                         <button
                             type="button"
                             className="header-button"
-                            onClick={() => openModal(<UserManagementModal currentUsername={user.username} />)}
+                            onClick={() => openModal(<UserManagementModal currentUsername={user.username} />, {boxed: false})}
                         >
                             Utilisateurs
                         </button>
