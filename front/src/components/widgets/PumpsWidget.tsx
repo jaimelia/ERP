@@ -1,10 +1,10 @@
-import { type FC, useCallback } from "react";
-import { Switch } from "../Switch.tsx";
-import { useFetch } from "../../hooks/useFetch.ts";
-import { FetchWrapper } from "../FetchWrapper.tsx";
-import { useToast } from "../../contexts/ToastContext.tsx";
-import { getPumps, togglePumpEnabled, type PumpDTO } from "../../api/pumpsApi.ts";
-import { apiUrl } from "../../api/common.ts";
+import {type FC, useCallback} from "react";
+import {Switch} from "../Switch.tsx";
+import {useFetch} from "../../hooks/useFetch.ts";
+import {FetchWrapper} from "../FetchWrapper.tsx";
+import {useToast} from "../../contexts/ToastContext.tsx";
+import {type PumpDTO, togglePumpEnabled} from "../../api/pumpsApi.ts";
+import {apiUrl} from "../../api/common.ts";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
