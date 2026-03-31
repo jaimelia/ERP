@@ -88,7 +88,8 @@ public class DailyTransactionsReportService {
             Integer reportId, LocalDate date, DocumentStatus status) {
 
         List<Transaction> transactions = transactionRepository
-                .findByTransactionDateAndStatus(date, TransactionStatus.accepted);
+                .findByTransactionDateBetweenAndStatus(
+                        date.atStartOfDay(), date.plusDays(1).atStartOfDay(), TransactionStatus.accepted);
 
         Map<String, BigDecimal> fuelVolumes = new LinkedHashMap<>();
         Map<String, BigDecimal> fuelAmounts = new LinkedHashMap<>();
@@ -147,7 +148,8 @@ public class DailyTransactionsReportService {
     /** Extrait uniquement le détail par carburant depuis les transactions (pour affichage en lecture seule). */
     private List<FuelReportLineDTO> extractFuelLines(LocalDate date) {
         List<Transaction> transactions = transactionRepository
-                .findByTransactionDateAndStatus(date, TransactionStatus.accepted);
+                .findByTransactionDateBetweenAndStatus(
+                        date.atStartOfDay(), date.plusDays(1).atStartOfDay(), TransactionStatus.accepted);
 
         Map<String, BigDecimal> fuelVolumes = new LinkedHashMap<>();
         Map<String, BigDecimal> fuelAmounts = new LinkedHashMap<>();

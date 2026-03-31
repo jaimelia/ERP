@@ -59,18 +59,12 @@ CREATE TABLE IF NOT EXISTS "items" (
 CREATE TABLE IF NOT EXISTS "transactions" (
 	"id_transaction" INTEGER NOT NULL UNIQUE GENERATED ALWAYS AS IDENTITY,
 	"type" VARCHAR(255) NOT NULL,
-	"transaction_date" DATE,
+	"transaction_date" TIMESTAMP,
 	"is_from_automat" BOOLEAN NOT NULL,
 	"status" transaction_status NOT NULL,
+	"id_user" INTEGER,
 	PRIMARY KEY("id_transaction")
 );
-
-
-
-
-
-
-
 
 CREATE TABLE IF NOT EXISTS "pumps" (
 	"id_pump" INTEGER NOT NULL UNIQUE GENERATED ALWAYS AS IDENTITY,
@@ -107,6 +101,9 @@ CREATE TABLE IF NOT EXISTS "users" (
 	"tile_layout" TEXT,
 	PRIMARY KEY("id_user")
 );
+
+ALTER TABLE "transactions"
+	ADD CONSTRAINT fk_transactions_user FOREIGN KEY ("id_user") REFERENCES "users"("id_user") ON DELETE SET NULL;
 
 CREATE TABLE IF NOT EXISTS "weekly_schedule" (
 	"id_weekly_schedule" INTEGER NOT NULL UNIQUE GENERATED ALWAYS AS IDENTITY,
@@ -338,10 +335,10 @@ INSERT INTO "pumps_fuels" ("id_fuel", "id_pump", "max_volume", "available_volume
 (2, 1, 5000.000, 2000.000),
 (3, 2, 5000.000, 500.000);
 
-INSERT INTO "transactions" ("type", "transaction_date", "is_from_automat", "status") VALUES
-('Carburant', '2026-02-18', false, 'accepted'),
-('Boutique', '2026-02-18', false, 'accepted'),
-('Mixte', '2026-02-18', false, 'accepted');
+INSERT INTO "transactions" ("type", "transaction_date", "is_from_automat", "status", "id_user") VALUES
+('Carburant', '2026-02-18', false, 'accepted', 2),
+('Boutique', '2026-02-18', false, 'accepted', 2),
+('Mixte', '2026-02-18', false, 'accepted', 2);
 
 INSERT INTO "transactions_lines" ("quantity", "id_transaction", "total_amount", "id_item") VALUES
 (42, 1, 61.410, 3),

@@ -4,11 +4,12 @@ import com.g1b.station_back.dto.*;
 import com.g1b.station_back.model.*;
 import com.g1b.station_back.model.enums.TransactionStatus;
 import com.g1b.station_back.repository.TransactionRepository;
+import com.g1b.station_back.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -18,11 +19,13 @@ import java.util.stream.Collectors;
 public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final ProductService productService;
+    private final UserRepository userRepository;
 
 
-    public TransactionService(TransactionRepository transactionRepository, ProductService productService) {
+    public TransactionService(TransactionRepository transactionRepository, ProductService productService, UserRepository userRepository) {
         this.transactionRepository = transactionRepository;
         this.productService = productService;
+        this.userRepository = userRepository;
     }
 
     @Transactional(readOnly = true)
@@ -30,6 +33,14 @@ public class TransactionService {
         List<Transaction> transactions = transactionRepository.findAllByOrderByTransactionDateDesc();
 
         return transactions.stream()
+                .map(this::mapToTransactionDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<TransactionDTO> getMyTransactions(String username) {
+        return transactionRepository.findAllByUser_UsernameOrderByTransactionDateDesc(username)
+                .stream()
                 .map(this::mapToTransactionDTO)
                 .collect(Collectors.toList());
     }
@@ -109,12 +120,13 @@ public class TransactionService {
     }
 
     @Transactional
-    public Integer createShopTransaction(TransactionCreationRequestDTO requestDTO) {
+    public Integer createShopTransaction(TransactionCreationRequestDTO requestDTO, String username) {
         Transaction newTransaction = new Transaction();
         newTransaction.setType(requestDTO.type());
         newTransaction.setIsFromAutomat(requestDTO.isFromAutomat());
-        newTransaction.setTransactionDate(LocalDate.now());
+        newTransaction.setTransactionDate(LocalDateTime.now());
         newTransaction.setStatus(TransactionStatus.inProgress);
+        userRepository.findByUsername(username).ifPresent(newTransaction::setUser);
 
         Set<TransactionLine> transactionLines = new HashSet<>();
         for (TransactionLineRequestDTO lineDTO : requestDTO.lines()) {

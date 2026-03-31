@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -16,5 +16,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
     List<Transaction> findAllByOrderByTransactionDateDesc();
 
     @EntityGraph(attributePaths = {"lines", "lines.item"})
-    List<Transaction> findByTransactionDateAndStatus(LocalDate transactionDate, TransactionStatus status);
+    List<Transaction> findByTransactionDateBetweenAndStatus(LocalDateTime from, LocalDateTime to, TransactionStatus status);
+
+    @EntityGraph(attributePaths = {"lines", "lines.item", "payments"})
+    List<Transaction> findAllByUser_UsernameOrderByTransactionDateDesc(String username);
 }
