@@ -2,7 +2,7 @@ package com.g1b.station_back.controller;
 
 import com.g1b.station_back.dto.PumpDTO;
 import com.g1b.station_back.dto.PumpEnabledDTO;
-import com.g1b.station_back.dto.PumpStatusUpdateDTO;
+import com.g1b.station_back.dto.PumpChargerStatusUpdateDTO;
 import com.g1b.station_back.service.PumpService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -39,7 +39,7 @@ public class PumpController {
 	@PreAuthorize("hasAuthority('UPDATE_PUMPS')")
     public ResponseEntity<PumpDTO> updateStatus(
             @PathVariable Integer id,
-            @RequestBody PumpStatusUpdateDTO dto
+            @RequestBody PumpChargerStatusUpdateDTO dto
     ) {
         return ResponseEntity.ok(service.updateStatus(id, dto.status()));
     }

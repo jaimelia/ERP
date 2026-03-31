@@ -1,6 +1,6 @@
 import { apiUrl, fetchJsonWithAuth } from "./common.ts";
 
-export type PumpStatus = "available" | "inUse" | "outOfOrder" | "deactivated";
+export type PumpChargerStatus = "available" | "inUse" | "outOfOrder" | "deactivated";
 
 export interface FuelLevel {
     type: string;
@@ -11,16 +11,11 @@ export interface FuelLevel {
 export interface PumpDTO {
     id: number;
     isAutomate: boolean;
-    status: PumpStatus;
+    status: PumpChargerStatus;
     enabled: boolean;
     inUseAt: string | null;
     fuelLevels: FuelLevel[];
 }
-
-export async function getPumps(): Promise<PumpDTO[]> {
-    return fetchJsonWithAuth(apiUrl("/pumps"));
-}
-
 export async function togglePumpEnabled(id: number, enabled: boolean): Promise<void> {
     await fetchJsonWithAuth(apiUrl(`/pumps/${id}/enabled`), {
         method: "PATCH",
