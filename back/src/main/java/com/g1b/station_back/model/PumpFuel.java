@@ -14,7 +14,7 @@ public class PumpFuel {
 
     @ManyToOne
     @JoinColumn(name = "id_fuel", nullable = false)
-    private Fuel fuel;
+    private Item fuel;
 
     @ManyToOne
     @JoinColumn(name = "id_pump", nullable = false)
@@ -27,14 +27,14 @@ public class PumpFuel {
     private BigDecimal availableVolume;
 
     public PumpFuel() {}
-    public PumpFuel(Integer idPumpFuel, Fuel fuel, Pump pump, BigDecimal maxVolume, BigDecimal availableVolume) {
+    public PumpFuel(Integer idPumpFuel, Item fuel, Pump pump, BigDecimal maxVolume, BigDecimal availableVolume) {
         this.idPumpFuel = idPumpFuel; this.fuel = fuel; this.pump = pump; this.maxVolume = maxVolume; this.availableVolume = availableVolume;
     }
 
     public Integer getIdPumpFuel() { return idPumpFuel; }
     public void setIdPumpFuel(Integer idPumpFuel) { this.idPumpFuel = idPumpFuel; }
-    public Fuel getFuel() { return fuel; }
-    public void setFuel(Fuel fuel) { this.fuel = fuel; }
+    public Item getFuel() { return fuel; }
+    public void setFuel(Item fuel) { this.fuel = fuel; }
     public Pump getPump() { return pump; }
     public void setPump(Pump pump) { this.pump = pump; }
     public BigDecimal getMaxVolume() { return maxVolume; }

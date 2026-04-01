@@ -4,7 +4,10 @@ import com.g1b.station_back.dto.DailyReportRequestDTO;
 import com.g1b.station_back.dto.DailyReportSummaryDTO;
 import com.g1b.station_back.dto.DailyTransactionsReportDTO;
 import com.g1b.station_back.dto.FuelReportLineDTO;
-import com.g1b.station_back.model.*;
+import com.g1b.station_back.model.DailyTransactionsReport;
+import com.g1b.station_back.model.Item;
+import com.g1b.station_back.model.Transaction;
+import com.g1b.station_back.model.TransactionLine;
 import com.g1b.station_back.model.enums.DocumentStatus;
 import com.g1b.station_back.model.enums.TransactionStatus;
 import com.g1b.station_back.repository.DailyTransactionsReportRepository;
@@ -110,14 +113,16 @@ public class DailyTransactionsReportService {
                 BigDecimal qty = BigDecimal.valueOf(line.getQuantity());
                 BigDecimal amt = line.getTotalAmount() != null ? line.getTotalAmount() : BigDecimal.ZERO;
 
-                if (item instanceof Fuel fuel) {
+                if (item.getType() != null && "fuel".equalsIgnoreCase(item.getType().getName())) {
                     fuelVolumes.merge(item.getName(), qty, BigDecimal::add);
                     fuelAmounts.merge(item.getName(), amt, BigDecimal::add);
-                    fuelPrices.putIfAbsent(item.getName(), fuel.getPricePerLiter());
-                } else if (item instanceof Electricity) {
+                    if (item.getPrices() != null && !item.getPrices().isEmpty()) {
+                        fuelPrices.putIfAbsent(item.getName(), item.getPrices().get(0).getPrice());
+                    }
+                } else if (item.getType() != null && "electricity".equalsIgnoreCase(item.getType().getName())) {
                     totalElectricityVolume = totalElectricityVolume.add(qty);
                     totalElectricityAmount = totalElectricityAmount.add(amt);
-                } else if (item instanceof Product) {
+                } else if (item.getType() != null && "product".equalsIgnoreCase(item.getType().getName())) {
                     totalProductVolume = totalProductVolume.add(qty);
                     totalProductsAmount = totalProductsAmount.add(amt);
                 }
@@ -158,12 +163,14 @@ public class DailyTransactionsReportService {
         for (Transaction t : transactions) {
             for (TransactionLine line : t.getLines()) {
                 Item item = line.getItem();
-                if (item instanceof Fuel fuel) {
+                if (item.getType() != null && "fuel".equalsIgnoreCase(item.getType().getName())) {
                     BigDecimal qty = BigDecimal.valueOf(line.getQuantity());
                     BigDecimal amt = line.getTotalAmount() != null ? line.getTotalAmount() : BigDecimal.ZERO;
                     fuelVolumes.merge(item.getName(), qty, BigDecimal::add);
                     fuelAmounts.merge(item.getName(), amt, BigDecimal::add);
-                    fuelPrices.putIfAbsent(item.getName(), fuel.getPricePerLiter());
+                    if (item.getPrices() != null && !item.getPrices().isEmpty()) {
+                        fuelPrices.putIfAbsent(item.getName(), item.getPrices().get(0).getPrice());
+                    }
                 }
             }
         }

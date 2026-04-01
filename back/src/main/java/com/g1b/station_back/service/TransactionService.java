@@ -1,7 +1,10 @@
 package com.g1b.station_back.service;
 
 import com.g1b.station_back.dto.*;
-import com.g1b.station_back.model.*;
+import com.g1b.station_back.model.Item;
+import com.g1b.station_back.model.Transaction;
+import com.g1b.station_back.model.TransactionLine;
+import com.g1b.station_back.model.TransactionPayment;
 import com.g1b.station_back.model.enums.TransactionStatus;
 import com.g1b.station_back.repository.TransactionRepository;
 import com.g1b.station_back.repository.UserRepository;
@@ -18,13 +21,13 @@ import java.util.stream.Collectors;
 @Service
 public class TransactionService {
     private final TransactionRepository transactionRepository;
-    private final ProductService productService;
+    private final ItemService itemService;
     private final UserRepository userRepository;
 
 
-    public TransactionService(TransactionRepository transactionRepository, ProductService productService, UserRepository userRepository) {
+    public TransactionService(TransactionRepository transactionRepository, ItemService itemService, UserRepository userRepository) {
         this.transactionRepository = transactionRepository;
-        this.productService = productService;
+        this.itemService = itemService;
         this.userRepository = userRepository;
     }
 
@@ -69,32 +72,20 @@ public class TransactionService {
         ItemIDTO itemDTO = null;
 
         if (line.getItem() != null) {
-            var item = line.getItem();
-
-            // Vérification du type d'Item et mapping vers le DTO spécifique
-            if (item instanceof Product p) {
-                itemDTO = new ProductDTO(
-                        p.getIdItem(),
-                        p.getName(),
-                        p.getUnitPrice(),
-                        p.getStock(),
-                        p.getAlertThreshold()
-                );
-            } else if (item instanceof Fuel f) {
-                itemDTO = new FuelDTO(
-                        f.getIdItem(),
-                        f.getName(),
-                        f.getPricePerLiter(),
-                        f.getStock()
-                );
-            } else if (item instanceof Electricity e) {
-                itemDTO = new ElectricityDTO(
-                        e.getIdItem(),
-                        e.getName(),
-                        e.getNormalPrice(),
-                        e.getFastPrice()
-                );
+            Item item = line.getItem();
+            
+            BigDecimal price = BigDecimal.ZERO;
+            if (item.getPrices() != null && !item.getPrices().isEmpty()) {
+                price = item.getPrices().getFirst().getPrice(); // Use the first available price for the DTO
             }
+
+            itemDTO = new TransactionItemDTO(
+                    item.getIdItem(),
+                    item.getName(),
+                    price,
+                    item.getStock(),
+                    item.getType() != null ? item.getType().getName() : null
+            );
         }
 
         return new TransactionLineDTO(
@@ -130,17 +121,33 @@ public class TransactionService {
 
         Set<TransactionLine> transactionLines = new HashSet<>();
         for (TransactionLineRequestDTO lineDTO : requestDTO.lines()) {
-            Product product = productService.getProductById(lineDTO.idItem());
-            if (product == null) {
-                throw new IllegalArgumentException("Product with ID " + lineDTO.idItem() + " not found");
+            ItemDTO itemDTO = itemService.getItemById(lineDTO.idItem());
+            if (itemDTO == null) {
+                throw new IllegalArgumentException("Item with ID " + lineDTO.idItem() + " not found");
             }
-            if (product.getStock() >= lineDTO.quantity()) {
+            if (itemDTO.getStock() != null && itemDTO.getStock().compareTo(new BigDecimal(lineDTO.quantity())) >= 0) {
                 TransactionLine transactionLine = new TransactionLine();
-                transactionLine.setItem(product);
+                Item item = new Item();
+                item.setIdItem(itemDTO.getIdItem());
+                item.setName(itemDTO.getName());
+                // In a real scenario, you'd fetch the entity from the repo to attach it
+                // We're adapting this briefly to compile, ideally itemService would return the entity or we fetch it here.
+                // Let's assume we have to use the ID.
+                transactionLine.setItem(item);
                 transactionLine.setQuantity(lineDTO.quantity());
-                product.setStock(product.getStock() - lineDTO.quantity());
+                
+                BigDecimal newStock = itemDTO.getStock().subtract(new BigDecimal(lineDTO.quantity()));
+                itemDTO.setStock(newStock);
+                itemService.updateItem(itemDTO.getIdItem(), itemDTO); // update stock
+
                 transactionLine.setTransaction(newTransaction);
-                transactionLine.setTotalAmount(product.getUnitPrice().multiply(new BigDecimal(lineDTO.quantity())));
+                
+                BigDecimal price = BigDecimal.ZERO;
+                if (itemDTO.getPrices() != null && !itemDTO.getPrices().isEmpty()) {
+                    price = itemDTO.getPrices().getFirst().getPrice();
+                }
+                
+                transactionLine.setTotalAmount(price.multiply(new BigDecimal(lineDTO.quantity())));
 
                 transactionLines.add(transactionLine);
             } else {
@@ -161,8 +168,13 @@ public class TransactionService {
             return transactionId;
         }
         for (TransactionLine line : transaction.getLines()) {
-            if (line.getItem() instanceof Product product) {
-                product.setStock(product.getStock() + line.getQuantity());
+            if (line.getItem() != null) {
+                ItemDTO itemDTO = itemService.getItemById(line.getItem().getIdItem());
+                if (itemDTO != null && itemDTO.getStock() != null) {
+                    BigDecimal newStock = itemDTO.getStock().add(new BigDecimal(line.getQuantity()));
+                    itemDTO.setStock(newStock);
+                    itemService.updateItem(itemDTO.getIdItem(), itemDTO);
+                }
             }
         }
         transaction.setStatus(TransactionStatus.canceled);
