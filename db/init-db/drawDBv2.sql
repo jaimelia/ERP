@@ -44,16 +44,38 @@ CREATE TYPE "role" AS ENUM (
 	'manager'
 );
 
-
 CREATE TYPE schedule AS (
 	opening_time TIME,
 	closing_time TIME
 );
 
+-- Nouvelles tables de l'architecture par composition
+CREATE TABLE IF NOT EXISTS "item_types" (
+	"id" INTEGER NOT NULL UNIQUE GENERATED ALWAYS AS IDENTITY,
+	"name" VARCHAR(255) NOT NULL UNIQUE,
+	"unit_of_measure" VARCHAR(50) NOT NULL,
+	"is_stock_managed" BOOLEAN NOT NULL,
+	PRIMARY KEY("id")
+);
+
 CREATE TABLE IF NOT EXISTS "items" (
 	"id_item" INTEGER NOT NULL UNIQUE GENERATED ALWAYS AS IDENTITY,
 	"name" VARCHAR(255) NOT NULL,
-	PRIMARY KEY("id_item")
+	"type_id" INTEGER NOT NULL,
+	"stock" NUMERIC(10,3),
+	"alert_threshold" NUMERIC(10,3),
+	"auto_restock_quantity" NUMERIC(10,3),
+	PRIMARY KEY("id_item"),
+	FOREIGN KEY("type_id") REFERENCES "item_types"("id") ON DELETE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS "item_prices" (
+	"id" INTEGER NOT NULL UNIQUE GENERATED ALWAYS AS IDENTITY,
+	"price_label" VARCHAR(255) NOT NULL,
+	"price" NUMERIC(5,3) NOT NULL,
+	"item_id" INTEGER NOT NULL,
+	PRIMARY KEY("id"),
+	FOREIGN KEY("item_id") REFERENCES "items"("id_item") ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS "transactions" (
@@ -172,34 +194,6 @@ CREATE TABLE IF NOT EXISTS "regional_guidelines" (
 	PRIMARY KEY("id_regional_guideline")
 );
 
-CREATE TABLE IF NOT EXISTS "products" (
-	"unit_price" NUMERIC(5,3) NOT NULL,
-	"stock" INTEGER NOT NULL,
-	"alert_threshold" INTEGER,
-	"auto_restock_quantity" INTEGER,
-	"id_item" INTEGER NOT NULL UNIQUE,
-	PRIMARY KEY("id_item"),
-	FOREIGN KEY("id_item") REFERENCES "items"("id_item") ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS "fuels" (
-	"price_per_liter" NUMERIC(5,3) NOT NULL,
-	"stock" NUMERIC(10,3),
-	"alert_threshold" NUMERIC(10,3),
-	"auto_restock_quantity" NUMERIC(10,3),
-	"id_item" INTEGER NOT NULL UNIQUE,
-	PRIMARY KEY("id_item"),
-	FOREIGN KEY("id_item") REFERENCES "items"("id_item") ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS "electricity" (
-	"id_item" INTEGER NOT NULL UNIQUE,
-	"fast_price" NUMERIC(5,3) NOT NULL,
-	"normal_price" NUMERIC(5,3) NOT NULL,
-	PRIMARY KEY("id_item"),
-	FOREIGN KEY("id_item") REFERENCES "items"("id_item") ON DELETE NO ACTION
-);
-
 CREATE TABLE IF NOT EXISTS "cce_cards" (
 	"id_cce_card" INTEGER NOT NULL UNIQUE GENERATED ALWAYS AS IDENTITY,
 	"id_client" INTEGER NOT NULL,
@@ -231,7 +225,7 @@ CREATE TABLE IF NOT EXISTS "pumps_fuels" (
 	"available_volume" NUMERIC(10,3),
 	PRIMARY KEY("id_pump_fuel"),
 	FOREIGN KEY("id_pump") REFERENCES "pumps"("id_pump") ON DELETE NO ACTION,
-	FOREIGN KEY("id_fuel") REFERENCES "fuels"("id_item") ON DELETE NO ACTION
+	FOREIGN KEY("id_fuel") REFERENCES "items"("id_item") ON DELETE NO ACTION
 );
 
 CREATE TABLE IF NOT EXISTS "transaction_payments" (
@@ -270,37 +264,41 @@ INSERT INTO "ev_chargers" ("is_fast", "status") VALUES
 (false, 'available'),
 (false, 'available');
 
-
 INSERT INTO "users" ("username", "password", "email", "role") VALUES
 ('gerant1', '$2a$10$2IBaa5RyHYQyz6qNdWfmteVIWJUbFKSq8KOnuUyY89k43tKMTWd8C', 'admin@example.com', 'manager'),
 ('employe1', '$2a$10$Q4H7dnAln9/nOyQg4hx0e.p8iwMNJAbffD6MVd9VNdtWT2V7E/WgS', 'employe1@example.com', 'employee'),
 ('employe2', '$2a$10$Q4H7dnAln9/nOyQg4hx0e.p8iwMNJAbffD6MVd9VNdtWT2V7E/WgS', 'employe2@example.com', 'employee');
 
-INSERT INTO "items" ("name") VALUES
-('Sans plomb 95'),
-('Sans plomb 98'),
-('Diesel'),
-('Stylo bille BIC'),
-('Essuie-glace'),
-('Arbre magique'),
-('Coca 33 Cl'),
-('Snack'),
-('Electricité');
+-- Initialisation des types dynamiques
+INSERT INTO "item_types" ("name", "unit_of_measure", "is_stock_managed") VALUES
+('Carburant', 'L', true),
+('Produit Boutique', 'Unité', true),
+('Electricité', 'kWh', false);
 
-INSERT INTO "fuels" ("id_item", "price_per_liter", "stock", "alert_threshold", "auto_restock_quantity") VALUES
-(1, 1.750, 1200.000, 500.000, 100.000),
-(2, 1.850, 500.000, 200.000, 100.000),
-(3, 1.650, 2000.000, 500.000, 100.000);
+-- Initialisation des articles unifiés
+INSERT INTO "items" ("name", "type_id", "stock", "alert_threshold", "auto_restock_quantity") VALUES
+('Sans plomb 95', 1, 1200.000, 500.000, 100.000),
+('Sans plomb 98', 1, 500.000, 200.000, 100.000),
+('Diesel', 1, 2000.000, 500.000, 100.000),
+('Stylo bille BIC', 2, 196.000, 50.000, 20.000),
+('Essuie-glace', 2, 15.000, 5.000, 30.000),
+('Arbre magique', 2, 37.000, 10.000, 10.000),
+('Coca 33 Cl', 2, 100.000, 20.000, 50.000),
+('Snack', 2, 50.000, 10.000, 100.000),
+('Electricité', 3, NULL, NULL, NULL);
 
-INSERT INTO "products" ("id_item", "unit_price", "stock", "alert_threshold", "auto_restock_quantity") VALUES
-(4, 1.570, 196, 50, 20),
-(5, 24.500, 15, 5, 30),
-(6, 0.990, 37, 10, 10),
-(7, 1.245, 100, 20, 50),
-(8, 2.500, 50, 10, 100);
-
-INSERT INTO "electricity" ("id_item", "fast_price", "normal_price") VALUES
-(9, 0.550, 0.350);
+-- Initialisation des prix
+INSERT INTO "item_prices" ("price_label", "price", "item_id") VALUES
+('Standard', 1.750, 1),
+('Standard', 1.850, 2),
+('Standard', 1.650, 3),
+('Standard', 1.570, 4),
+('Standard', 24.500, 5),
+('Standard', 0.990, 6),
+('Standard', 1.245, 7),
+('Standard', 2.500, 8),
+('Charge Normale', 0.350, 9),
+('Charge Rapide', 0.550, 9);
 
 INSERT INTO "clients" ("firstname", "lastname", "mail", "phone_number") VALUES
 ('Mathéo', 'CARLI', 'matheo.carli@gmail.com', '06.95.90.41.23'),
@@ -322,7 +320,7 @@ INSERT INTO "restocks" ("quantity", "restock_date", "id_item", "status") VALUES
 (500.000, '2025-11-21', 2, 'canceled'),
 (10.000, '2025-11-21', 2, 'delivered'),
 (500.000, '2025-11-21', 2, 'delivered'),
-(500, '2025-11-21', 4, 'delivered');
+(500.000, '2025-11-21', 4, 'delivered');
 
 INSERT INTO "pumps" ("is_automat", "status", "enabled") VALUES
 (true, 'available', true),

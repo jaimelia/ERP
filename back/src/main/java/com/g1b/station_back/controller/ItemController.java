@@ -1,143 +1,73 @@
 package com.g1b.station_back.controller;
 
-import com.g1b.station_back.dto.*;
-import com.g1b.station_back.service.ElectricityService;
-import com.g1b.station_back.service.FuelService;
+import com.g1b.station_back.dto.ItemDTO;
+import com.g1b.station_back.dto.RestockableItemDTO;
 import com.g1b.station_back.service.ItemService;
-import com.g1b.station_back.service.ProductService;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/items")
 public class ItemController {
 
-	private final ItemService itemService;
-    private final ProductService productService;
-    private final FuelService fuelService;
-	private final ElectricityService electricityService;
+    private final ItemService itemService;
 
-	public ItemController(ItemService itemService, ProductService productService, FuelService fuelService, ElectricityService electricityService) {
-		this.itemService = itemService;
-        this.productService = productService;
-        this.fuelService = fuelService;
-		this.electricityService = electricityService;
-	}
-
-	@GetMapping("/restockables")
-	@PreAuthorize("hasAuthority('READ_ITEMS')")
-	public ResponseEntity<List<RestockableItemDTO>> getRestockableItems() {
-		return ResponseEntity.ok(itemService.getRestockableItems());
-	}
-
-    // ── Produits ──────────────────────────────────────────────────────────────
-
-	@GetMapping("products")
-	@PreAuthorize("hasAuthority('READ_ITEMS')")
-	public ResponseEntity<List<ProductDTO>> getAllProducts() {
-		return ResponseEntity.ok(productService.getAllProducts());
-	}
-
-	@GetMapping("/products/available-names")
-	@PreAuthorize("hasAuthority('READ_ITEMS')")
-	public ResponseEntity<List<String>> getAvailableProductNames(@RequestParam(required = false) String search) {
-		return ResponseEntity.ok(productService.getAvailableProductNames(search));
-	}
-
-    @PostMapping("/products")
-	@PreAuthorize("hasAuthority('CREATE_ITEMS')")
-    public ResponseEntity<ProductDTO> createProduct(@RequestBody ProductDTO dto) {
-        return ResponseEntity.ok(productService.createProduct(dto));
+    public ItemController(ItemService itemService) {
+        this.itemService = itemService;
     }
 
-    @PutMapping("/products/{id}")
-	@PreAuthorize("hasAuthority('UPDATE_ITEMS')")
-    public ResponseEntity<ProductDTO> updateProduct(@PathVariable Long id, @RequestBody ProductDTO dto) {
-        return ResponseEntity.ok(productService.updateProduct(id, dto));
+    @GetMapping
+    @PreAuthorize("hasAuthority('READ_ITEMS')")
+    public ResponseEntity<List<ItemDTO>> getItems(@RequestParam(required = false) String typeName) {
+        return ResponseEntity.ok(itemService.getAllItems(typeName));
     }
 
-    @DeleteMapping("/products/{id}")
-	@PreAuthorize("hasAuthority('DELETE_ITEMS')")
-    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
-        productService.deleteProduct(id);
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('READ_ITEMS')")
+    public ResponseEntity<ItemDTO> getItemById(@PathVariable Integer id) {
+        ItemDTO item = itemService.getItemById(id);
+        if (item != null) {
+            return ResponseEntity.ok(item);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @PostMapping
+    @PreAuthorize("hasAuthority('CREATE_ITEMS')")
+    public ResponseEntity<ItemDTO> createItem(@RequestBody ItemDTO dto) {
+        return ResponseEntity.ok(itemService.createItem(dto));
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('UPDATE_ITEMS')")
+    public ResponseEntity<ItemDTO> updateItem(@PathVariable Integer id, @RequestBody ItemDTO dto) {
+        ItemDTO updated = itemService.updateItem(id, dto);
+        if (updated != null) {
+            return ResponseEntity.ok(updated);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('DELETE_ITEMS')")
+    public ResponseEntity<Void> deleteItem(@PathVariable Integer id) {
+        itemService.deleteItem(id);
         return ResponseEntity.noContent().build();
     }
 
-    // ── Carburants ────────────────────────────────────────────────────────────
-
-	@PostMapping("/fuels")
-	@PreAuthorize("hasAuthority('CREATE_ITEMS')")
-	public ResponseEntity<FuelDTO> createFuel(@RequestBody FuelDTO dto) {
-		return ResponseEntity.ok(fuelService.createFuel(dto));
-	}
-
-    @PutMapping("/fuels/{id}")
-	@PreAuthorize("hasAuthority('UPDATE_ITEMS')")
-    public ResponseEntity<FuelDTO> updateFuel(@PathVariable Long id, @RequestBody FuelDTO dto) {
-        return ResponseEntity.ok(fuelService.updateFuel(id, dto));
+    @GetMapping("/restockables")
+    @PreAuthorize("hasAuthority('READ_ITEMS')")
+    public ResponseEntity<List<RestockableItemDTO>> getRestockableItems() {
+        return ResponseEntity.ok(itemService.getRestockableItems());
     }
 
-    @DeleteMapping("/fuels/{id}")
-	@PreAuthorize("hasAuthority('DELETE_ITEMS')")
-    public ResponseEntity<Void> deleteFuel(@PathVariable Long id) {
-        fuelService.deleteFuel(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    // ── Stock combiné (Produits + Carburants) ─────────────────────────────────
-
+    // Keep the stock endpoint for compatibility if needed, but the generalized GetMapping handles ?typeName=fuel
     @GetMapping("/stock")
-	@PreAuthorize("hasAuthority('READ_ITEMS')")
+    @PreAuthorize("hasAuthority('READ_ITEMS')")
     public ResponseEntity<List<ItemDTO>> getStock() {
-        List<ItemDTO> stock = new ArrayList<>();
-
-        productService.getAllProducts().forEach(p ->
-                stock.add(new ItemDTO(
-                        p.idItem(),
-                        p.name(),
-                        BigDecimal.valueOf(p.stock()),
-                        p.unitPrice(),
-						"product")));
-
-        fuelService.getAllFuels().forEach(f ->
-                stock.add(new ItemDTO(
-                        f.idItem(),
-                        f.name(),
-                        f.stock(),
-                        f.price(),
-                        "fuel")));
-
-        return ResponseEntity.ok(stock);
+        return ResponseEntity.ok(itemService.getAllItems(null));
     }
-
-	@GetMapping("/electricity")
-	@PreAuthorize("hasAuthority('READ_ITEMS')")
-	public ResponseEntity<List<ElectricityDTO>> getElectricity() {
-		return ResponseEntity.ok(electricityService.getElectricity());
-	}
-
-	@PostMapping("/electricity")
-	@PreAuthorize("hasAuthority('CREATE_ITEMS')")
-	public ResponseEntity<ElectricityDTO> createElectricity(@RequestBody ElectricityDTO dto) {
-		return ResponseEntity.ok(electricityService.createElectricity(dto));
-	}
-
-	@PutMapping("/electricity/{id}")
-	@PreAuthorize("hasAuthority('UPDATE_ITEMS')")
-	public ResponseEntity<ElectricityDTO> updateElectricity(@PathVariable Integer id, @RequestBody ElectricityDTO dto) {
-		return ResponseEntity.ok(electricityService.updateElectricity(id, dto));
-	}
-
-	@DeleteMapping("/electricity/{id}")
-	@PreAuthorize("hasAuthority('DELETE_ITEMS')")
-	public ResponseEntity<Void> deleteElectricity(@PathVariable Integer id) {
-		electricityService.deleteElectricity(id);
-		return ResponseEntity.noContent().build();
-	}
 }
