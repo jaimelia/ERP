@@ -1,11 +1,23 @@
 package com.g1b.station_back.repository;
 
 import com.g1b.station_back.model.Transaction;
-import com.g1b.station_back.model.TransactionLine;
-import com.g1b.station_back.model.TransactionPayment;
+import com.g1b.station_back.model.enums.TransactionStatus;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-@Repository
-public interface TransactionRepository extends JpaRepository<Transaction, Integer> {}
+import java.time.LocalDateTime;
+import java.util.List;
 
+@Repository
+public interface TransactionRepository extends JpaRepository<Transaction, Integer> {
+
+    @EntityGraph(attributePaths = {"lines", "lines.item", "payments"})
+    List<Transaction> findAllByOrderByTransactionDateDesc();
+
+    @EntityGraph(attributePaths = {"lines", "lines.item"})
+    List<Transaction> findByTransactionDateBetweenAndStatus(LocalDateTime from, LocalDateTime to, TransactionStatus status);
+
+    @EntityGraph(attributePaths = {"lines", "lines.item", "payments"})
+    List<Transaction> findAllByUser_UsernameOrderByTransactionDateDesc(String username);
+}

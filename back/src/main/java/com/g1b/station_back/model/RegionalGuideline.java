@@ -13,7 +13,7 @@ public class RegionalGuideline {
     @Column(nullable = false)
     private String object;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
     public RegionalGuideline() {}

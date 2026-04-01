@@ -1,13 +1,9 @@
 package com.g1b.station_back.dto;
 
-import com.g1b.station_back.model.CceCard;
-
 public record ClientDTO(
         Integer idClient,
-        String surname,
+        String lastname,
         String firstname,
-        String email,
-        String phoneNumber,
-        CceCard cceCard
-) {
-}
+        String mail,
+        String phoneNumber
+) {}

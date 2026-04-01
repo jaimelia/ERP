@@ -1,5 +1,10 @@
 package com.g1b.station_back.model;
 
+import com.g1b.station_back.model.enums.Role;
+
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.dialect.type.PostgreSQLEnumJdbcType;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -19,8 +24,10 @@ public class User {
     @Column(nullable = false)
     private String email;
 
+	@Enumerated(EnumType.STRING)
+	@JdbcType(PostgreSQLEnumJdbcType.class)
     @Column(nullable = false)
-    private String role;
+    private Role role;
 
     @Column(name = "uses_dark_mode", nullable = false)
     private Boolean usesDarkMode;
@@ -29,7 +36,7 @@ public class User {
     private String tileLayout;
 
     public User() {}
-    public User(Integer idUser, String username, String password, String email, String role, Boolean usesDarkMode, String tileLayout) {
+    public User(Integer idUser, String username, String password, String email, Role role, Boolean usesDarkMode, String tileLayout) {
         this.idUser = idUser; this.username = username; this.password = password; this.email = email; this.role = role; this.usesDarkMode = usesDarkMode; this.tileLayout = tileLayout;
     }
 
@@ -41,8 +48,8 @@ public class User {
     public void setPassword(String password) { this.password = password; }
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
-    public String getRole() { return role; }
-    public void setRole(String role) { this.role = role; }
+    public Role getRole() { return role; }
+    public void setRole(Role role) { this.role = role; }
     public Boolean getUsesDarkMode() { return usesDarkMode; }
     public void setUsesDarkMode(Boolean usesDarkMode) { this.usesDarkMode = usesDarkMode; }
     public String getTileLayout() { return tileLayout; }

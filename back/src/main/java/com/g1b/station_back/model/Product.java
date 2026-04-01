@@ -15,12 +15,15 @@ public class Product extends Item {
     @Column(nullable = false)
     private Integer stock;
 
-    @Column(name = "alert_threshold", nullable = false)
+    @Column(name = "alert_threshold")
     private Integer alertThreshold;
 
+	@Column(name = "auto_restock_quantity")
+	private Integer autoRestockQuantity;
+
     public Product() {}
-    public Product(Integer idItem, String itemType, String name, BigDecimal unitPrice, Integer stock, Integer alertThreshold) {
-        super(idItem, itemType, name);
+    public Product(Integer idItem, String name, BigDecimal unitPrice, Integer stock, Integer alertThreshold) {
+        super(idItem, name);
         this.unitPrice = unitPrice; this.stock = stock; this.alertThreshold = alertThreshold;
     }
 
@@ -30,4 +33,6 @@ public class Product extends Item {
     public void setStock(Integer stock) { this.stock = stock; }
     public Integer getAlertThreshold() { return alertThreshold; }
     public void setAlertThreshold(Integer alertThreshold) { this.alertThreshold = alertThreshold; }
+	public Integer getAutoRestockQuantity() { return autoRestockQuantity; }
+	public void setAutoRestockQuantity(Integer autoRestockQuantity) { this.autoRestockQuantity = autoRestockQuantity; }
 }

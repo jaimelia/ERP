@@ -4,6 +4,7 @@ import com.g1b.station_back.dto.*;
 import com.g1b.station_back.model.CceBonusTier;
 import com.g1b.station_back.model.CceCard;
 import com.g1b.station_back.model.Client;
+import com.g1b.station_back.model.TransactionPayment;
 import com.g1b.station_back.model.enums.CceStatus;
 import com.g1b.station_back.repository.CceBonusTierRepository;
 import com.g1b.station_back.repository.CceCardRepository;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -48,14 +50,19 @@ public class CceCardService {
     }
 
     public List<CceTransactionDTO> getCceTransactions(Integer idCceCard) {
-        return transactionPaymentRepository.findByCceCard_IdCceCard(idCceCard).stream()
-                .map(payment -> new CceTransactionDTO(
-                        payment.getTransaction().getIdTransaction(),
-                        payment.getTransaction().getType(),
-                        payment.getDate(),
-                        payment.getAmount()
-                ))
-                .toList();
+        List<CceTransactionDTO> transactions = new ArrayList<>();
+        List<TransactionPayment> payments = transactionPaymentRepository.findByCceCard_IdCceCard(idCceCard);
+
+        for (TransactionPayment payment : payments) {
+            transactions.add(new CceTransactionDTO(
+                    payment.getTransaction().getIdTransaction(),
+                    payment.getTransaction().getType(),
+                    payment.getDate(),
+                    payment.getAmount()
+            ));
+        }
+
+        return transactions;
     }
 
     @Transactional
@@ -70,17 +77,17 @@ public class CceCardService {
 
         CceCard card = new CceCard();
         card.setClient(client);
-        card.setBalance(new BigDecimal(request.montant()));
+        card.setBalance(request.montant());
         card.setCreatedAt(LocalDate.now());
         card.setExpiresAt(LocalDate.now().plusYears(3));
-        card.setCode(request.code());
+        card.setCode(Integer.parseInt(request.code()));
         card.setStatus(CceStatus.activated);
         cceCardRepository.save(card);
     }
 
     public void editCce(Integer id, CceEditDTO request) {
         cceCardRepository.findById(id).ifPresent(card -> {
-            card.setCode(request.code());
+            card.setCode(Integer.parseInt(request.code()));
             cceCardRepository.save(card);
 
             Client client = card.getClient();
@@ -128,7 +135,7 @@ public class CceCardService {
         newCard.setBalance(transferredBalance);
         newCard.setCreatedAt(LocalDate.now());
         newCard.setExpiresAt(LocalDate.now().plusYears(3));
-        newCard.setCode(request.code());
+        newCard.setCode(Integer.parseInt(request.code()));
         newCard.setStatus(CceStatus.activated);
         cceCardRepository.save(newCard);
     }

@@ -97,17 +97,11 @@ export const Login: FC<LoginProps> = ({onLogin, theme, toggleTheme}) => {
 
                     {error && <div className="login-error">{error}</div>}
 
-                    <button type="submit" className="login-submit-button" disabled={busy}>
+                    <button type="submit" className="login-submit-button" disabled={busy || !username && !password}>
                         {busy ? "Connexion..." : "Se connecter"}
                     </button>
                 </form>
-
-                <p className="login-demo">
-                    <strong>Comptes demo:</strong>
-                    <br/>
-                    employe1 / 1234 · employe2 / 1234 · gerant1 / admin
-                </p>
-            </section>
+			</section>
         </div>
     );
 };

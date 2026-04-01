@@ -8,6 +8,17 @@
     border-bottom: 1px solid var(--color-border);
 }
 
+.ticket-remaining-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 16px; 
+    background: var(--color-surface-alt);
+    font-size: 13px;
+    color: var(--color-text-muted);
+    border-bottom: 1px solid var(--color-border);
+    font-style: italic;
+}
+
 .ticket-items-list {
     flex: 1;
     overflow-y: auto;
@@ -68,6 +79,21 @@
     background: var(--color-surface-alt);
 }
 
+.ticket-payment-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    padding: 8px 10px;
+    border-top: 1px solid var(--color-border);
+    flex-shrink: 0;
+    background: var(--color-surface-alt);
+}
+
+.ticket-amount-input {
+    flex: 1;
+    padding: 8px;
+}
+
 .ticket-action-btn {
     padding: 8px 4px;
     border-radius: 5px;
@@ -84,4 +110,88 @@
 .ticket-action-btn:hover {
     border-color: var(--color-accent);
     color: var(--color-accent);
+}
+
+.widget-toolbar-relative {
+    position: relative;
+    overflow: visible;
+}
+
+.search-results-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 8px;
+    background-color: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    z-index: 1000;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.search-results-message {
+    padding: 12px 16px;
+    color: #64748b;
+    font-size: 14px;
+}
+
+.search-results-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 14px;
+    color: #334155;
+}
+
+.search-results-item:hover {
+    background-color: #f8fafc;
+}
+
+.ticket-notification {
+  margin: 10px 15px;
+  padding: 12px 15px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-align: center;
+  animation: fadeIn 0.3s ease-in-out;
+  border: 1px solid transparent;
+}
+
+.notification-success {
+  background-color: #dcfce7;
+  color: #166534;
+  border-color: #bbf7d0;
+}
+
+.notification-error {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border-color: #fecaca;
+}
+
+.notification-warning {
+  background-color: #fef3c7;
+  color: #92400e;
+  border-color: #fde68a;
+}
+
+.notification-info {
+  background-color: #e0f2fe;
+  color: #075985;
+  border-color: #bae6fd;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

@@ -1,0 +1,67 @@
+/* ── Barre d'actions en bas du widget incident ──────────────── */
+.incident-actions-bar {
+    display: flex;
+    gap: 8px;
+    padding: 8px 10px;
+    background: var(--color-surface-alt);
+    border-top: 1px solid var(--color-border);
+    flex-shrink: 0;
+}
+
+.incident-action-btn {
+    flex: 1;
+    padding: 5px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+}
+
+.incident-action-btn:hover:not(:disabled) {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+.incident-action-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.incident-action-btn--primary {
+    background: var(--color-accent);
+    color: #fff;
+    border-color: var(--color-accent);
+}
+
+.incident-action-btn--primary:hover:not(:disabled) {
+    background: var(--color-accent-hover);
+    border-color: var(--color-accent-hover);
+    color: #fff;
+}
+
+/* ── Sélection de ligne ─────────────────────────────────────── */
+.widget-table tbody tr.incident-row-selected td {
+    background: var(--color-accent-soft);
+}
+
+.widget-table tbody tr.incident-row-selected:hover td {
+    background: var(--color-accent-soft-hover);
+}
+
+/* ── Curseur pointer sur les lignes cliquables ──────────────── */
+.widget-table.incident-table tbody tr {
+    cursor: pointer;
+}
+
+/* ── Modale incident (champs désactivés en consultation) ────── */
+.modal-incident .modal-field input:disabled,
+.modal-incident .modal-field select:disabled {
+    opacity: 0.7;
+    cursor: default;
+    background: var(--color-surface-alt);
+}

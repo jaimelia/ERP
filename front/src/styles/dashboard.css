@@ -75,6 +75,12 @@ main {
     color: #ffffff;
 }
 
+.header-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
 .header-role-badge {
     border-radius: 6px;
     padding: 3px 10px;

@@ -2,7 +2,7 @@ package com.g1b.station_back.model;
 
 import com.g1b.station_back.model.enums.DocumentStatus;
 import jakarta.persistence.*;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "incident_reports")
@@ -16,7 +16,7 @@ public class IncidentReport {
     private String type;
 
     @Column(name = "date")
-    private LocalDate date;
+    private LocalDateTime date;
 
     @Column(name = "technical_detail")
     private String technicalDetail;
@@ -29,7 +29,7 @@ public class IncidentReport {
     private DocumentStatus status;
 
     public IncidentReport() {}
-    public IncidentReport(Integer idIncidentReport, String type, LocalDate date, String technicalDetail, String resolution, DocumentStatus status) {
+    public IncidentReport(Integer idIncidentReport, String type, LocalDateTime date, String technicalDetail, String resolution, DocumentStatus status) {
         this.idIncidentReport = idIncidentReport; this.type = type; this.date = date; this.technicalDetail = technicalDetail; this.resolution = resolution; this.status = status;
     }
 
@@ -37,8 +37,8 @@ public class IncidentReport {
     public void setIdIncidentReport(Integer idIncidentReport) { this.idIncidentReport = idIncidentReport; }
     public String getType() { return type; }
     public void setType(String type) { this.type = type; }
-    public LocalDate getDate() { return date; }
-    public void setDate(LocalDate date) { this.date = date; }
+    public LocalDateTime getDate() { return date; }
+    public void setDate(LocalDateTime date) { this.date = date; }
     public String getTechnicalDetail() { return technicalDetail; }
     public void setTechnicalDetail(String technicalDetail) { this.technicalDetail = technicalDetail; }
     public String getResolution() { return resolution; }

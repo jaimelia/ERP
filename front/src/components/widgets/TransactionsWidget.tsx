@@ -1,122 +1,125 @@
-import {useState, type FC} from "react";
+import { useState, type FC } from "react";
+import { useFetch } from "../../hooks/useFetch.ts";
+import { FetchWrapper } from "../FetchWrapper.tsx";
+import { type TransactionDTO, type TransactionLineDTO } from "../../types.ts";
+import { apiUrl } from "../../api/common.ts";
 
-interface Transaction {
-    id: string;
-    dateHeure: string;
-    type: "Carburant" | "Boutique" | "Mixte";
-    produit: string;
-    quantite: string;
-    montantTotal: string;
-    modePaiement: string;
-    equipement: string;
-    statut: "Validée" | "Annulée" | "Remboursée";
-}
+// Mapping des statuts du backend vers les labels et classes CSS du front
+const getStatusBadge = (status: string | null) => {
+  switch (status?.toLowerCase()) {
+    case "accepted":
+    case "validated":
+      return { class: "status-valide", label: "Validée" };
+    case "canceled":
+      return { class: "status-annule", label: "Annulée" };
+    case "inprogress":
+      return { class: "status-attente", label: "En cours" };
+    default:
+      return { class: "status-rembourse", label: status || "—" };
+  }
+};
 
-// TODO : remplacer par des appels API
-const mockTransactions: Transaction[] = [
-    {
-        id: "TR-000 145",
-        dateHeure: "18/02/2026 08:15",
-        type: "Carburant",
-        produit: "Diesel 42.35 L",
-        quantite: "42.35",
-        montantTotal: "61.41 €",
-        modePaiement: "CCE",
-        equipement: "Pompe 1",
-        statut: "Validée",
-    },
-    {
-        id: "TR-000 146",
-        dateHeure: "18/02/2026 08:22",
-        type: "Boutique",
-        produit: "Coca 33 Cl",
-        quantite: "2",
-        montantTotal: "2.49 €",
-        modePaiement: "Carte bancaire",
-        equipement: "—",
-        statut: "Annulée",
-    },
-    {
-        id: "TR-000 147",
-        dateHeure: "18/02/2026 08:38",
-        type: "Mixte",
-        produit: "SP05 + Snack",
-        quantite: "35 L + 1",
-        montantTotal: "58.70 €",
-        modePaiement: "Espèces",
-        equipement: "Pompe 5",
-        statut: "Remboursée",
-    },
-];
+// Fonction pour formater la date renvoyée par le backend
+const formatDate = (dateString: string | null) => {
+  if (!dateString) return "—";
+  const date = new Date(dateString);
+  return date.toLocaleString("fr-FR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
 
-const statutClass: Record<Transaction["statut"], string> = {
-    Validée: "status-valide",
-    Annulée: "status-annule",
-    Remboursée: "status-rembourse",
+// Fonction pour calculer le total à partir des lignes
+const calculateTotalAmount = (lines: TransactionLineDTO[]) => {
+  if (!lines || lines.length === 0) return 0;
+  return lines.reduce((acc, line) => acc + (line.totalAmount || 0), 0);
 };
 
 export const TransactionsWidget: FC = () => {
-    const [search, setSearch] = useState("");
+  const [search, setSearch] = useState("");
 
-    const filtered = mockTransactions.filter(t =>
-        t.id.toLowerCase().includes(search.toLowerCase()) ||
-        t.produit.toLowerCase().includes(search.toLowerCase()) ||
-        t.type.toLowerCase().includes(search.toLowerCase())
-    );
+  const { data: transactions, loading, error } = useFetch<TransactionDTO[]>(
+    apiUrl("/transactions"),
+    5000
+  );
 
-    return (
-        <div className="widget-container">
-            <div className="widget-toolbar">
-                <div className="widget-search">
-                    <svg className="widget-search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                        <circle cx="11" cy="11" r="8"/>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                    </svg>
-                    <input
-                        type="text"
-                        placeholder="Rechercher une transaction"
-                        value={search}
-                        onChange={e => setSearch(e.target.value)}
-                    />
-                </div>
-            </div>
+  const filtered = (transactions || []).filter((t) =>
+    String(t.idTransaction).includes(search) ||
+    (t.type && t.type.toLowerCase().includes(search.toLowerCase())) ||
+    (t.status && t.status.toLowerCase().includes(search.toLowerCase()))
+  );
 
-            <div className="widget-table-wrap">
-                <table className="widget-table">
-                    <thead>
-                        <tr>
-                            <th>Id</th>
-                            <th>Date &amp; heure</th>
-                            <th>Type</th>
-                            <th>Produit</th>
-                            <th>Qté</th>
-                            <th>Montant total</th>
-                            <th>Mode de paiement</th>
-                            <th>Équipement</th>
-                            <th>Statut</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filtered.map(t => (
-                            <tr key={t.id}>
-                                <td style={{fontFamily: "monospace", fontSize: "11px"}}>{t.id}</td>
-                                <td>{t.dateHeure}</td>
-                                <td>{t.type}</td>
-                                <td>{t.produit}</td>
-                                <td>{t.quantite}</td>
-                                <td>{t.montantTotal}</td>
-                                <td>{t.modePaiement}</td>
-                                <td>{t.equipement}</td>
-                                <td>
-                                    <span className={`status-badge ${statutClass[t.statut]}`}>
-                                        {t.statut}
-                                    </span>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+  const handleRowClick = (transactionId: number) => {
+    console.log("Transaction cliquée :", transactionId);
+    // TODO: Afficher les détails des produits et paiements
+  };
+
+  return (
+    <div className="widget-container">
+      <div className="widget-toolbar">
+        <div className="widget-search">
+          <svg className="widget-search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <input
+            type="text"
+            placeholder="Rechercher une transaction"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
-    );
+      </div>
+
+      <FetchWrapper loading={loading} error={error}>
+        <div className="widget-table-wrap">
+          <table className="widget-table">
+            <thead>
+              <tr>
+                <th>Id</th>
+                <th>Date &amp; heure</th>
+                <th>Type</th>
+                <th>Montant total</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((t) => {
+                const statusInfo = getStatusBadge(t.status);
+                return (
+                  <tr
+                    key={t.idTransaction}
+                    onClick={() => handleRowClick(t.idTransaction)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <td style={{ fontFamily: "monospace", fontSize: "11px" }}>
+                      TR-{String(t.idTransaction).padStart(6, "0")}
+                    </td>
+                    <td>{formatDate(t.transactionDate)}</td>
+                    <td>{t.type}</td>
+                    <td>{calculateTotalAmount(t.lines).toFixed(2)} €</td>
+                    <td>
+                      <span className={`status-badge ${statusInfo.class}`}>
+                        {statusInfo.label}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={5} style={{ textAlign: "center", padding: "20px" }}>
+                    Aucune transaction trouvée.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </FetchWrapper>
+    </div>
+  );
 };
